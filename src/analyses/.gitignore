@@ -1,0 +1,8 @@
+# Distribution / packaging
+.Python
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Remove unnecessary plots and data samples
