@@ -8,18 +8,17 @@ class RewardFunction(torch.nn.Module):
                  out_size=1,
                  device="cpu"):
         
-        super(RewardFunction, self).__init__()
+        super(RewardFunction,
+              self).__init__()
 
         self.device = device
 
-        self.reward = torch.nn.Sequential(
-            torch.nn.Linear(state_size, hidden_size, bias=True),
-            torch.nn.ReLU(),
-            torch.nn.Linear(hidden_size, hidden_size, bias=True),
-            torch.nn.ReLU(),
-            torch.nn.Linear(hidden_size, out_size, bias=True),
-            torch.nn.Sigmoid()
-        )
+        self.reward = torch.nn.Sequential(torch.nn.Linear(state_size, hidden_size, bias=True),
+                                          torch.nn.ReLU(),
+                                          torch.nn.Linear(hidden_size, hidden_size, bias=True),
+                                          torch.nn.ReLU(),
+                                          torch.nn.Linear(hidden_size, out_size, bias=True),
+                                          torch.nn.Tanh())
         
     def forward(self, x):
         value = self.reward(x)
