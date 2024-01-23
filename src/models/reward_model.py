@@ -3,7 +3,7 @@ import torch
 
 class RewardFunction(torch.nn.Module):
     def __init__(self,
-                 state_size=3,
+                 state_action_size=6,
                  hidden_size=64, 
                  out_size=1,
                  device="cpu"):
@@ -13,7 +13,7 @@ class RewardFunction(torch.nn.Module):
 
         self.device = device
 
-        self.reward = torch.nn.Sequential(torch.nn.Linear(state_size, hidden_size, bias=True),
+        self.reward = torch.nn.Sequential(torch.nn.Linear(state_action_size, hidden_size, bias=True),
                                           torch.nn.ReLU(),
                                           torch.nn.Linear(hidden_size, hidden_size, bias=True),
                                           torch.nn.ReLU(),
