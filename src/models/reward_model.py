@@ -3,7 +3,7 @@ import torch
 
 class RewardFunction(torch.nn.Module):
     def __init__(self,
-                 state_action_size=6,
+                 state_action_size=7,
                  hidden_size=64, 
                  out_size=1,
                  device="cpu"):

@@ -5,4 +5,5 @@
 pip-log.txt
 pip-delete-this-directory.txt
 
-# Remove unnecessary results
+# Remove unused model parameters from results
+*.pt
