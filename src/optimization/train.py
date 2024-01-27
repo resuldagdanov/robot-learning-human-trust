@@ -28,7 +28,7 @@ def load_dataset(configs):
 
 
 if __name__ == "__main__":
-    print("\n================== Initializing Training (chuff chuff) ! ==================\n")
+    print("\n================== Initializing Training (chuff chuff) ==================\n")
 
     configs = Config()
     # call the parameters method to set the parameters

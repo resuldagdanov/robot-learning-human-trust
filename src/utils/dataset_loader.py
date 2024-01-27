@@ -12,8 +12,6 @@ class PolicyDatasetLoader(Dataset):
     def __init__(self,
                  demo_data_json_paths: List[str]):
         
-        print("\n================== Policy Dataset Loader ==================\n")
-
         self.state_columns = constants.STATE_COLUMNS
         self.action_columns = constants.ACTION_COLUMNS
 
@@ -26,12 +24,21 @@ class PolicyDatasetLoader(Dataset):
                              constants.END_EFFECTOR_POSITION_RANGE_Y,
                              constants.END_EFFECTOR_POSITION_RANGE_Z]
         
+        self.trajectory_length = constants.TRAJECTORY_SIZE
+        
         self.demo_state_data, self.demo_action_data = self.load_data(json_paths=demo_data_json_paths,
                                                                      column_names=constants.COLUMN_NAMES)
+        
+        self.dataset_size = len(self.demo_state_data) if not self.demo_state_data.empty else 0
+
+        print("\n================== Policy Dataset Loader ==================\n")
+        print("Number of Trajectories: ", len(demo_data_json_paths))
+        print("Each Trajectory Length: ", self.trajectory_length)
+        print("Full Demo Dataset Size: ", self.dataset_size)
     
     def __len__(self):
 
-        return len(self.demo_state_data) if not self.demo_state_data.empty else 0
+        return self.dataset_size
     
     def __getitem__(self,
                     idx: int):
@@ -56,6 +63,10 @@ class PolicyDatasetLoader(Dataset):
         for json_path in json_paths:
             df = common.json2dataframe(json_path=json_path,
                                        column_names=column_names)
+            
+            # discritize the trajectory into equally spaced points
+            df = common.discritize_dataframe(df=df,
+                                             return_n_rows=self.trajectory_length)
             
             state_dfs.append(
                 common.extract_state_vector(df=df,

@@ -228,3 +228,23 @@ def is_float(value) -> bool:
     binary = str(value).replace(".", "", 1).isnumeric()
 
     return binary
+
+
+def discritize_dataframe(df: pd.DataFrame,
+                         return_n_rows: int) -> pd.DataFrame:
+    
+    if not isinstance(df, pd.DataFrame):
+        raise TypeError("Input 'df' in discritize_dataframe function must be a pandas dataframe.")
+    if not isinstance(return_n_rows, int):
+        raise TypeError("Input 'return_n_rows' in discritize_dataframe function must be an integer.")
+    
+    # get the number of rows in the dataframe
+    num_rows = df.shape[0]
+
+    # get the number of rows to skip (interval number)
+    skip_rows = num_rows // return_n_rows
+
+    # select rows at regular intervals
+    df_subset = df.iloc[::skip_rows]
+
+    return df_subset

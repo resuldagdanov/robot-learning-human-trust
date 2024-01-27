@@ -29,3 +29,6 @@ STATE_COLUMNS = ["distance_to_object",
 ACTION_COLUMNS = ["arm_action_x",
                   "arm_action_y",
                   "arm_action_z"]
+
+# number of state action pairs to discritize in each trajectory
+TRAJECTORY_SIZE = 8 # equally spaced number of points
