@@ -33,6 +33,11 @@ class Config(object):
         self.data_shuffle = True
         self.num_workers = 0
 
+        self.policy_std_min = -2.0
+        self.policy_std_max = 2.0
+
+        self.policy_lr = 1e-3
+
     def model_saving_path(self,
                           directory: str) -> str:
         
