@@ -32,3 +32,9 @@ ACTION_COLUMNS = ["arm_action_x",
 
 # number of state action pairs to discritize in each trajectory
 TRAJECTORY_SIZE = 8 # equally spaced number of points
+
+# collected dataset folder name in ("dataset \\ human_demonstrations \\ collection_date")
+DEMO_COLLECTION_DATE = "2024_01_23" # year_month_day 
+
+# number of training epoch for behavior cloning
+BC_NUMBER_EPOCHS = 10

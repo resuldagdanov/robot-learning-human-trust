@@ -37,9 +37,17 @@ def json2dataframe(json_path: str,
                       columns=column_names)
     
     timestamps = []
+    traj_idx = 0
     
     # loop through each sample element in the trajectory
-    for idx, sample in enumerate(trajectory):
+    for sample in trajectory:
+
+        # some trajectories could be missing position data
+        if len(sample) != 5:
+            # remove the last row from df if it exists
+            df = df.drop(df.index[-1])
+            continue
+
         entry = {
             column_names[0]: int(sample[4]["timestamp"]),
             column_names[1]: sample[0]["message"],
@@ -55,7 +63,8 @@ def json2dataframe(json_path: str,
             column_names[7]: arm_action["z"]
         })
 
-        df.loc[idx] = entry
+        df.loc[traj_idx] = entry
+        traj_idx += 1
 
         timestamps.append(int(sample[4]["timestamp"]))
     
