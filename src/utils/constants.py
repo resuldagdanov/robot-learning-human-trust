@@ -31,7 +31,7 @@ ACTION_COLUMNS = ["arm_action_x",
                   "arm_action_z"]
 
 # number of state action pairs to discritize in each trajectory
-TRAJECTORY_SIZE = 8 # equally spaced number of points
+TRAJECTORY_SIZE = 32 # equally spaced number of points
 
 # collected dataset folder name in ("dataset \\ human_demonstrations \\ collection_date")
 DEMO_COLLECTION_DATE = "2024_01_23" # year_month_day 

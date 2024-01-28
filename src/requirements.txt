@@ -1,9 +1,8 @@
 torch
 bagpy
-jsonlib
 pandas
 numpy
-pyrosenv
 matplotlib
 mpl-tools
 tqdm
+tensorboard

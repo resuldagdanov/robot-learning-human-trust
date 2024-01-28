@@ -23,7 +23,7 @@ class Config(object):
         self.seed = 1234
         self.device = "cpu"
 
-        self.batch_size = 2
+        self.batch_size = 32
 
         self.state_size = 4
         self.hidden_size = 64
@@ -36,7 +36,7 @@ class Config(object):
         self.policy_std_min = -2.0
         self.policy_std_max = 2.0
 
-        self.policy_lr = 1e-3
+        self.policy_lr = 1e-1
 
     def model_saving_path(self,
                           directory: str) -> str:
