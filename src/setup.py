@@ -10,11 +10,11 @@ with open(requirement_path) as f:
     install_requires = f.read().splitlines()
 
 setuptools.setup(
-    name="learning_trust_behavior",
+    name="src_trust_learning",
     version="0.1",
     author="Resul Dagdanov",
     author_email="",
-    description="learning trust behavior via IRL",
+    description="source codes for learning trust behavior via IRL",
     url="https://github.com/resuldagdanov/learning-trust-behavior",
     install_requires=install_requires,
     packages=setuptools.find_packages(),
