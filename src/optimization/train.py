@@ -4,11 +4,6 @@ import sys
 import torch
 
 from tqdm import tqdm
-from typing import List
-
-from updater import Updater
-
-from torch.utils.tensorboard import SummaryWriter
 
 # get the current script's directory
 current_directory = os.path.dirname(os.path.abspath(__file__)) if "__file__" in locals() else os.getcwd()
@@ -18,69 +13,27 @@ parent_directory = os.path.dirname(current_directory)
 sys.path.append(parent_directory)
 
 from utils import constants
-from utils.config import Config
 from utils.dataset_loader import PolicyDatasetLoader
+
+from optimization.updater import Updater
+from optimization.functions import setup_config, get_directories, create_directories, save_policy
 
 from models.policy_model import RobotPolicy
 
 
-def get_directories(configs: Config,
-                    parent_directory: str) -> (List[str],
-                                               str):
-    
-    grand_parent_path = os.path.dirname(parent_directory)
-    results_path = os.path.join(grand_parent_path,
-                                "results")
-    
-    policy_model_directory = os.path.join(results_path,
-                                          "policy_network_params")
-    if not os.path.exists(policy_model_directory):
-        os.makedirs(policy_model_directory)
-    
-    policy_saving_path = configs.model_saving_path(directory=policy_model_directory)
-
-    dataset_path = os.path.join(grand_parent_path,
-                                "dataset")
-    demo_path = os.path.join(dataset_path,
-                             "human_demonstrations")
-    dataset_folder = os.path.join(demo_path,
-                                  constants.DEMO_COLLECTION_DATE)
-    
-    json_folder = os.path.join(dataset_folder,
-                               "jsons")
-    json_files = os.listdir(json_folder)
-    json_paths = [os.path.join(json_folder, file)
-                  for file in json_files if file.endswith(".json")]
-    
-    return json_paths, policy_saving_path
-
-
-def save_policy(saving_path: str,
-                loss_value_str: str) -> None:
-
-    # save the action prediction model after each epoch
-    filename = f"policy_network_epoch_{epoch + 1}_loss_{loss_value_str}.pt"
-    torch.save(obj=policy_network.state_dict(),
-               f=os.path.join(saving_path, filename))
-    
-    print(f"Saved Policy Network Model: {filename}")
-
-
 if __name__ == "__main__":
 
-    configs = Config()
-    # call the parameters method to set the parameters
-    configs.parameters()
-
+    # available training machine
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print("Training Device: ", device)
-    configs.device = device
 
-    torch.manual_seed(configs.seed)
+    # setup hyperparameters
+    configs = setup_config(device=device)
 
     # create and return preliminary base paths
-    json_paths, policy_saving_path = get_directories(configs=configs,
-                                                     parent_directory=parent_directory)
+    json_paths, results_path = get_directories(parent_directory=parent_directory)
+    policy_saving_path = create_directories(configs=configs,
+                                            results_path=results_path)
     
     # load demonstrations dataset
     training_data = PolicyDatasetLoader(demo_data_json_paths=json_paths)
@@ -109,8 +62,8 @@ if __name__ == "__main__":
         for batch_data in tqdm(torch_loader):
 
             # get batch of data
-            input_state = batch_data[0].float().to(device)
-            output_action = batch_data[1].float().to(device)
+            input_state = batch_data[0].float().to(configs.device)
+            output_action = batch_data[1].float().to(configs.device)
             
             # forward pass to get mean of Gaussian distribution
             action_pred, action_std = policy_network.forward(x=input_state)
@@ -135,5 +88,7 @@ if __name__ == "__main__":
         print(f"Epoch {epoch + 1}/{constants.BC_NUMBER_EPOCHS}, Batch Loss: {bc_loss_value}")
             
         # save action policy network parameters after every epoch
-        save_policy(saving_path=policy_saving_path,
+        save_policy(epoch=epoch,
+                    policy_network=policy_network,
+                    saving_path=policy_saving_path,
                     loss_value_str=str(bc_loss_value).replace(".", "_"))
