@@ -1,5 +1,8 @@
 import torch
 
+import numpy as np
+
+
 class Updater(object):
 
     def __init__(self,
@@ -13,18 +16,39 @@ class Updater(object):
         self.policy_optimizer = None
 
     def calculate_bc_loss(self,
-                          predicted,
-                          target):
-        loss = torch.nn.MSELoss()(predicted,
-                                  target)
+                          action_dist,
+                          output_action):
+        
+        loss_nll = -action_dist.log_prob(output_action).sum(axis=-1)
+        batch_loss = loss_nll.mean()
 
-        return loss
+        return batch_loss
+    
+    def gaussian_nll_loss(self,
+                          y_true,
+                          y_pred):
+        
+        n_dims = int(int(y_pred.shape[1]) / 2)
+        
+        mu = y_pred[:, 0:n_dims]
+        log_sigma = y_pred[:, n_dims:]
+        
+        mse = -0.5 * torch.sum(torch.square((y_true - mu) / torch.exp(log_sigma)),
+                               axis=1)
+        sigma_trace = -torch.sum(log_sigma,
+                                 axis=1)
+        log_2_pi = -0.5 * n_dims * np.log(2 * np.pi)
+        
+        log_likelihood = mse + sigma_trace + log_2_pi
+
+        return torch.mean(-log_likelihood)
     
     def calculate_irl_loss(self,
                            demo_traj_reward,
                            robot_traj_reward,
                            probability,
                            nu_factor):
+        
         loss = - torch.mean(demo_traj_reward) + \
             torch.log(torch.exp(nu_factor) * (torch.mean(torch.exp(robot_traj_reward) / (probability + 1e-7))))
 

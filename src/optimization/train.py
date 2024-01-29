@@ -76,6 +76,8 @@ if __name__ == "__main__":
     print("Training Device: ", device)
     configs.device = device
 
+    torch.manual_seed(configs.seed)
+
     # create and return preliminary base paths
     json_paths, policy_saving_path = get_directories(configs=configs,
                                                      parent_directory=parent_directory)
@@ -90,8 +92,9 @@ if __name__ == "__main__":
     policy_network = RobotPolicy(state_size=configs.state_size,
                                  hidden_size=configs.hidden_size,
                                  out_size=configs.action_size,
-                                 std_min=configs.policy_std_min,
-                                 std_max=configs.policy_std_max,
+                                 log_std_min=configs.policy_log_std_min,
+                                 log_std_max=configs.policy_log_std_max,
+                                 log_std_init=configs.policy_log_std_init,
                                  device=configs.device)
 
     updater = Updater(configs=configs,
@@ -111,23 +114,26 @@ if __name__ == "__main__":
             
             # forward pass to get mean of Gaussian distribution
             action_pred, action_std = policy_network.forward(x=input_state)
-            action_prob, action_dist = policy_network.calculate_distribution(action_mu=action_pred,
-                                                                             action_std=action_std)
+            action_log_prob, action_dist = policy_network.calculate_distribution(action_mu=action_pred,
+                                                                                 action_std=action_std)
             
             # policy distribution entropy
             entropy = action_dist.entropy()
             
-            # compute negative log-likelihood loss value for maximum likelihood estimation
-            loss_nll = - action_dist.log_prob(output_action).sum(axis=-1)
-            batch_loss = loss_nll.mean()
+            action_mu_and_std = torch.cat((action_pred, action_std),
+                                          dim=-1)
+            
+            # multivariate Gaussian negative log-likelihood loss function
+            nll_loss = updater.gaussian_nll_loss(y_true=output_action,
+                                                 y_pred=action_mu_and_std)
             
             # backward pass and optimization
-            updater.run_optimizers(bc_loss=batch_loss)
+            updater.run_optimizers(bc_loss=nll_loss)
             
-            loss_value = round(batch_loss.item(), 5)
+            bc_loss_value = round(nll_loss.item(), 5)
             
-        print(f"Epoch {epoch + 1}/{constants.BC_NUMBER_EPOCHS}, Batch Loss: {loss_value}")
+        print(f"Epoch {epoch + 1}/{constants.BC_NUMBER_EPOCHS}, Batch Loss: {bc_loss_value}")
             
         # save action policy network parameters after every epoch
         save_policy(saving_path=policy_saving_path,
-                    loss_value_str=str(loss_value).replace(".", "_"))
+                    loss_value_str=str(bc_loss_value).replace(".", "_"))
