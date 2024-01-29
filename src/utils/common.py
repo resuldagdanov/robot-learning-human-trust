@@ -194,6 +194,40 @@ def normalize_action(action: np.array,
     return normed_action
 
 
+def denormalize_state(state_norm: np.array,
+                      norm_value_list: List[float]) -> np.array:
+    
+    if not isinstance(state_norm, np.ndarray):
+        raise TypeError("Input 'state_norm' must be a numpy array.")
+    if not isinstance(norm_value_list, list):
+        raise TypeError("Input 'norm_value_list' must be a list.")
+    if state_norm.shape[-1] != len(norm_value_list):
+        raise ValueError("Length of 'state_norm' and 'norm_value_list' must be the same.")
+    
+    denormed_state = state_norm * np.array(norm_value_list)
+
+    return denormed_state
+
+
+def denormalize_action(action_norm: np.array,
+                       norm_range_list: List[List[float]]) -> np.array:
+    
+    if not isinstance(action_norm, np.ndarray):
+        raise TypeError("Input 'action_norm' must be a numpy array.")
+    if not isinstance(norm_range_list, list):
+        raise TypeError("Input 'norm_range_list' must be a list.")
+    if len(action_norm.shape) != 2 or action_norm.shape[-1] != len(norm_range_list):
+        raise ValueError("Shape of 'action_norm' and 'norm_range_list' must be compatible.")
+    
+    denormed_action = np.zeros_like(action_norm, dtype=np.float64)
+    
+    for i in range(len(norm_range_list)):
+        min_val, max_val = norm_range_list[i]
+        denormed_action[:, i] = ((action_norm[:, i] + 1) * (max_val - min_val) / 2) + min_val
+
+    return denormed_action
+
+
 def rosbag2json(bag_file: str,
                 output_json_file: str,
                 ros_topics: List[str]) -> None:

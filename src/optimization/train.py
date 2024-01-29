@@ -60,11 +60,11 @@ if __name__ == "__main__":
 
         # loop through each batch inside the dataset
         for batch_data in tqdm(torch_loader):
-
+            
             # get batch of data
             input_state = batch_data[0].float().to(configs.device)
             output_action = batch_data[1].float().to(configs.device)
-            
+
             # forward pass to get mean of Gaussian distribution
             action_pred, action_std = policy_network.forward(x=input_state)
             action_log_prob, action_dist = policy_network.calculate_distribution(action_mu=action_pred,
