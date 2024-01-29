@@ -7,7 +7,7 @@ class Updater(object):
 
     def __init__(self,
                  configs,
-                 policy_network):
+                 policy_network) -> object:
         
         self.configs = configs
         self.device = configs.device
@@ -17,7 +17,7 @@ class Updater(object):
 
     def calculate_bc_loss(self,
                           action_dist,
-                          output_action):
+                          output_action) -> float:
         
         loss_nll = -action_dist.log_prob(output_action).sum(axis=-1)
         batch_loss = loss_nll.mean()
@@ -25,8 +25,8 @@ class Updater(object):
         return batch_loss
     
     def gaussian_nll_loss(self,
-                          y_true,
-                          y_pred):
+                          y_true: torch.FloatTensor,
+                          y_pred: torch.FloatTensor) -> float:
         
         n_dims = int(int(y_pred.shape[1]) / 2)
         
@@ -54,7 +54,7 @@ class Updater(object):
 
         return loss
 
-    def initialize_optimizers(self):
+    def initialize_optimizers(self) -> None:
         
         self.policy_optimizer = torch.optim.Adam(self.policy_network.parameters(),
                                                  lr=self.configs.policy_lr)

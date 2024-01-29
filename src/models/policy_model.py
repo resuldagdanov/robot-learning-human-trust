@@ -10,7 +10,7 @@ class RobotPolicy(torch.nn.Module):
                  log_std_min: float = -11,
                  log_std_max: float = 1.1,
                  log_std_init: float = 0.0,
-                 device: str = "cpu"):
+                 device: str = "cpu") -> object:
         
         super(RobotPolicy,
               self).__init__()
@@ -72,8 +72,8 @@ class RobotPolicy(torch.nn.Module):
         return log_probability, action_distribution
     
     def init_weights(self,
-                     hidden_layer,
-                     gain=1.0):
+                     hidden_layer: torch.nn.Linear,
+                     gain: float=1.0) -> None:
         
         # xavier_normal_ is used when activation functions is tanh or sigmoid
         # orthogonal_ is used when activation functions is relu

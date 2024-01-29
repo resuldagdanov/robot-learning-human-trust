@@ -5,7 +5,7 @@ from datetime import datetime
 
 class Config(object):
 
-    def __init__(self):
+    def __init__(self) -> object:
 
         today = datetime.today() # month - date - year
         now = datetime.now() # hours - minutes - seconds

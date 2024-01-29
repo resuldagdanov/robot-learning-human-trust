@@ -30,6 +30,12 @@ ACTION_COLUMNS = ["arm_action_x",
                   "arm_action_y",
                   "arm_action_z"]
 
+# column name to represent number index of the state in a trajectory
+STATE_NUMBER_COLUMN = "state_number"
+
+# trajectory index number column name
+NUMBER_TRAJECTORY_COLUMN = "trajectory_index"
+
 # number of state action pairs to discritize in each trajectory
 TRAJECTORY_SIZE = 20 # equally spaced number of points
 
@@ -37,4 +43,4 @@ TRAJECTORY_SIZE = 20 # equally spaced number of points
 DEMO_COLLECTION_DATE = "2024_01_23" # year_month_day 
 
 # number of training epoch for behavior cloning
-BC_NUMBER_EPOCHS = 100
+BC_NUMBER_EPOCHS = 1

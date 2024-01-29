@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+
 import torch
 
 from typing import List
@@ -10,7 +11,7 @@ from utils import common, constants
 class PolicyDatasetLoader(Dataset):
 
     def __init__(self,
-                 demo_data_json_paths: List[str]):
+                 demo_data_json_paths: List[str]) -> object:
         
         self.state_columns = constants.STATE_COLUMNS
         self.action_columns = constants.ACTION_COLUMNS
@@ -24,6 +25,8 @@ class PolicyDatasetLoader(Dataset):
                              constants.END_EFFECTOR_POSITION_RANGE_Y,
                              constants.END_EFFECTOR_POSITION_RANGE_Z]
         
+        self.state_number_column = constants.STATE_NUMBER_COLUMN
+        self.traj_index_column = constants.NUMBER_TRAJECTORY_COLUMN
         self.trajectory_length = constants.TRAJECTORY_SIZE
         
         self.demo_state_data, self.demo_action_data = self.load_data(json_paths=demo_data_json_paths,
@@ -36,31 +39,39 @@ class PolicyDatasetLoader(Dataset):
         print("Each Trajectory Length: ", self.trajectory_length)
         print("Full Demo Dataset Size: ", self.dataset_size)
     
-    def __len__(self):
+    def __len__(self) -> int:
 
         return self.dataset_size
     
     def __getitem__(self,
-                    idx: int):
+                    idx: int) -> (torch.FloatTensor,
+                                  torch.FloatTensor,
+                                  int,
+                                  int):
         
         # get normalized state and action vectors as dataframe
-        sample_states = self.demo_state_data.iloc[idx].astype(np.float64)
-        sample_actions = self.demo_action_data.iloc[idx].astype(np.float64)
+        sample_states = self.demo_state_data[self.state_columns].iloc[idx].astype(np.float64)
+        sample_actions = self.demo_action_data[self.action_columns].iloc[idx].astype(np.float64)
+
+        # get trajectory index number and state number in that trajectory
+        traj_idx_number = self.demo_state_data[self.traj_index_column].iloc[idx]
+        state_number = self.demo_state_data[self.state_number_column].iloc[idx]
         
         # convert state and action to torch tensors
         state_tensor = torch.FloatTensor(sample_states.values.flatten())
         action_tensor = torch.FloatTensor(sample_actions.values.flatten())
 
-        return state_tensor, action_tensor
+        return state_tensor, action_tensor, traj_idx_number, state_number
     
     def load_data(self,
                   json_paths: List[str],
-                  column_names: List[str]) -> (pd.DataFrame, pd.DataFrame):
+                  column_names: List[str]) -> (pd.DataFrame,
+                                               pd.DataFrame):
         
         state_dfs, action_dfs = [], []
 
         # loop through every trajectory data specified in json_paths
-        for json_path in json_paths:
+        for traj_idx, json_path in enumerate(json_paths):
             
             df = common.json2dataframe(json_path=json_path,
                                        column_names=column_names)
@@ -68,13 +79,23 @@ class PolicyDatasetLoader(Dataset):
             # discritize the trajectory into equally spaced points
             df = common.discritize_dataframe(df=df,
                                              return_n_rows=self.trajectory_length)
-            
+                
+            # add a new column to store the trajectory index number
+            df[self.traj_index_column] = traj_idx
+
+            # reset the index and store it in a new column
+            df[self.state_number_column] = df.reset_index().index
+
             state_dfs.append(
                 common.extract_state_vector(df=df,
+                                            traj_idx_column=self.traj_index_column,
+                                            state_idx_column=self.state_number_column,
                                             state_columns=self.state_columns,
                                             norm_value_list=self.state_norms))
             action_dfs.append(
                 common.extract_action_vector(df=df,
+                                             traj_idx_column=self.traj_index_column,
+                                             state_idx_column=self.state_number_column,
                                              action_columns=self.action_columns,
                                              norm_range_list=self.action_norms))
         

@@ -88,16 +88,24 @@ def timestamp2second(timestamps: list) -> list:
 
 
 def extract_state_vector(df: pd.DataFrame,
+                         traj_idx_column: str,
+                         state_idx_column: str,
                          state_columns: List[str],
                          norm_value_list: List[float]) -> pd.DataFrame:
     
     if not isinstance(df, pd.DataFrame):
         raise TypeError("Input 'df' in extract_state_vector function must be a pandas dataframe.")
+    if not isinstance(traj_idx_column, str):
+        raise TypeError("Input 'traj_idx_column' in extract_state_vector function must be a string.")
+    if not isinstance(state_idx_column, str):
+        raise TypeError("Input 'state_idx_column' in extract_state_vector function must be a string.")
     if not isinstance(state_columns, list):
-        raise TypeError("Input 'state_columns' must be a list of strings.")
+        raise TypeError("Input 'state_columns' in extract_state_vector function must be a list of strings.")
     if not isinstance(norm_value_list, list):
-        raise TypeError("Input 'norm_value_list' must be a list of float values.")
+        raise TypeError("Input 'norm_value_list' in extract_state_vector function must be a list of float values.")
     
+    traj_idxs = df[traj_idx_column].iloc[0]
+    state_numbers = df[state_idx_column]
     state_df = df[state_columns]
 
     state_array = state_df.to_numpy()
@@ -105,24 +113,35 @@ def extract_state_vector(df: pd.DataFrame,
     # normalize state vector to range [0, 1]
     normalized_state_array = normalize_state(state=state_array,
                                              norm_value_list=norm_value_list)
-    
     normalized_state_df = pd.DataFrame(normalized_state_array,
                                        columns=state_columns)
+    
+    # add trajectory index number column and state number column
+    normalized_state_df[traj_idx_column] = traj_idxs
+    normalized_state_df[state_idx_column] = state_numbers.values
 
     return normalized_state_df
 
 
 def extract_action_vector(df: pd.DataFrame,
+                          traj_idx_column: str,
+                          state_idx_column: str,
                           action_columns: List[str],
                           norm_range_list: List[List[float]]) -> pd.DataFrame:
     
     if not isinstance(df, pd.DataFrame):
         raise TypeError("Input 'df' in extract_action_vector function must be a pandas dataframe.")
+    if not isinstance(traj_idx_column, str):
+        raise TypeError("Input 'traj_idx_column' in extract_action_vector function must be a string.")
+    if not isinstance(state_idx_column, str):
+        raise TypeError("Input 'state_idx_column' in extract_action_vector function must be a string.")
     if not isinstance(action_columns, list):
-        raise TypeError("Input 'action_columns' must be a list of strings.")
+        raise TypeError("Input 'action_columns' in extract_action_vector function must be a list of strings.")
     if not isinstance(norm_range_list, list):
-        raise TypeError("Input 'norm_range_list' must be a list of list of float values.")
+        raise TypeError("Input 'norm_range_list' in extract_action_vector function must be a list of list of float values.")
     
+    traj_idxs = df[traj_idx_column].iloc[0]
+    state_numbers = df[state_idx_column]
     action_df = df[action_columns]
 
     action_array = action_df.to_numpy()
@@ -130,9 +149,12 @@ def extract_action_vector(df: pd.DataFrame,
     # normalize each element of the action vector to range [-1, 1]
     normalized_state_array = normalize_action(action=action_array,
                                               norm_range_list=norm_range_list)
-    
     normalized_action_df = pd.DataFrame(normalized_state_array,
                                         columns=action_columns)
+    
+    # add trajectory index number column and state number column
+    normalized_action_df[traj_idx_column] = traj_idxs
+    normalized_action_df[state_idx_column] = state_numbers.values
 
     return normalized_action_df
 
