@@ -98,3 +98,17 @@ def save_policy(epoch: int,
                f=os.path.join(saving_path, filename))
     
     print(f"Saved Policy Network Model: {filename}")
+
+
+def load_policy(policy_network: torch.nn.Module,
+                model_path: str) -> torch.nn.Module:
+    
+    if not isinstance(policy_network, torch.nn.Module):
+        raise TypeError("Input 'policy_network' in load_policy function must be torch neural network module.")
+    if not isinstance(model_path, str):
+        raise TypeError("Input 'model_path' in load_policy function must be a valid string path.")
+    
+    policy_network.load_state_dict(torch.load(model_path))
+    policy_network.eval()
+    
+    return policy_network
