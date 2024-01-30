@@ -16,7 +16,7 @@ parent_directory = os.path.dirname(current_directory)
 # add the parent directory to the sys.path
 sys.path.append(parent_directory)
 
-from utils import constants
+from utils import common, constants
 from utils.config import Config
 
 
@@ -140,13 +140,13 @@ def read_each_loader(configs: Config,
 
 
 def convert_sample_2_df(input_state: torch.Tensor,
-                        real_state_input: np.array,
+                        real_state_input: np.ndarray,
                         output_action: torch.Tensor,
-                        real_action_output: np.array,
+                        real_action_output: np.ndarray,
                         action_log_prob: torch.Tensor,
                         action_pred: torch.Tensor,
                         action_std: torch.Tensor,
-                        real_action_pred: np.array,
+                        real_action_pred: np.ndarray,
                         trajectory_index: int,
                         state_number: int,
                         nll_loss: float) -> pd.DataFrame:
@@ -197,3 +197,141 @@ def convert_sample_2_df(input_state: torch.Tensor,
                       index=[state_number])
     
     return df
+
+
+def get_initial_position(data_loader: torch.utils.data.Dataset) -> np.ndarray:
+
+    if not isinstance(data_loader, torch.utils.data.Dataset):
+        raise TypeError("Input 'data_loader' in get_initial_position function must be a torch data loader object.")
+    
+    # get the first sample in the dataset
+    sample_data = data_loader[0]
+
+    # get initial end-effector position
+    ee_location = common.denormalize_action(action_norm=sample_data[1].unsqueeze(0).numpy(),
+                                            norm_range_list=data_loader.action_norms)[0]
+    
+    return ee_location
+
+
+def calculate_next_state(action_denorm_prediction: np.ndarray,
+                         obstacle_location: np.ndarray,
+                         initial_state_location: np.ndarray,
+                         target_location: np.ndarray) -> np.ndarray:
+    
+    if not isinstance(action_denorm_prediction, np.ndarray):
+        raise TypeError("Input 'action_denorm_prediction' in calculate_next_state function must be a numpy array.")
+    if not isinstance(obstacle_location, np.ndarray):
+        raise TypeError("Input 'obstacle_location' in calculate_next_state function must be a numpy array.")
+    if not isinstance(initial_state_location, np.ndarray):
+        raise TypeError("Input 'initial_state_location' in calculate_next_state function must be a numpy array.")
+    if not isinstance(target_location, np.ndarray):
+        raise TypeError("Input 'target_location' in calculate_next_state function must be a numpy array.")
+    if len(action_denorm_prediction) != len(constants.ACTION_COLUMNS):
+        raise ValueError("The length of 'action_denorm_prediction' must be [action vector size].")
+    
+    # because both obstacle location and action prediction locations are computed w.r.t. the robot base,
+    # we could direcly calculate euclidean distance between them without any transformation
+    object_distance = np.linalg.norm(obstacle_location - action_denorm_prediction)
+    target_distance = np.linalg.norm(target_location - action_denorm_prediction)
+    start_distance = np.linalg.norm(initial_state_location - action_denorm_prediction)
+
+    # TODO: check if this is correct
+    ground_distance = action_denorm_prediction[2] + constants.ROBOT_BASE_HEIGHT
+    
+    next_state_denorm = np.array([object_distance,
+                                  target_distance,
+                                  start_distance,
+                                  ground_distance])
+    
+    return next_state_denorm
+
+
+def trajectory_estimation(configs: Config,
+                          data_loader: torch.utils.data.Dataset,
+                          policy_network: torch.nn.Module,
+                          initial_norm_state: torch.Tensor,
+                          trajectory_length: int) -> pd.DataFrame:
+    
+    if not isinstance(policy_network, torch.nn.Module):
+        raise TypeError("Input 'policy_network' in trajectory_estimation function must be a torch neural network module.")
+    if not isinstance(data_loader, torch.utils.data.Dataset):
+        raise TypeError("Input 'data_loader' in trajectory_estimation function must be a torch data loader object.")
+    if not isinstance(configs, Config):
+        raise TypeError("Input 'configs' in trajectory_estimation function must be an instance of Config.")
+    if not isinstance(initial_norm_state, torch.Tensor):
+        raise TypeError("Input 'initial_norm_state' in trajectory_estimation function must be a torch.Tensor.")
+    if not isinstance(trajectory_length, int):
+        raise TypeError("Input 'trajectory_length' in trajectory_estimation function must be an integer.")
+    if initial_norm_state.shape != (1, len(constants.STATE_COLUMNS)):
+        raise ValueError("The shape of 'initial_norm_state' must be [1, state vector size].")
+    
+    # position (x, y, z w.r.t robot base) is constant throughout the trajectory
+    initial_state_location = get_initial_position(data_loader=data_loader)
+
+    # initialize the state vector (normalized)
+    state_norm_vector = initial_norm_state
+
+    # initialize the trajectory dataframe
+    trajectory_df = pd.DataFrame()
+
+    # loop through the trajectory length
+    for state_number in range(trajectory_length):
+
+        print("state_number : ", state_number)
+
+        # estimate the action given the current state
+        action_pred, action_std, action_log_prob, action_entropy, action_mu_and_std, action_dist = policy_network.estimate_action(state=state_norm_vector)
+
+        # denormalize the action prediction to get x, y, z position of the end-effector
+        action_denorm_prediction = common.denormalize_action(action_norm=action_pred.detach().numpy(),
+                                                             norm_range_list=data_loader.action_norms)[0]
+
+        # denormalize the state vector to get distances to object, target, start, and ground
+        current_state_denorm = common.denormalize_state(state_norm=state_norm_vector.numpy(),
+                                                        norm_value_list=data_loader.state_norms)[0]
+        
+        # TODO: currently, target location is wrong so use last end-effector location label
+        target_location = np.array(constants.TARGET_LOCATION)
+        # target_location = common.denormalize_action(action_norm=data_loader[-1][1].unsqueeze(0).numpy(),
+        #                                             norm_range_list=data_loader.action_norms)[0]
+        
+        # calculate the next denormalized state as given the current state and action prediction
+        next_state_denorm = calculate_next_state(action_denorm_prediction=action_denorm_prediction,
+                                                 obstacle_location=np.array(constants.OBSTACLE_LOCATION),
+                                                 initial_state_location=initial_state_location,
+                                                 target_location=target_location)
+        
+        # normalize calculated next state
+        next_state_norm = common.normalize_state(state=next_state_denorm,
+                                                 norm_value_list=data_loader.state_norms)
+        
+        print("initial_state_location : ", initial_state_location)
+        print("action_pred : ", action_pred)
+        print("state_norm_vector : ", state_norm_vector)
+        print("action_denorm_prediction : ", action_denorm_prediction)
+        print("current_state_denorm : ", current_state_denorm)
+        print("next_state_denorm : ", next_state_denorm)
+        print("next_state_norm : ", next_state_norm)
+        print("target_location : ", target_location)
+
+        # # convert the sample to a dataframe
+        # sample_df = convert_sample_2_df(input_state=state_vector,
+        #                                 real_state_input=state_denorm,
+        #                                 output_action=action_pred,
+        #                                 real_action_output=action_denorm_prediction,
+        #                                 action_log_prob=action_log_prob,
+        #                                 action_pred=action_pred,
+        #                                 action_std=action_std,
+        #                                 real_action_pred=action_denorm_prediction,
+        #                                 trajectory_index=0,
+        #                                 state_number=state_number,
+        #                                 nll_loss=0.0)
+
+        # # append the sample dataframe to the trajectory dataframe
+        # trajectory_df = trajectory_df.append(sample_df)
+
+        # update the state vector
+        state_norm_vector = torch.from_numpy(next_state_norm).unsqueeze(0).float().to(configs.device)
+
+        break

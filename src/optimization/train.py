@@ -65,17 +65,9 @@ if __name__ == "__main__":
             input_state = batch_data[0].float().to(configs.device)
             output_action = batch_data[1].float().to(configs.device)
 
-            # forward pass to get mean of Gaussian distribution
-            action_pred, action_std = policy_network.forward(x=input_state)
-            action_log_prob, action_dist = policy_network.calculate_distribution(action_mu=action_pred,
-                                                                                 action_std=action_std)
-            
-            # policy distribution entropy
-            entropy = action_dist.entropy()
-            
-            action_mu_and_std = torch.cat((action_pred, action_std),
-                                          dim=-1)
-            
+            # forward pass to get Gaussian distribution
+            action_pred, action_std, action_log_prob, action_entropy, action_mu_and_std, action_dist = policy_network.estimate_action(state=input_state)
+
             # multivariate Gaussian negative log-likelihood loss function
             nll_loss = updater.multivariate_gaussian_nll_loss(y_true=output_action,
                                                               y_pred=action_mu_and_std)

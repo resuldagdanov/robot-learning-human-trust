@@ -56,7 +56,16 @@ GAUSSIAN_NLL_LOSS_COLUMN = "gnll_loss"
 TRAJECTORY_SIZE = 20 # equally spaced number of points
 
 # collected dataset folder name in ("dataset \\ human_demonstrations \\ collection_date")
-DEMO_COLLECTION_DATE = "2024_01_23" # year_month_day 
+DEMO_COLLECTION_DATE = "2024_01_23" # year_month_day NOTE: make sure that data date is correct
+
+# experiment obstacle location x, y, z coordinates
+OBSTACLE_LOCATION = [0.4, 0.0, 0.554] # meters NOTE: make sure the alignment with experiment
+
+# altitute of the base of the robot from the ground as a focal point
+ROBOT_BASE_HEIGHT = 0.2 # meters NOTE: make sure the alignment with robot experiment
+
+# experiment target location x, y, z coordinates
+TARGET_LOCATION = [-0.36, 0.77, -ROBOT_BASE_HEIGHT] # meters NOTE: make sure the alignment with robot experiment
 
 # number of training epoch for behavior cloning
 BC_NUMBER_EPOCHS = 1

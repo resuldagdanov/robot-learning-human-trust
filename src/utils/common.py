@@ -159,8 +159,8 @@ def extract_action_vector(df: pd.DataFrame,
     return normalized_action_df
 
 
-def normalize_state(state: np.array,
-                    norm_value_list: List[float]) -> np.array:
+def normalize_state(state: np.ndarray,
+                    norm_value_list: List[float]) -> np.ndarray:
     
     if not isinstance(state, np.ndarray):
         raise TypeError("Input 'state' must be a numpy array.")
@@ -174,8 +174,8 @@ def normalize_state(state: np.array,
     return normed_state
 
 
-def normalize_action(action: np.array,
-                     norm_range_list: List[List[float]]) -> np.array:
+def normalize_action(action: np.ndarray,
+                     norm_range_list: List[List[float]]) -> np.ndarray:
     
     if not isinstance(action, np.ndarray):
         raise TypeError("Input 'action' must be a numpy array.")
@@ -194,8 +194,8 @@ def normalize_action(action: np.array,
     return normed_action
 
 
-def denormalize_state(state_norm: np.array,
-                      norm_value_list: List[float]) -> np.array:
+def denormalize_state(state_norm: np.ndarray,
+                      norm_value_list: List[float]) -> np.ndarray:
     
     if not isinstance(state_norm, np.ndarray):
         raise TypeError("Input 'state_norm' must be a numpy array.")
@@ -209,8 +209,8 @@ def denormalize_state(state_norm: np.array,
     return denormed_state
 
 
-def denormalize_action(action_norm: np.array,
-                       norm_range_list: List[List[float]]) -> np.array:
+def denormalize_action(action_norm: np.ndarray,
+                       norm_range_list: List[List[float]]) -> np.ndarray:
     
     if not isinstance(action_norm, np.ndarray):
         raise TypeError("Input 'action_norm' must be a numpy array.")

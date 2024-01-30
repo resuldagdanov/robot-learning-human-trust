@@ -84,3 +84,24 @@ class RobotPolicy(torch.nn.Module):
         else:
             pass
     
+    def estimate_action(self,
+                        state: torch.Tensor) -> (torch.Tensor,
+                                                 torch.Tensor,
+                                                 torch.Tensor,
+                                                 torch.Tensor,
+                                                 torch.Tensor,
+                                                 torch.distributions.Normal):
+           
+        # forward pass to get mean of Gaussian distribution
+        action_pred, action_std = self.forward(x=state)
+        action_log_prob, action_dist = self.calculate_distribution(action_mu=action_pred,
+                                                                   action_std=action_std)
+        
+        # policy distribution entropy
+        action_entropy = action_dist.entropy().mean()
+
+        # concatenate mean and standard deviation to output
+        action_mu_and_std = torch.cat((action_pred, action_std),
+                                      dim=-1)
+        
+        return action_pred, action_std, action_log_prob, action_entropy, action_mu_and_std, action_dist
