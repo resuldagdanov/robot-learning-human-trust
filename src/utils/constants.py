@@ -35,6 +35,7 @@ ACTION_NORMALIZED_LABEL_NAME = "action_label_norm" # normalized action label
 ACTION_DENORMALIZED_LABEL_NAME = "action_label_denorm" # denormalized action vector
 STATE_NORMALIZED_NAME = "state_norm" # normalized state vector
 STATE_DENORMALIZED_NAME = "state_denorm" # denormalized state vector
+STATE_ESTIMATION_NAME = "state_est" # estimated state vector given the prediction action
 ACTION_PREDICTION_NAME = "action_pred" # mean of distribution
 ACTION_PREDICTION_STD_NAME = "action_pred_std" # standard deviation
 ACTION_PREDICTION_DENORMALIZED_NAME = "action_pred_denorm" # x, y, z locations
