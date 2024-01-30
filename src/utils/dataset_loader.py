@@ -79,7 +79,12 @@ class PolicyDatasetLoader(Dataset):
             # discritize the trajectory into equally spaced points
             df = common.discritize_dataframe(df=df,
                                              return_n_rows=self.trajectory_length)
-                
+            
+            # correct action label correspondence, as we want to predict next action given the state
+            df = common.shift_action_label(df=df,
+                                           action_columns=self.action_columns,
+                                           shift_amount=constants.ACTION_LABEL_SHIFT_IDX)
+            
             # add a new column to store the trajectory index number
             df[self.traj_index_column] = traj_idx
 

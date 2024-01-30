@@ -313,3 +313,23 @@ def discritize_dataframe(df: pd.DataFrame,
     df_subset = df.iloc[::skip_rows]
 
     return df_subset
+
+
+def shift_action_label(df: pd.DataFrame,
+                       action_columns: List[str],
+                       shift_amount: int) -> pd.DataFrame:
+    
+    if not isinstance(df, pd.DataFrame):
+        raise TypeError("Input 'df' in shift_action_label function must be a pandas dataframe.")
+    if not isinstance(action_columns, list):
+        raise TypeError("Input 'action_columns' in shift_action_label function must be a list of strings.")
+    if not isinstance(shift_amount, int):
+        raise TypeError("Input 'shift_amount' in shift_action_label function must be an integer.")
+    
+    # shift the action label by the specified amount
+    df[action_columns] = df[action_columns].shift(shift_amount)
+
+    # remove the first few rows that are NaN
+    df = df.dropna()
+
+    return df

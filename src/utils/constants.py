@@ -52,6 +52,9 @@ NUMBER_TRAJECTORY_COLUMN = "trajectory_index"
 # multivarate gaussian log likelihood loss value column name
 GAUSSIAN_NLL_LOSS_COLUMN = "gnll_loss"
 
+# end-effector position is next action value for the given state (constant : -1)
+ACTION_LABEL_SHIFT_IDX = -1
+
 # number of state action pairs to discritize in each trajectory
 TRAJECTORY_SIZE = 20 # equally spaced number of points
 
@@ -68,4 +71,4 @@ ROBOT_BASE_HEIGHT = 0.2 # meters NOTE: make sure the alignment with robot experi
 TARGET_LOCATION = [-0.36, 0.77, -ROBOT_BASE_HEIGHT] # meters NOTE: make sure the alignment with robot experiment
 
 # number of training epoch for behavior cloning
-BC_NUMBER_EPOCHS = 1
+BC_NUMBER_EPOCHS = 100
