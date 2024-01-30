@@ -177,20 +177,20 @@ def convert_sample_2_df(input_state: torch.Tensor,
     data = {}
 
     # add array elements to the dictionary
-    data.update({f"input_state_{i+1}": input_state.numpy()[i] for i in range(input_state.shape[0])})
-    data.update({f"real_state_input_{i+1}": real_state_input[i] for i in range(len(real_state_input))})
-    data.update({f"output_action_{i+1}": output_action.numpy()[i] for i in range(output_action.shape[0])})
-    data.update({f"real_action_output_{i+1}": real_action_output[i] for i in range(len(real_action_output))})
-    data.update({f"action_log_prob_{i+1}": action_log_prob[0].detach().numpy()[i] for i in range(action_log_prob.shape[1])})
-    data.update({f"action_pred_{i+1}": action_pred[0].detach().numpy()[i] for i in range(action_pred.shape[1])})
-    data.update({f"action_std_{i+1}": action_std[0].detach().numpy()[i] for i in range(action_std.shape[1])})
-    data.update({f"real_action_pred_{i+1}": real_action_pred[i] for i in range(len(real_action_pred))})
+    data.update({constants.STATE_NORMALIZED_NAME + f"_{i+1}": input_state.numpy()[i] for i in range(input_state.shape[0])})
+    data.update({constants.STATE_DENORMALIZED_NAME + f"_{i+1}": real_state_input[i] for i in range(len(real_state_input))})
+    data.update({constants.ACTION_NORMALIZED_LABEL_NAME + f"_{i+1}": output_action.numpy()[i] for i in range(output_action.shape[0])})
+    data.update({constants.ACTION_DENORMALIZED_LABEL_NAME + f"_{i+1}": real_action_output[i] for i in range(len(real_action_output))})
+    data.update({constants.ACTION_PREDICTION_LOGPROB_NAME + f"_{i+1}": action_log_prob[0].detach().numpy()[i] for i in range(action_log_prob.shape[1])})
+    data.update({constants.ACTION_PREDICTION_NAME + f"_{i+1}": action_pred[0].detach().numpy()[i] for i in range(action_pred.shape[1])})
+    data.update({constants.ACTION_PREDICTION_STD_NAME + f"_{i+1}": action_std[0].detach().numpy()[i] for i in range(action_std.shape[1])})
+    data.update({constants.ACTION_PREDICTION_DENORMALIZED_NAME + f"_{i+1}": real_action_pred[i] for i in range(len(real_action_pred))})
 
     # add non-array elements to the dictionary
     data.update({
-        "trajectory_index": trajectory_index,
-        "state_number": state_number,
-        "nll_loss": nll_loss
+        constants.NUMBER_TRAJECTORY_COLUMN: trajectory_index,
+        constants.STATE_NUMBER_COLUMN: state_number,
+        constants.GAUSSIAN_NLL_LOSS_COLUMN: nll_loss
     })
 
     df = pd.DataFrame([data],

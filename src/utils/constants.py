@@ -30,11 +30,26 @@ ACTION_COLUMNS = ["arm_action_x",
                   "arm_action_y",
                   "arm_action_z"]
 
+# column names for normalized and denormalized state and action vectors
+ACTION_NORMALIZED_LABEL_NAME = "action_label_norm" # normalized action label
+ACTION_DENORMALIZED_LABEL_NAME = "action_label_denorm" # denormalized action vector
+STATE_NORMALIZED_NAME = "state_norm" # normalized state vector
+STATE_DENORMALIZED_NAME = "state_denorm" # denormalized state vector
+ACTION_PREDICTION_NAME = "action_pred" # mean of distribution
+ACTION_PREDICTION_STD_NAME = "action_pred_std" # standard deviation
+ACTION_PREDICTION_DENORMALIZED_NAME = "action_pred_denorm" # x, y, z locations
+ACTION_PREDICTION_LOGPROB_NAME = "action_pred_logprob" # log probability of action prediction
+ACTION_PREDICTION_ENTROPY_NAME = "action_pred_entropy" # entropy of action prediction
+ACTION_LABEL_LOGPROB_NAME = "action_label_logprob" # log probability of demonstration action
+
 # column name to represent number index of the state in a trajectory
 STATE_NUMBER_COLUMN = "state_number"
 
 # trajectory index number column name
 NUMBER_TRAJECTORY_COLUMN = "trajectory_index"
+
+# multivarate gaussian log likelihood loss value column name
+GAUSSIAN_NLL_LOSS_COLUMN = "gnll_loss"
 
 # number of state action pairs to discritize in each trajectory
 TRAJECTORY_SIZE = 20 # equally spaced number of points
