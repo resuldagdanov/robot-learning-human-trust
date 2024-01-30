@@ -24,24 +24,29 @@ class Updater(object):
 
         return batch_loss
     
-    def gaussian_nll_loss(self,
-                          y_true: torch.FloatTensor,
-                          y_pred: torch.FloatTensor) -> float:
+    def multivariate_gaussian_nll_loss(self,
+                                       y_true: torch.FloatTensor,
+                                       y_pred: torch.FloatTensor) -> float:
         
+        # size of action space
         n_dims = int(int(y_pred.shape[1]) / 2)
         
         mu = y_pred[:, 0:n_dims]
         log_sigma = y_pred[:, n_dims:]
         
-        mse = -0.5 * torch.sum(torch.square((y_true - mu) / torch.exp(log_sigma)),
+        # mean squared error given mean and standard deviation
+        mse = 0.5 * torch.sum(torch.square((y_true - mu) / torch.exp(log_sigma)),
                                axis=1)
-        sigma_trace = -torch.sum(log_sigma,
+        # sum of predicted log standard deviations to penalize higher uncertainties in predictions
+        sigma_trace = torch.sum(log_sigma,
                                  axis=1)
-        log_2_pi = -0.5 * n_dims * np.log(2 * np.pi)
+        # constant term related to the natural logarithm of 2 pi
+        log_2_pi = 0.5 * n_dims * np.log(2 * np.pi)
         
+        # multivariate Gaussian negative log-likelihood loss function
         log_likelihood = mse + sigma_trace + log_2_pi
 
-        return torch.mean(-log_likelihood)
+        return torch.mean(log_likelihood)
     
     def calculate_irl_loss(self,
                            demo_traj_reward,

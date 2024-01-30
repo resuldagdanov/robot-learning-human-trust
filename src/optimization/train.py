@@ -77,8 +77,8 @@ if __name__ == "__main__":
                                           dim=-1)
             
             # multivariate Gaussian negative log-likelihood loss function
-            nll_loss = updater.gaussian_nll_loss(y_true=output_action,
-                                                 y_pred=action_mu_and_std)
+            nll_loss = updater.multivariate_gaussian_nll_loss(y_true=output_action,
+                                                              y_pred=action_mu_and_std)
             
             # backward pass and optimization
             updater.run_optimizers(bc_loss=nll_loss)

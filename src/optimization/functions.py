@@ -1,6 +1,9 @@
 import os
 import sys
 
+import numpy as np
+import pandas as pd
+
 import torch
 
 from typing import List
@@ -112,3 +115,85 @@ def load_policy(policy_network: torch.nn.Module,
     policy_network.eval()
     
     return policy_network
+
+
+def read_each_loader(configs: Config,
+                     sample_data: tuple) -> (torch.Tensor,
+                                             torch.Tensor,
+                                             int,
+                                             int):
+    
+    if not isinstance(configs, Config):
+        raise TypeError("Input 'configs' in read_each_loader function must be an instance of Config.")
+    if not isinstance(sample_data, tuple):
+        raise TypeError("Input 'sample_data' in read_each_loader function must be a tuple.")
+    if len(sample_data) != 4:
+        raise ValueError("Input 'sample_data' must be a tuple of length 4.")
+    
+    # extract sample data in correct order
+    input_state = sample_data[0].float().to(configs.device)
+    output_action = sample_data[1].float().to(configs.device)
+    trajectory_index = sample_data[2]
+    state_number = sample_data[3]
+    
+    return input_state, output_action, trajectory_index, state_number
+
+
+def convert_sample_2_df(input_state: torch.Tensor,
+                        real_state_input: np.array,
+                        output_action: torch.Tensor,
+                        real_action_output: np.array,
+                        action_log_prob: torch.Tensor,
+                        action_pred: torch.Tensor,
+                        action_std: torch.Tensor,
+                        real_action_pred: np.array,
+                        trajectory_index: int,
+                        state_number: int,
+                        nll_loss: float) -> pd.DataFrame:
+    
+    if not isinstance(input_state, torch.Tensor):
+        raise TypeError("Input 'input_state' in convert_sample_2_df function must be a torch.Tensor.")
+    if not isinstance(real_state_input, np.ndarray):
+        raise TypeError("Input 'real_state_input' in convert_sample_2_df function must be a numpy array.")
+    if not isinstance(output_action, torch.Tensor):
+        raise TypeError("Input 'output_action' in convert_sample_2_df function must be a torch.Tensor.")
+    if not isinstance(real_action_output, np.ndarray):
+        raise TypeError("Input 'real_action_output' in convert_sample_2_df function must be a numpy array.")
+    if not isinstance(action_log_prob, torch.Tensor):
+        raise TypeError("Input 'action_log_prob' in convert_sample_2_df function must be a torch.Tensor.")
+    if not isinstance(action_pred, torch.Tensor):
+        raise TypeError("Input 'action_pred' in convert_sample_2_df function must be a torch.Tensor.")
+    if not isinstance(action_std, torch.Tensor):
+        raise TypeError("Input 'action_std' in convert_sample_2_df function must be a torch.Tensor.")
+    if not isinstance(real_action_pred, np.ndarray):
+        raise TypeError("Input 'real_action_pred' in convert_sample_2_df function must be a numpy array.")
+    if not isinstance(trajectory_index, int):
+        raise TypeError("Input 'trajectory_index' in convert_sample_2_df function must be an integer.")
+    if not isinstance(state_number, int):
+        raise TypeError("Input 'state_number' in convert_sample_2_df function must be an integer.")
+    if not isinstance(nll_loss, float):
+        raise TypeError("Input 'nll_loss' in convert_sample_2_df function must be a float.")
+    
+    data = {}
+
+    # add array elements to the dictionary
+    data.update({f"input_state_{i+1}": input_state.numpy()[i] for i in range(input_state.shape[0])})
+    data.update({f"real_state_input_{i+1}": real_state_input[i] for i in range(len(real_state_input))})
+    data.update({f"output_action_{i+1}": output_action.numpy()[i] for i in range(output_action.shape[0])})
+    data.update({f"real_action_output_{i+1}": real_action_output[i] for i in range(len(real_action_output))})
+    data.update({f"action_log_prob_{i+1}": action_log_prob[0].detach().numpy()[i] for i in range(action_log_prob.shape[1])})
+    data.update({f"action_pred_{i+1}": action_pred[0].detach().numpy()[i] for i in range(action_pred.shape[1])})
+    data.update({f"action_std_{i+1}": action_std[0].detach().numpy()[i] for i in range(action_std.shape[1])})
+    data.update({f"real_action_pred_{i+1}": real_action_pred[i] for i in range(len(real_action_pred))})
+
+    # add non-array elements to the dictionary
+    data.update({
+        "trajectory_index": trajectory_index,
+        "state_number": state_number,
+        "nll_loss": nll_loss
+    })
+
+    df = pd.DataFrame([data],
+                      index=[state_number])
+    
+    return df
