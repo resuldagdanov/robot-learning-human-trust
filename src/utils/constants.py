@@ -57,7 +57,7 @@ GAUSSIAN_NLL_LOSS_COLUMN = "gnll_loss"
 ACTION_LABEL_SHIFT_IDX = -1
 
 # number of state action pairs to discritize in each trajectory
-TRAJECTORY_SIZE = 10 # equally spaced number of points
+TRAJECTORY_SIZE = 20 # equally spaced number of points
 
 # collected dataset folder name in ("dataset \\ human_demonstrations \\ collection_date")
 DEMO_COLLECTION_DATE = "2024_01_23" # year_month_day NOTE: make sure that data date is correct

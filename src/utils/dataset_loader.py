@@ -9,7 +9,7 @@ from utils import common, constants
 
 
 class PolicyDatasetLoader(Dataset):
-
+    
     def __init__(self,
                  demo_data_json_paths: List[str]) -> object:
         
@@ -72,7 +72,7 @@ class PolicyDatasetLoader(Dataset):
 
         # loop through every trajectory data specified in json_paths
         for traj_idx, json_path in enumerate(json_paths):
-            
+
             df = common.json2dataframe(json_path=json_path,
                                        column_names=column_names)
             
@@ -107,9 +107,7 @@ class PolicyDatasetLoader(Dataset):
                                              state_idx_column=self.state_number_column,
                                              action_columns=self.action_columns,
                                              norm_range_list=self.action_norms))
-            
-            break
-
+        
         # all trajectories are concatenated into one dataframe
         concatenated_state_df = pd.concat(state_dfs,
                                           ignore_index=True)
@@ -122,11 +120,11 @@ class PolicyDatasetLoader(Dataset):
                               trajectory_df: pd.DataFrame) -> pd.DataFrame:
         
         # manually update distance to the target location as state vector is not realiable, but action vector is reliable
-        trajectory_df = self.correct_distance_to_target(df=trajectory_df)
+        trajectory_df = self.correct_distance_to_target(df=trajectory_df) if "distance_to_target" in self.state_columns else trajectory_df
         # manually update distance to the start location as state vector is not realiable, but action vector is reliable
-        trajectory_df = self.correct_distance_to_start(df=trajectory_df)
+        trajectory_df = self.correct_distance_to_start(df=trajectory_df) if "distance_to_start" in self.state_columns else trajectory_df
         # manually correct distance to the ground as state vector is not realiable, but action vector is reliable
-        trajectory_df = self.correct_distance_to_ground(df=trajectory_df)
+        trajectory_df = self.correct_distance_to_ground(df=trajectory_df) if "distance_to_ground" in self.state_columns else trajectory_df
         
         return trajectory_df
     

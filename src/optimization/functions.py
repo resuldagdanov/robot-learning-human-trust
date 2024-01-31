@@ -352,4 +352,3 @@ def trajectory_estimation(configs: Config,
 
         # update the current state vector with estimated next state vector
         state_norm_estimation_vector = torch.from_numpy(next_state_norm_estimation).unsqueeze(0).float().to(configs.device)
-
