@@ -89,7 +89,7 @@ class PolicyDatasetLoader(Dataset):
             # TODO: remove the following correction functions after bug in data collection is solved
             # currently, this setup works because of the deterministic experimental system
             df = self.make_state_correction(trajectory_df=df)
-            
+
             # correct action label correspondence, as we want to predict next action given the state
             df = common.shift_action_label(df=df,
                                            action_columns=self.action_columns,
@@ -107,13 +107,15 @@ class PolicyDatasetLoader(Dataset):
                                              state_idx_column=self.state_number_column,
                                              action_columns=self.action_columns,
                                              norm_range_list=self.action_norms))
-        
+            
+            break
+
         # all trajectories are concatenated into one dataframe
         concatenated_state_df = pd.concat(state_dfs,
                                           ignore_index=True)
         concatenated_action_df = pd.concat(action_dfs,
                                           ignore_index=True)
-
+        
         return concatenated_state_df, concatenated_action_df
     
     def make_state_correction(self,
@@ -136,7 +138,7 @@ class PolicyDatasetLoader(Dataset):
                                                                                   dtype=np.float64), axis=1)
         # correct distance to the target given constant location on the ground
         df[self.state_columns[1]] = distances
-        
+
         return df
     
     def correct_distance_to_start(self,
@@ -146,19 +148,14 @@ class PolicyDatasetLoader(Dataset):
         state_0_idx = 0
 
         # initial position (x, y, z w.r.t robot base) is constant throughout the trajectory
-        first_sample_data = df.iloc[state_0_idx][self.action_columns]
-        initial_state_location = common.denormalize_action(action_norm=first_sample_data.values.reshape(1, -1),
-                                                           norm_range_list=self.action_norms)
+        initial_state_location = np.array(df.iloc[state_0_idx][self.action_columns].values,
+                                          dtype=np.float64)
         
         # calculate the Euclidean distance for each row
         distances = np.linalg.norm(initial_state_location - np.array(df[self.action_columns],
                                                                      dtype=np.float64), axis=1)
         # correct distance to the start
         df[self.state_columns[2]] = distances
-
-        print("first_sample_data.values.reshape(1, -1) : ", first_sample_data.values.reshape(1, -1))
-        print("initial_state_location : ", initial_state_location)
-        # print("distances : ", distances)
 
         return df
     
