@@ -270,7 +270,7 @@ def trajectory_estimation(configs: Config,
     trajectory_df = pd.DataFrame()
 
     # loop through the trajectory length
-    for state_number in range(trajectory_length):
+    for state_number in range(trajectory_length + constants.ACTION_LABEL_SHIFT_IDX):
 
         # estimate the action given the current state
         action_pred, action_std, action_log_prob, action_entropy, action_mu_and_std, action_dist = policy_network.estimate_action(state=state_norm_estimation_vector)
