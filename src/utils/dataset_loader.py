@@ -80,24 +80,21 @@ class PolicyDatasetLoader(Dataset):
             df = common.discritize_dataframe(df=df,
                                              return_n_rows=self.trajectory_length)
             
-            # TODO: remove the following correction functions after bug in data collection is solved
-            # manually correct distance to the ground as state vector is not realiable, but action vector is reliable
-            df = self.correct_distance_to_ground(df=df)
+            # add a new column to store the trajectory index number
+            df[self.traj_index_column] = traj_idx
+
+            # reset the index and store it in a new column
+            df[self.state_number_column] = df.reset_index().index
             
-            # manually update distance to the target location as state vector is not realiable, but action vector is reliable
-            df = self.correct_distance_to_target(df=df)
+            # TODO: remove the following correction functions after bug in data collection is solved
+            # currently, this setup works because of the deterministic experimental system
+            df = self.make_state_correction(trajectory_df=df)
             
             # correct action label correspondence, as we want to predict next action given the state
             df = common.shift_action_label(df=df,
                                            action_columns=self.action_columns,
                                            shift_amount=constants.ACTION_LABEL_SHIFT_IDX)
             
-            # add a new column to store the trajectory index number
-            df[self.traj_index_column] = traj_idx
-
-            # reset the index and store it in a new column
-            df[self.state_number_column] = df.reset_index().index
-
             state_dfs.append(
                 common.extract_state_vector(df=df,
                                             traj_idx_column=self.traj_index_column,
@@ -119,13 +116,17 @@ class PolicyDatasetLoader(Dataset):
 
         return concatenated_state_df, concatenated_action_df
     
-    def correct_distance_to_ground(self,
-                                   df: pd.DataFrame) -> pd.DataFrame:
+    def make_state_correction(self,
+                              trajectory_df: pd.DataFrame) -> pd.DataFrame:
         
-        # correct distance to the ground given the base height of the robot
-        df[self.state_columns[3]] = df[self.action_columns[2]] + constants.ROBOT_BASE_HEIGHT
+        # manually update distance to the target location as state vector is not realiable, but action vector is reliable
+        trajectory_df = self.correct_distance_to_target(df=trajectory_df)
+        # manually update distance to the start location as state vector is not realiable, but action vector is reliable
+        trajectory_df = self.correct_distance_to_start(df=trajectory_df)
+        # manually correct distance to the ground as state vector is not realiable, but action vector is reliable
+        trajectory_df = self.correct_distance_to_ground(df=trajectory_df)
         
-        return df
+        return trajectory_df
     
     def correct_distance_to_target(self,
                                    df: pd.DataFrame) -> pd.DataFrame:
@@ -133,9 +134,39 @@ class PolicyDatasetLoader(Dataset):
         # calculate the Euclidean distance for each row
         distances = np.linalg.norm(np.array(constants.TARGET_LOCATION) - np.array(df[self.action_columns],
                                                                                   dtype=np.float64), axis=1)
-        
         # correct distance to the target given constant location on the ground
         df[self.state_columns[1]] = distances
+        
+        return df
+    
+    def correct_distance_to_start(self,
+                                  df: pd.DataFrame) -> pd.DataFrame:
+        
+        # initialize the state vector (normalized) from initial state value which is known
+        state_0_idx = 0
+
+        # initial position (x, y, z w.r.t robot base) is constant throughout the trajectory
+        first_sample_data = df.iloc[state_0_idx][self.action_columns]
+        initial_state_location = common.denormalize_action(action_norm=first_sample_data.values.reshape(1, -1),
+                                                           norm_range_list=self.action_norms)
+        
+        # calculate the Euclidean distance for each row
+        distances = np.linalg.norm(initial_state_location - np.array(df[self.action_columns],
+                                                                     dtype=np.float64), axis=1)
+        # correct distance to the start
+        df[self.state_columns[2]] = distances
+
+        print("first_sample_data.values.reshape(1, -1) : ", first_sample_data.values.reshape(1, -1))
+        print("initial_state_location : ", initial_state_location)
+        # print("distances : ", distances)
 
         return df
     
+    def correct_distance_to_ground(self,
+                                   df: pd.DataFrame) -> pd.DataFrame:
+        
+        # correct distance to the ground given the base height of the robot
+        distances = df[self.action_columns[2]] + constants.ROBOT_BASE_HEIGHT
+        df[self.state_columns[3]] = distances
+
+        return df

@@ -199,13 +199,16 @@ def convert_sample_2_df(input_state: torch.Tensor,
     return df
 
 
-def get_initial_position(data_loader: torch.utils.data.Dataset) -> np.ndarray:
+def get_initial_position(data_loader: torch.utils.data.Dataset,
+                         traj_start_index: int) -> np.ndarray:
 
     if not isinstance(data_loader, torch.utils.data.Dataset):
         raise TypeError("Input 'data_loader' in get_initial_position function must be a torch data loader object.")
+    if not isinstance(traj_start_index, int):
+        raise TypeError("Input 'traj_start_index' in get_initial_position function must be an integer.")
     
     # get the first sample in the dataset
-    sample_data = data_loader[0]
+    sample_data = data_loader[traj_start_index]
 
     # get initial end-effector position
     ee_location = common.denormalize_action(action_norm=sample_data[1].unsqueeze(0).numpy(),
@@ -248,7 +251,8 @@ def calculate_next_state(action_denorm: np.ndarray,
 def trajectory_estimation(configs: Config,
                           data_loader: torch.utils.data.Dataset,
                           policy_network: torch.nn.Module,
-                          trajectory_length: int) -> pd.DataFrame:
+                          trajectory_length: int,
+                          traj_start_index: int) -> pd.DataFrame:
     
     if not isinstance(policy_network, torch.nn.Module):
         raise TypeError("Input 'policy_network' in trajectory_estimation function must be a torch neural network module.")
@@ -258,16 +262,19 @@ def trajectory_estimation(configs: Config,
         raise TypeError("Input 'configs' in trajectory_estimation function must be an instance of Config.")
     if not isinstance(trajectory_length, int):
         raise TypeError("Input 'trajectory_length' in trajectory_estimation function must be an integer.")
+    if not isinstance(traj_start_index, int):
+        raise TypeError("Input 'traj_start_index' in trajectory_estimation function must be an integer.")
     
     # position (x, y, z w.r.t robot base) is constant throughout the trajectory
-    initial_state_location = get_initial_position(data_loader=data_loader)
+    initial_state_location = get_initial_position(data_loader=data_loader,
+                                                  traj_start_index=traj_start_index)
 
     # initialize the state vector (normalized) from initial state value which is known
     state_0_idx = 0
-    state_norm_estimation_vector = data_loader[state_0_idx][0].unsqueeze(0).float().to(configs.device)
+    state_norm_estimation_vector = data_loader[traj_start_index + state_0_idx][0].unsqueeze(0).float().to(configs.device)
 
     # initialize the trajectory dataframe to store results
-    trajectory_df = pd.DataFrame()
+    created_trajectory_df = pd.DataFrame()
 
     # loop through the trajectory length
     for state_number in range(trajectory_length + constants.ACTION_LABEL_SHIFT_IDX):
@@ -276,7 +283,7 @@ def trajectory_estimation(configs: Config,
         action_pred, action_std, action_log_prob, action_entropy, action_mu_and_std, action_dist = policy_network.estimate_action(state=state_norm_estimation_vector)
 
         # actual action given the current state
-        action_label_norm = data_loader[state_number][1]
+        action_label_norm = data_loader[traj_start_index + state_number][1]
 
         # denormalize the demonstration action to get actual x, y, z position of the end-effector
         action_denorm_label = common.denormalize_action(action_norm=action_label_norm.unsqueeze(0).detach().numpy(),
@@ -328,7 +335,7 @@ def trajectory_estimation(configs: Config,
         # print("target_location : ", target_location)
 
         # # convert the sample to a dataframe
-        # sample_df = convert_sample_2_df(input_state=state_vector,
+        # created_df = convert_sample_2_df(input_state=state_vector,
         #                                 real_state_input=state_denorm,
         #                                 output_action=action_pred,
         #                                 real_action_output=action_denorm_prediction,
@@ -341,7 +348,7 @@ def trajectory_estimation(configs: Config,
         #                                 nll_loss=0.0)
 
         # # append the sample dataframe to the trajectory dataframe
-        # trajectory_df = trajectory_df.append(sample_df)
+        # created_trajectory_df = created_trajectory_df.append(created_df)
 
         # update the current state vector with estimated next state vector
         state_norm_estimation_vector = torch.from_numpy(next_state_norm_estimation).unsqueeze(0).float().to(configs.device)
