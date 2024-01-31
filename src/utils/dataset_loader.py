@@ -90,6 +90,13 @@ class PolicyDatasetLoader(Dataset):
 
             # reset the index and store it in a new column
             df[self.state_number_column] = df.reset_index().index
+            
+            # TODO: remove the following function after distace to the ground problem is fixed
+            # correct distance to the ground
+            df = self.correct_distance_to_ground(df=df,
+                                                 state_columns=self.state_columns,
+                                                 action_columns=self.action_columns,
+                                                 robot_base_height=constants.ROBOT_BASE_HEIGHT)
 
             state_dfs.append(
                 common.extract_state_vector(df=df,
@@ -111,3 +118,15 @@ class PolicyDatasetLoader(Dataset):
                                           ignore_index=True)
 
         return concatenated_state_df, concatenated_action_df
+    
+    def correct_distance_to_ground(self,
+                                   df: pd.DataFrame,
+                                   state_columns: List[str],
+                                   action_columns: List[str],
+                                   robot_base_height: float) -> pd.DataFrame:
+        
+        # correct distance to the ground
+        df[state_columns[3]] = df[action_columns[2]] + robot_base_height
+
+        return df
+    
