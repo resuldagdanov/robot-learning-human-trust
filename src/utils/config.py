@@ -23,13 +23,14 @@ class Config(object):
         self.seed = 1234
         self.device = "cpu"
 
-        self.batch_size = 32
-
+        # neural network optimization parameters
         self.state_size = 4
         self.hidden_size = 32
         self.action_size = 3
         self.reward_size = 1
 
+        # strategy for batch sampling
+        self.batch_size = 32
         self.data_shuffle = True
         self.num_workers = 0
 
@@ -38,8 +39,15 @@ class Config(object):
         self.policy_log_std_max = 1.4 # exp(1.1) = 4.0
         self.policy_log_std_init = 0.0 # exp(0.0) = 1.0
         
+        # learning rate
         self.policy_lr = 1e-3
 
+        # 15% of the dataset will be used for validation
+        self.validation_split = 0.15
+
+        # patience for early stopping (number of epochs with no improvement on validation loss)
+        self.early_stopping_patience = 5
+    
     def model_saving_path(self,
                           directory: str) -> str:
         
