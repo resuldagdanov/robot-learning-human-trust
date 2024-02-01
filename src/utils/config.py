@@ -26,7 +26,7 @@ class Config(object):
         self.batch_size = 32
 
         self.state_size = 4
-        self.hidden_size = 64
+        self.hidden_size = 32
         self.action_size = 3
         self.reward_size = 1
 
@@ -34,8 +34,8 @@ class Config(object):
         self.num_workers = 0
 
         # min-max log standard deviations for policy network output
-        self.policy_log_std_min = -11 # exp(11.0) = 0.0
-        self.policy_log_std_max = 1.1 # exp(1.1) = 3.0
+        self.policy_log_std_min = -14 # exp(11.0) = 0.0
+        self.policy_log_std_max = 1.4 # exp(1.1) = 4.0
         self.policy_log_std_init = 0.0 # exp(0.0) = 1.0
         
         self.policy_lr = 1e-3

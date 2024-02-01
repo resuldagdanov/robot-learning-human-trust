@@ -66,7 +66,8 @@ if __name__ == "__main__":
             output_action = batch_data[1].float().to(configs.device)
 
             # forward pass to get Gaussian distribution
-            action_pred, action_std, action_log_prob, action_entropy, action_mu_and_std, action_dist = policy_network.estimate_action(state=input_state)
+            action_pred, action_std, action_log_prob, action_entropy, action_mu_and_std, action_dist = policy_network.estimate_action(state=input_state,
+                                                                                                                                      is_inference=False)
 
             # multivariate Gaussian negative log-likelihood loss function
             nll_loss = updater.multivariate_gaussian_nll_loss(y_true=output_action,

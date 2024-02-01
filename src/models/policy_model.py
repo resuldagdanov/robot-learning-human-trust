@@ -85,15 +85,23 @@ class RobotPolicy(torch.nn.Module):
             pass
     
     def estimate_action(self,
-                        state: torch.Tensor) -> (torch.Tensor,
-                                                 torch.Tensor,
-                                                 torch.Tensor,
-                                                 torch.Tensor,
-                                                 torch.Tensor,
-                                                 torch.distributions.Normal):
+                        state: torch.Tensor,
+                        is_inference: bool=False) -> (torch.Tensor,
+                                                      torch.Tensor,
+                                                      torch.Tensor,
+                                                      torch.Tensor,
+                                                      torch.Tensor,
+                                                      torch.distributions.Normal):
            
         # forward pass to get mean of Gaussian distribution
-        action_pred, action_std = self.forward(x=state)
+        if is_inference:
+            self.eval()
+            # inference
+            with torch.no_grad():
+                action_pred, action_std = self.forward(x=state)
+        else:
+            action_pred, action_std = self.forward(x=state)
+
         action_log_prob, action_dist = self.calculate_distribution(action_mu=action_pred,
                                                                    action_std=action_std)
         

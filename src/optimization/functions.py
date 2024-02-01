@@ -252,7 +252,8 @@ def trajectory_estimation(configs: Config,
                           data_loader: torch.utils.data.Dataset,
                           policy_network: torch.nn.Module,
                           trajectory_length: int,
-                          traj_start_index: int) -> pd.DataFrame:
+                          traj_start_index: int,
+                          is_inference: bool=False) -> pd.DataFrame:
     
     if not isinstance(policy_network, torch.nn.Module):
         raise TypeError("Input 'policy_network' in trajectory_estimation function must be a torch neural network module.")
@@ -264,6 +265,8 @@ def trajectory_estimation(configs: Config,
         raise TypeError("Input 'trajectory_length' in trajectory_estimation function must be an integer.")
     if not isinstance(traj_start_index, int):
         raise TypeError("Input 'traj_start_index' in trajectory_estimation function must be an integer.")
+    if not isinstance(is_inference, bool):
+        raise TypeError("Input 'is_inference' in trajectory_estimation function must be a boolean.")
     
     # position (x, y, z w.r.t robot base) is constant throughout the trajectory
     initial_state_location = get_initial_position(data_loader=data_loader,
@@ -280,7 +283,8 @@ def trajectory_estimation(configs: Config,
     for state_number in range(trajectory_length + constants.ACTION_LABEL_SHIFT_IDX):
 
         # estimate the action given the current state
-        action_pred, action_std, action_log_prob, action_entropy, action_mu_and_std, action_dist = policy_network.estimate_action(state=state_norm_estimation_vector)
+        action_pred, action_std, action_log_prob, action_entropy, action_mu_and_std, action_dist = policy_network.estimate_action(state=state_norm_estimation_vector,
+                                                                                                                                  is_inference=is_inference)
 
         # actual action given the current state
         action_label_norm = data_loader[traj_start_index + state_number][1]
@@ -326,7 +330,7 @@ def trajectory_estimation(configs: Config,
         # print("action_pred : ", action_pred)
         # print("state_norm_estimation_vector : ", state_norm_estimation_vector)
         print("action_denorm_label : ", action_denorm_label)
-        # print("action_denorm_prediction : ", action_denorm_prediction)
+        print("action_denorm_prediction : ", action_denorm_prediction)
         print("current_state_denorm_estimation : ", current_state_denorm_estimation)
         print("next_state_denorm_label : ", next_state_denorm_label)
         # print("next_state_denorm_estimation : ", next_state_denorm_estimation)

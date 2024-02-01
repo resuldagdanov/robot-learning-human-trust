@@ -44,7 +44,7 @@ class Updater(object):
         log_2_pi = 0.5 * n_dims * np.log(2 * np.pi)
         
         # multivariate Gaussian negative log-likelihood loss function
-        log_likelihood = mse + sigma_trace + log_2_pi
+        log_likelihood = mse + sigma_trace #+ log_2_pi
 
         return torch.mean(log_likelihood)
     
