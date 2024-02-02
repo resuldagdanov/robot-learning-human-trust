@@ -9,16 +9,6 @@ END_EFFECTOR_POSITION_RANGE_X = [-2.0, 2.0] # meters
 END_EFFECTOR_POSITION_RANGE_Y = [-2.0, 2.0] # meters
 END_EFFECTOR_POSITION_RANGE_Z = [-2.0, 2.0] # meters
 
-# behavior cloning policy model trajectories column names
-COLUMN_NAMES = ["time_seconds",
-                "distance_to_object",
-                "distance_to_target",
-                "distance_to_start",
-                "distance_to_ground",
-                "arm_action_x",
-                "arm_action_y",
-                "arm_action_z"]
-
 # state vector column names
 STATE_COLUMNS = ["distance_to_object",
                  "distance_to_target",
@@ -29,6 +19,11 @@ STATE_COLUMNS = ["distance_to_object",
 ACTION_COLUMNS = ["arm_action_x",
                   "arm_action_y",
                   "arm_action_z"]
+
+# behavior cloning policy model trajectories column names
+COLUMN_NAMES = ["time_seconds"] + \
+                STATE_COLUMNS + \
+                ACTION_COLUMNS
 
 # column names for normalized and denormalized state and action vectors
 ACTION_NORMALIZED_LABEL_NAME = "action_label_norm" # normalized action label
@@ -61,6 +56,7 @@ TRAJECTORY_SIZE = 20 # equally spaced number of points
 
 # collected dataset folder name in ("dataset \\ human_demonstrations \\ collection_date")
 DEMO_COLLECTION_DATE = "2024_01_23" # year_month_day NOTE: make sure that data date is correct
+TEST_COLLECTION_DATE = "2024_02_02_Test" # year_month_day NOTE: make sure folder name is correct
 
 # experiment obstacle location x, y, z coordinates
 OBSTACLE_LOCATION = [0.4, 0.0, 0.554] # meters NOTE: make sure the alignment with experiment
@@ -72,4 +68,4 @@ ROBOT_BASE_HEIGHT = 0.1685 # meters NOTE: make sure the alignment with robot exp
 TARGET_LOCATION = [-0.36, 0.77, -ROBOT_BASE_HEIGHT] # meters NOTE: make sure the alignment with robot experiment
 
 # number of training epoch for behavior cloning
-BC_NUMBER_EPOCHS = 100
+BC_NUMBER_EPOCHS = 1

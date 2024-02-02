@@ -36,8 +36,9 @@ def setup_config(device: torch.device) -> Config:
     return configs
 
 
-def get_directories(parent_directory: str) -> (List[str],
-                                               str):
+def get_directories(parent_directory: str,
+                    data_folder_name: str = constants.DEMO_COLLECTION_DATE) -> (List[str],
+                                                                                str):
     
     if not isinstance(parent_directory, str):
         raise TypeError("Input 'parent_directory' in get_directories function must be a string.")
@@ -49,7 +50,7 @@ def get_directories(parent_directory: str) -> (List[str],
     demo_path = os.path.join(dataset_path,
                              "human_demonstrations")
     dataset_folder = os.path.join(demo_path,
-                                  constants.DEMO_COLLECTION_DATE)
+                                  data_folder_name)
     
     json_folder = os.path.join(dataset_folder,
                                "jsons")
