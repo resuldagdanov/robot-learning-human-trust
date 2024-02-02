@@ -4,7 +4,6 @@ import sys
 import torch
 
 from tqdm import tqdm
-
 from sklearn.model_selection import train_test_split
 
 # get the current script's directory
@@ -18,7 +17,7 @@ from utils import constants
 from utils.dataset_loader import PolicyDatasetLoader
 
 from optimization.updater import Updater
-from optimization.functions import setup_config, get_directories, create_directories, save_policy
+from optimization.functions import setup_config, get_directories, create_directories, save_policy, read_each_loader
 
 from models.policy_model import RobotPolicy
 
@@ -38,10 +37,10 @@ if __name__ == "__main__":
                                             results_path=results_path)
     
     # load demonstrations dataset
-    training_data = PolicyDatasetLoader(demo_data_json_paths=json_paths)
+    all_data = PolicyDatasetLoader(demo_data_json_paths=json_paths)
 
     # split dataset into training and validation sets
-    train_data, val_data = train_test_split(training_data,
+    train_data, val_data = train_test_split(all_data,
                                             test_size=configs.validation_split,
                                             random_state=configs.seed)
 
@@ -75,17 +74,16 @@ if __name__ == "__main__":
     for epoch in range(constants.BC_NUMBER_EPOCHS):
 
         print("================== Training Phase ==================")
-        # training phase
         policy_network.train()
         cummulative_train_loss = 0.0
 
         # loop through each batch inside the training dataset
         for batch_train_data in tqdm(train_loader):
-            
-            # get batch of data
-            input_state = batch_train_data[0].float().to(configs.device)
-            output_action = batch_train_data[1].float().to(configs.device)
 
+            # get batch of data
+            input_state, output_action, _, _ = read_each_loader(configs=configs,
+                                                                sample_data=tuple(batch_train_data))
+            
             # forward pass to get Gaussian distribution
             action_pred, action_std, action_log_prob, action_entropy, action_mu_and_std, action_dist = policy_network.estimate_action(state=input_state,
                                                                                                                                       is_inference=False)
@@ -103,7 +101,6 @@ if __name__ == "__main__":
         avg_bc_train_loss_value = round(cummulative_train_loss / len(train_loader), 5)
         
         print("================== Validation Phase ==================")
-        # validation phase
         policy_network.eval()
         cummulative_val_loss = 0.0
 
@@ -111,8 +108,8 @@ if __name__ == "__main__":
         with torch.no_grad():
             # loop through each batch inside the validation dataset
             for batch_val_data in tqdm(val_loader):
-                input_state = batch_val_data[0].float().to(configs.device)
-                output_action = batch_val_data[1].float().to(configs.device)
+                input_state, output_action, _, _ = read_each_loader(configs=configs,
+                                                                    sample_data=tuple(batch_val_data))
                 action_pred, action_std, action_log_prob, action_entropy, action_mu_and_std, action_dist = policy_network.estimate_action(state=input_state,
                                                                                                                                           is_inference=True)
                 nll_val_loss = updater.multivariate_gaussian_nll_loss(y_true=output_action,
@@ -123,7 +120,6 @@ if __name__ == "__main__":
         avg_bc_val_loss_value = round(cummulative_val_loss / len(val_loader), 5)
 
         print(f"Epoch {epoch + 1}/{constants.BC_NUMBER_EPOCHS}, Batch Train Loss: {avg_bc_train_loss_value}, Batch Validation Loss: {avg_bc_val_loss_value}")
-        print("best_bc_val_loss: ", best_bc_val_loss)
         
         # check for early stopping
         if avg_bc_val_loss_value < best_bc_val_loss:

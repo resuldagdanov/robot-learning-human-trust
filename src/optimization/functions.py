@@ -6,7 +6,7 @@ import pandas as pd
 
 import torch
 
-from typing import List
+from typing import List, Tuple, Union
 from torch.utils.tensorboard import SummaryWriter
 
 # get the current script's directory
@@ -118,17 +118,20 @@ def load_policy(policy_network: torch.nn.Module,
 
 
 def read_each_loader(configs: Config,
-                     sample_data: tuple) -> (torch.Tensor,
-                                             torch.Tensor,
-                                             int,
-                                             int):
+                     sample_data: Tuple[torch.Tensor,
+                                        torch.Tensor,
+                                        Union[torch.Tensor, int],
+                                        Union[torch.Tensor, int]]) -> Tuple[torch.Tensor,
+                                                                            torch.Tensor,
+                                                                            Union[torch.Tensor, int],
+                                                                            Union[torch.Tensor, int]]:
     
     if not isinstance(configs, Config):
         raise TypeError("Input 'configs' in read_each_loader function must be an instance of Config.")
-    if not isinstance(sample_data, tuple):
-        raise TypeError("Input 'sample_data' in read_each_loader function must be a tuple.")
-    if len(sample_data) != 4:
+    if not isinstance(sample_data, tuple) or len(sample_data) != 4:
         raise ValueError("Input 'sample_data' must be a tuple of length 4.")
+    if not all(isinstance(elem, torch.Tensor) for elem in sample_data[:2]):
+        raise TypeError("The first two elements in 'sample_data' must be instances of torch.Tensor.")
     
     # extract sample data in correct order
     input_state = sample_data[0].float().to(configs.device)
@@ -177,13 +180,13 @@ def convert_sample_2_df(input_state: torch.Tensor,
     data = {}
 
     # add array elements to the dictionary
-    data.update({constants.STATE_NORMALIZED_LABEL_NAME + f"_{i+1}": input_state.numpy()[i] for i in range(input_state.shape[0])})
+    data.update({constants.STATE_NORMALIZED_LABEL_NAME + f"_{i+1}": input_state.numpy()[i] for i in range(len(input_state))})
     data.update({constants.STATE_DENORMALIZED_LABEL_NAME + f"_{i+1}": real_state_input[i] for i in range(len(real_state_input))})
-    data.update({constants.ACTION_NORMALIZED_LABEL_NAME + f"_{i+1}": output_action.numpy()[i] for i in range(output_action.shape[0])})
+    data.update({constants.ACTION_NORMALIZED_LABEL_NAME + f"_{i+1}": output_action.numpy()[i] for i in range(len(output_action))})
     data.update({constants.ACTION_DENORMALIZED_LABEL_NAME + f"_{i+1}": real_action_output[i] for i in range(len(real_action_output))})
-    data.update({constants.ACTION_PREDICTION_LOGPROB_NAME + f"_{i+1}": action_log_prob[0].detach().numpy()[i] for i in range(action_log_prob.shape[1])})
-    data.update({constants.ACTION_PREDICTION_NAME + f"_{i+1}": action_pred[0].detach().numpy()[i] for i in range(action_pred.shape[1])})
-    data.update({constants.ACTION_PREDICTION_STD_NAME + f"_{i+1}": action_std[0].detach().numpy()[i] for i in range(action_std.shape[1])})
+    data.update({constants.ACTION_PREDICTION_LOGPROB_NAME + f"_{i+1}": action_log_prob.detach().numpy()[i] for i in range(len(action_log_prob))})
+    data.update({constants.ACTION_PREDICTION_NAME + f"_{i+1}": action_pred.detach().numpy()[i] for i in range(len(action_pred))})
+    data.update({constants.ACTION_PREDICTION_STD_NAME + f"_{i+1}": action_std.detach().numpy()[i] for i in range(len(action_std))})
     data.update({constants.ACTION_PREDICTION_DENORMALIZED_NAME + f"_{i+1}": real_action_pred[i] for i in range(len(real_action_pred))})
 
     # add non-array elements to the dictionary
