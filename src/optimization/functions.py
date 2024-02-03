@@ -204,6 +204,8 @@ def convert_sample_2_df(input_state: torch.Tensor,
 
 
 def extend_df_4_next_states(data_df: pd.DataFrame,
+                            current_state_norm_estimation: torch.Tensor,
+                            current_state_denorm_estimation: np.ndarray,
                             next_state_norm_label: np.ndarray,
                             next_state_denorm_label: np.ndarray,
                             next_state_norm_estimation: np.ndarray,
@@ -211,6 +213,10 @@ def extend_df_4_next_states(data_df: pd.DataFrame,
     
     if not isinstance(data_df, pd.DataFrame):
         raise TypeError("Input 'data_df' in extend_df_4_next_state_estimation function must be a pandas dataframe.")
+    if not isinstance(current_state_norm_estimation, torch.Tensor):
+        raise TypeError("Input 'current_state_norm_estimation' in extend_df_4_next_state_estimation function must be a torch.Tensor.")
+    if not isinstance(current_state_denorm_estimation, np.ndarray):
+        raise TypeError("Input 'current_state_denorm_estimation' in extend_df_4_next_state_estimation function must be a numpy array.")
     if not isinstance(next_state_norm_label, np.ndarray):
         raise TypeError("Input 'next_state_norm_label' in extend_df_4_next_state_estimation function must be a numpy array.")
     if not isinstance(next_state_denorm_label, np.ndarray):
@@ -220,14 +226,18 @@ def extend_df_4_next_states(data_df: pd.DataFrame,
     if not isinstance(next_state_denorm_estimation, np.ndarray):
         raise TypeError("Input 'next_state_denorm_estimation' in extend_df_4_next_state_estimation function must be a numpy array.")
     
+    for i in range(len(current_state_norm_estimation)):
+        data_df[constants.STATE_ESTIMATION_NORMALIZED_NAME + f"_{i+1}"] = current_state_norm_estimation.numpy()[i]
+    for i in range(len(current_state_denorm_estimation)):
+        data_df[constants.STATE_ESTIMATION_DENORMALIZED_NAME + f"_{i+1}"] = current_state_denorm_estimation[i]
     for i in range(len(next_state_norm_label)):
         data_df[constants.NEXT_STATE_NORMALIZED_LABEL_NAME + f"_{i+1}"] = next_state_norm_label[i]
     for i in range(len(next_state_denorm_label)):
         data_df[constants.NEXT_STATE_DENORMALIZED_LABEL_NAME + f"_{i+1}"] = next_state_denorm_label[i]
     for i in range(len(next_state_norm_estimation)):
-        data_df[constants.STATE_ESTIMATION_NORMALIZED_NAME + f"_{i+1}"] = next_state_norm_estimation[i]
+        data_df[constants.NEXT_STATE_ESTIMATION_NORMALIZED_NAME + f"_{i+1}"] = next_state_norm_estimation[i]
     for i in range(len(next_state_denorm_estimation)):
-        data_df[constants.STATE_ESTIMATION_DENORMALIZED_NAME + f"_{i+1}"] = next_state_denorm_estimation[i]
+        data_df[constants.NEXT_STATE_ESTIMATION_DENORMALIZED_NAME + f"_{i+1}"] = next_state_denorm_estimation[i]
     
     return data_df
 
@@ -361,9 +371,9 @@ def trajectory_estimation(configs: Config,
                                                             norm_value_list=data_loader.state_norms)
         
         
-        print("\nstate_number : ", state_number)
+        # print("\nstate_number : ", state_number)
         # print("state_label_norm : ", state_label_norm)
-        print("current_state_denorm_label : ", current_state_denorm_label)
+        # print("current_state_denorm_label : ", current_state_denorm_label)
         # print("initial_state_location : ", initial_state_location)
         # print("action_label_norm : ", action_label_norm)
         # print("action_pred : ", action_pred)
@@ -371,7 +381,7 @@ def trajectory_estimation(configs: Config,
         # print("action_denorm_label : ", action_denorm_label)
         # print("action_denorm_prediction : ", action_denorm_prediction)
         # print("current_state_denorm_estimation : ", current_state_denorm_estimation)
-        print("next_state_denorm_label : ", next_state_denorm_label)
+        # print("next_state_denorm_label : ", next_state_denorm_label)
         # print("next_state_denorm_estimation : ", next_state_denorm_estimation)
         # print("next_state_norm_label : ", next_state_norm_label)
         # print("next_state_norm_estimation : ", next_state_norm_estimation)
@@ -391,6 +401,8 @@ def trajectory_estimation(configs: Config,
                                          state_number=state_number,
                                          nll_loss=0.0)
         created_df = extend_df_4_next_states(data_df=created_df,
+                                             current_state_norm_estimation=state_norm_estimation_vector.squeeze(0),
+                                             current_state_denorm_estimation=current_state_denorm_estimation[0],
                                              next_state_norm_label=next_state_norm_label,
                                              next_state_denorm_label=next_state_denorm_label,
                                              next_state_norm_estimation=next_state_norm_estimation,

@@ -28,10 +28,12 @@ COLUMN_NAMES = ["time_seconds"] + \
 # column names for normalized and denormalized state and action vectors
 STATE_NORMALIZED_LABEL_NAME = "state_label_norm" # normalized state vector
 STATE_DENORMALIZED_LABEL_NAME = "state_label_denorm" # denormalized state vector
-NEXT_STATE_NORMALIZED_LABEL_NAME = "next_state_label_norm" # normalized next state vector
-NEXT_STATE_DENORMALIZED_LABEL_NAME = "next_state_label_denorm" # denormalized next state vector
 STATE_ESTIMATION_NORMALIZED_NAME = "state_est_norm" # estimated normalized state vector
 STATE_ESTIMATION_DENORMALIZED_NAME = "state_est_denorm" # estimated denormalized state vector
+NEXT_STATE_NORMALIZED_LABEL_NAME = "next_state_label_norm" # normalized next state vector
+NEXT_STATE_DENORMALIZED_LABEL_NAME = "next_state_label_denorm" # denormalized next state vector
+NEXT_STATE_ESTIMATION_NORMALIZED_NAME = "next_state_est_norm" # estimated normalized state vector
+NEXT_STATE_ESTIMATION_DENORMALIZED_NAME = "next_state_est_denorm" # estimated denormalized state vector
 ACTION_NORMALIZED_LABEL_NAME = "action_label_norm" # normalized action label
 ACTION_DENORMALIZED_LABEL_NAME = "action_label_denorm" # denormalized action vector
 ACTION_PREDICTION_NAME = "action_pred_norm" # mean of distribution
