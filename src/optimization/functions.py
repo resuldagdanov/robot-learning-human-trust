@@ -361,7 +361,9 @@ def trajectory_estimation(configs: Config,
                                                             norm_value_list=data_loader.state_norms)
         
         
-        # print("\nstate_number : ", state_number)
+        print("\nstate_number : ", state_number)
+        # print("state_label_norm : ", state_label_norm)
+        print("current_state_denorm_label : ", current_state_denorm_label)
         # print("initial_state_location : ", initial_state_location)
         # print("action_label_norm : ", action_label_norm)
         # print("action_pred : ", action_pred)
@@ -369,13 +371,12 @@ def trajectory_estimation(configs: Config,
         # print("action_denorm_label : ", action_denorm_label)
         # print("action_denorm_prediction : ", action_denorm_prediction)
         # print("current_state_denorm_estimation : ", current_state_denorm_estimation)
-        # print("next_state_denorm_label : ", next_state_denorm_label)
+        print("next_state_denorm_label : ", next_state_denorm_label)
         # print("next_state_denorm_estimation : ", next_state_denorm_estimation)
         # print("next_state_norm_label : ", next_state_norm_label)
         # print("next_state_norm_estimation : ", next_state_norm_estimation)
         # print("target_location : ", target_location)
         # print("trajectory_index : ", trajectory_index)
-        # print("current_state_denorm_label : ", current_state_denorm_label)
 
         # convert the sample to a dataframe
         created_df = convert_sample_2_df(input_state=state_label_norm.squeeze(0),

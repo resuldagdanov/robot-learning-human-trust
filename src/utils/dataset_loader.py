@@ -119,6 +119,8 @@ class PolicyDatasetLoader(Dataset):
     def make_state_correction(self,
                               trajectory_df: pd.DataFrame) -> pd.DataFrame:
         
+        # manually update distance to the obstacle location as state vector is not realiable, but action vector is reliable
+        trajectory_df = self.correct_distance_to_object(df=trajectory_df) if "distance_to_object" in self.state_columns else trajectory_df
         # manually update distance to the target location as state vector is not realiable, but action vector is reliable
         trajectory_df = self.correct_distance_to_target(df=trajectory_df) if "distance_to_target" in self.state_columns else trajectory_df
         # manually update distance to the start location as state vector is not realiable, but action vector is reliable
@@ -127,6 +129,15 @@ class PolicyDatasetLoader(Dataset):
         trajectory_df = self.correct_distance_to_ground(df=trajectory_df) if "distance_to_ground" in self.state_columns else trajectory_df
         
         return trajectory_df
+    
+    def correct_distance_to_object(self,
+                                   df: pd.DataFrame) -> pd.DataFrame:
+        # correct Euclideandistance to the object given constant location of the object (obstacle)
+        distances = np.linalg.norm(np.array(constants.OBSTACLE_LOCATION) - np.array(df[self.action_columns],
+                                                                                    dtype=np.float64), axis=1)
+        df[self.state_columns[0]] = distances
+        
+        return df
     
     def correct_distance_to_target(self,
                                    df: pd.DataFrame) -> pd.DataFrame:
