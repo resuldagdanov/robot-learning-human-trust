@@ -292,18 +292,21 @@ def calculate_next_state(action_denorm: np.ndarray,
 
 
 def trajectory_estimation(configs: Config,
+                          updater_obj: object,
                           data_loader: torch.utils.data.Dataset,
                           policy_network: torch.nn.Module,
                           trajectory_length: int,
                           traj_start_index: int,
                           is_inference: bool=False) -> pd.DataFrame:
     
-    if not isinstance(policy_network, torch.nn.Module):
-        raise TypeError("Input 'policy_network' in trajectory_estimation function must be a torch neural network module.")
-    if not isinstance(data_loader, torch.utils.data.Dataset):
-        raise TypeError("Input 'data_loader' in trajectory_estimation function must be a torch data loader object.")
     if not isinstance(configs, Config):
         raise TypeError("Input 'configs' in trajectory_estimation function must be an instance of Config.")
+    if not isinstance(updater_obj, object):
+        raise TypeError("Input 'updater_obj' in trajectory_estimation function must be an object of Updater class.")
+    if not isinstance(data_loader, torch.utils.data.Dataset):
+        raise TypeError("Input 'data_loader' in trajectory_estimation function must be a torch data loader object.")
+    if not isinstance(policy_network, torch.nn.Module):
+        raise TypeError("Input 'policy_network' in trajectory_estimation function must be a torch neural network module.")
     if not isinstance(trajectory_length, int):
         raise TypeError("Input 'trajectory_length' in trajectory_estimation function must be an integer.")
     if not isinstance(traj_start_index, int):
@@ -332,6 +335,8 @@ def trajectory_estimation(configs: Config,
         # estimate the action given the current state
         action_pred, action_std, action_log_prob, action_entropy, action_mu_and_std, action_dist = policy_network.estimate_action(state=state_norm_estimation_vector,
                                                                                                                                   is_inference=is_inference)
+        nll_loss = updater_obj.multivariate_gaussian_nll_loss(y_true=action_label_norm,
+                                                              y_pred=action_mu_and_std)
         
         # denormalize the state vector to get distances to object, target, start, and ground
         current_state_denorm_label = common.denormalize_state(state_norm=state_label_norm.numpy(),
@@ -370,24 +375,6 @@ def trajectory_estimation(configs: Config,
         next_state_norm_estimation = common.normalize_state(state=next_state_denorm_estimation,
                                                             norm_value_list=data_loader.state_norms)
         
-        
-        # print("\nstate_number : ", state_number)
-        # print("state_label_norm : ", state_label_norm)
-        # print("current_state_denorm_label : ", current_state_denorm_label)
-        # print("initial_state_location : ", initial_state_location)
-        # print("action_label_norm : ", action_label_norm)
-        # print("action_pred : ", action_pred)
-        # print("state_norm_estimation_vector : ", state_norm_estimation_vector)
-        # print("action_denorm_label : ", action_denorm_label)
-        # print("action_denorm_prediction : ", action_denorm_prediction)
-        # print("current_state_denorm_estimation : ", current_state_denorm_estimation)
-        # print("next_state_denorm_label : ", next_state_denorm_label)
-        # print("next_state_denorm_estimation : ", next_state_denorm_estimation)
-        # print("next_state_norm_label : ", next_state_norm_label)
-        # print("next_state_norm_estimation : ", next_state_norm_estimation)
-        # print("target_location : ", target_location)
-        # print("trajectory_index : ", trajectory_index)
-
         # convert the sample to a dataframe
         created_df = convert_sample_2_df(input_state=state_label_norm.squeeze(0),
                                          real_state_input=current_state_denorm_label,
@@ -399,7 +386,7 @@ def trajectory_estimation(configs: Config,
                                          real_action_pred=action_denorm_prediction[0],
                                          trajectory_index=int(trajectory_index),
                                          state_number=state_number,
-                                         nll_loss=0.0)
+                                         nll_loss=nll_loss.item())
         created_df = extend_df_4_next_states(data_df=created_df,
                                              current_state_norm_estimation=state_norm_estimation_vector.squeeze(0),
                                              current_state_denorm_estimation=current_state_denorm_estimation[0],
