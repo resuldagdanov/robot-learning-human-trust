@@ -26,15 +26,17 @@ COLUMN_NAMES = ["time_seconds"] + \
                 ACTION_COLUMNS
 
 # column names for normalized and denormalized state and action vectors
-ACTION_NORMALIZED_LABEL_NAME = "action_label_norm" # normalized action label
-ACTION_DENORMALIZED_LABEL_NAME = "action_label_denorm" # denormalized action vector
 STATE_NORMALIZED_LABEL_NAME = "state_label_norm" # normalized state vector
 STATE_DENORMALIZED_LABEL_NAME = "state_label_denorm" # denormalized state vector
+NEXT_STATE_NORMALIZED_LABEL_NAME = "next_state_label_norm" # normalized next state vector
+NEXT_STATE_DENORMALIZED_LABEL_NAME = "next_state_label_denorm" # denormalized next state vector
 STATE_ESTIMATION_NORMALIZED_NAME = "state_est_norm" # estimated normalized state vector
 STATE_ESTIMATION_DENORMALIZED_NAME = "state_est_denorm" # estimated denormalized state vector
+ACTION_NORMALIZED_LABEL_NAME = "action_label_norm" # normalized action label
+ACTION_DENORMALIZED_LABEL_NAME = "action_label_denorm" # denormalized action vector
 ACTION_PREDICTION_NAME = "action_pred" # mean of distribution
-ACTION_PREDICTION_STD_NAME = "action_pred_std" # standard deviation
 ACTION_PREDICTION_DENORMALIZED_NAME = "action_pred_denorm" # x, y, z locations
+ACTION_PREDICTION_STD_NAME = "action_pred_std" # standard deviation
 ACTION_PREDICTION_LOGPROB_NAME = "action_pred_logprob" # log probability of action prediction
 ACTION_PREDICTION_ENTROPY_NAME = "action_pred_entropy" # entropy of action prediction
 ACTION_LABEL_LOGPROB_NAME = "action_label_logprob" # log probability of demonstration action
@@ -52,7 +54,7 @@ GAUSSIAN_NLL_LOSS_COLUMN = "gnll_loss"
 ACTION_LABEL_SHIFT_IDX = -1
 
 # number of state action pairs to discritize in each trajectory
-TRAJECTORY_SIZE = 20 # equally spaced number of points
+TRAJECTORY_SIZE = 30 # equally spaced number of points
 
 # collected dataset folder name in ("dataset \\ human_demonstrations \\ collection_date")
 DEMO_COLLECTION_DATE = "2024_01_23" # year_month_day NOTE: make sure that data date is correct
@@ -68,4 +70,4 @@ ROBOT_BASE_HEIGHT = 0.1685 # meters NOTE: make sure the alignment with robot exp
 TARGET_LOCATION = [-0.36, 0.77, -ROBOT_BASE_HEIGHT] # meters NOTE: make sure the alignment with robot experiment
 
 # number of training epoch for behavior cloning
-BC_NUMBER_EPOCHS = 1
+BC_NUMBER_EPOCHS = 100

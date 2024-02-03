@@ -203,6 +203,35 @@ def convert_sample_2_df(input_state: torch.Tensor,
     return df
 
 
+def extend_df_4_next_states(data_df: pd.DataFrame,
+                            next_state_norm_label: np.ndarray,
+                            next_state_denorm_label: np.ndarray,
+                            next_state_norm_estimation: np.ndarray,
+                            next_state_denorm_estimation: np.ndarray) -> pd.DataFrame:
+    
+    if not isinstance(data_df, pd.DataFrame):
+        raise TypeError("Input 'data_df' in extend_df_4_next_state_estimation function must be a pandas dataframe.")
+    if not isinstance(next_state_norm_label, np.ndarray):
+        raise TypeError("Input 'next_state_norm_label' in extend_df_4_next_state_estimation function must be a numpy array.")
+    if not isinstance(next_state_denorm_label, np.ndarray):
+        raise TypeError("Input 'next_state_denorm_label' in extend_df_4_next_state_estimation function must be a numpy array.")
+    if not isinstance(next_state_norm_estimation, np.ndarray):
+        raise TypeError("Input 'next_state_norm_estimation' in extend_df_4_next_state_estimation function must be a numpy array.")    
+    if not isinstance(next_state_denorm_estimation, np.ndarray):
+        raise TypeError("Input 'next_state_denorm_estimation' in extend_df_4_next_state_estimation function must be a numpy array.")
+    
+    for i in range(len(next_state_norm_label)):
+        data_df[constants.NEXT_STATE_NORMALIZED_LABEL_NAME + f"_{i+1}"] = next_state_norm_label[i]
+    for i in range(len(next_state_denorm_label)):
+        data_df[constants.NEXT_STATE_DENORMALIZED_LABEL_NAME + f"_{i+1}"] = next_state_denorm_label[i]
+    for i in range(len(next_state_norm_estimation)):
+        data_df[constants.STATE_ESTIMATION_NORMALIZED_NAME + f"_{i+1}"] = next_state_norm_estimation[i]
+    for i in range(len(next_state_denorm_estimation)):
+        data_df[constants.STATE_ESTIMATION_DENORMALIZED_NAME + f"_{i+1}"] = next_state_denorm_estimation[i]
+    
+    return data_df
+
+
 def get_initial_position(data_loader: torch.utils.data.Dataset,
                          traj_start_index: int) -> np.ndarray:
 
@@ -286,30 +315,33 @@ def trajectory_estimation(configs: Config,
     # loop through the trajectory length
     for state_number in range(trajectory_length + constants.ACTION_LABEL_SHIFT_IDX):
 
+        # actual state and action given the current state
+        state_label_norm, action_label_norm, trajectory_index, _ = read_each_loader(configs=configs,
+                                                                                    sample_data=tuple(data_loader[traj_start_index + state_number]))
+        
         # estimate the action given the current state
         action_pred, action_std, action_log_prob, action_entropy, action_mu_and_std, action_dist = policy_network.estimate_action(state=state_norm_estimation_vector,
                                                                                                                                   is_inference=is_inference)
-
-        # actual action given the current state
-        action_label_norm = data_loader[traj_start_index + state_number][1]
-
+        
+        # denormalize the state vector to get distances to object, target, start, and ground
+        current_state_denorm_label = common.denormalize_state(state_norm=state_label_norm.numpy(),
+                                                              norm_value_list=data_loader.state_norms)
+        current_state_denorm_estimation = common.denormalize_state(state_norm=state_norm_estimation_vector.numpy(),
+                                                                   norm_value_list=data_loader.state_norms)
+        
         # denormalize the demonstration action to get actual x, y, z position of the end-effector
         action_denorm_label = common.denormalize_action(action_norm=action_label_norm.unsqueeze(0).detach().numpy(),
-                                                        norm_range_list=data_loader.action_norms)[0]
+                                                        norm_range_list=data_loader.action_norms)
         
         # denormalize the action prediction to get x, y, z position of the end-effector
         action_denorm_prediction = common.denormalize_action(action_norm=action_pred.detach().numpy(),
-                                                             norm_range_list=data_loader.action_norms)[0]
-        
-        # denormalize the state vector to get distances to object, target, start, and ground
-        current_state_denorm_estimation = common.denormalize_state(state_norm=state_norm_estimation_vector.numpy(),
-                                                                   norm_value_list=data_loader.state_norms)[0]
+                                                             norm_range_list=data_loader.action_norms)
         
         # x, y, z coordinates of the target location w.r.t robot base focal point is constant in this experiment
         target_location = np.array(constants.TARGET_LOCATION)
 
         # calculate the next denormalized actual state as given the current state and actual action
-        next_state_denorm_label = calculate_next_state(action_denorm=action_denorm_label,
+        next_state_denorm_label = calculate_next_state(action_denorm=action_denorm_label[0],
                                                        obstacle_location=np.array(constants.OBSTACLE_LOCATION),
                                                        initial_state_location=initial_state_location,
                                                        target_location=target_location)
@@ -319,7 +351,7 @@ def trajectory_estimation(configs: Config,
                                                        norm_value_list=data_loader.state_norms)
         
         # calculate the next denormalized estimation state as given the current state and action prediction
-        next_state_denorm_estimation = calculate_next_state(action_denorm=action_denorm_prediction,
+        next_state_denorm_estimation = calculate_next_state(action_denorm=action_denorm_prediction[0],
                                                             obstacle_location=np.array(constants.OBSTACLE_LOCATION),
                                                             initial_state_location=initial_state_location,
                                                             target_location=target_location)
@@ -328,35 +360,46 @@ def trajectory_estimation(configs: Config,
         next_state_norm_estimation = common.normalize_state(state=next_state_denorm_estimation,
                                                             norm_value_list=data_loader.state_norms)
         
-        print("\nstate_number : ", state_number)
-        print("initial_state_location : ", initial_state_location)
+        
+        # print("\nstate_number : ", state_number)
+        # print("initial_state_location : ", initial_state_location)
         # print("action_label_norm : ", action_label_norm)
         # print("action_pred : ", action_pred)
         # print("state_norm_estimation_vector : ", state_norm_estimation_vector)
-        print("action_denorm_label : ", action_denorm_label)
-        print("action_denorm_prediction : ", action_denorm_prediction)
-        print("current_state_denorm_estimation : ", current_state_denorm_estimation)
-        print("next_state_denorm_label : ", next_state_denorm_label)
+        # print("action_denorm_label : ", action_denorm_label)
+        # print("action_denorm_prediction : ", action_denorm_prediction)
+        # print("current_state_denorm_estimation : ", current_state_denorm_estimation)
+        # print("next_state_denorm_label : ", next_state_denorm_label)
         # print("next_state_denorm_estimation : ", next_state_denorm_estimation)
         # print("next_state_norm_label : ", next_state_norm_label)
         # print("next_state_norm_estimation : ", next_state_norm_estimation)
         # print("target_location : ", target_location)
+        # print("trajectory_index : ", trajectory_index)
+        # print("current_state_denorm_label : ", current_state_denorm_label)
 
-        # # convert the sample to a dataframe
-        # created_df = convert_sample_2_df(input_state=state_vector,
-        #                                 real_state_input=state_denorm,
-        #                                 output_action=action_pred,
-        #                                 real_action_output=action_denorm_prediction,
-        #                                 action_log_prob=action_log_prob,
-        #                                 action_pred=action_pred,
-        #                                 action_std=action_std,
-        #                                 real_action_pred=action_denorm_prediction,
-        #                                 trajectory_index=0,
-        #                                 state_number=state_number,
-        #                                 nll_loss=0.0)
-
-        # # append the sample dataframe to the trajectory dataframe
-        # created_trajectory_df = created_trajectory_df.append(created_df)
-
+        # convert the sample to a dataframe
+        created_df = convert_sample_2_df(input_state=state_label_norm.squeeze(0),
+                                         real_state_input=current_state_denorm_label,
+                                         output_action=action_label_norm.squeeze(0),
+                                         real_action_output=action_denorm_label[0],
+                                         action_log_prob=action_log_prob.squeeze(0),
+                                         action_pred=action_pred.squeeze(0),
+                                         action_std=action_std.squeeze(0),
+                                         real_action_pred=action_denorm_prediction[0],
+                                         trajectory_index=int(trajectory_index),
+                                         state_number=state_number,
+                                         nll_loss=0.0)
+        created_df = extend_df_4_next_states(data_df=created_df,
+                                             next_state_norm_label=next_state_norm_label,
+                                             next_state_denorm_label=next_state_denorm_label,
+                                             next_state_norm_estimation=next_state_norm_estimation,
+                                             next_state_denorm_estimation=next_state_denorm_estimation)
+        
         # update the current state vector with estimated next state vector
         state_norm_estimation_vector = torch.from_numpy(next_state_norm_estimation).unsqueeze(0).float().to(configs.device)
+
+        # append the sample dataframe to the trajectory dataframe
+        created_trajectory_df = pd.concat([created_trajectory_df, created_df],
+                                          ignore_index=True)
+    
+    return created_trajectory_df
