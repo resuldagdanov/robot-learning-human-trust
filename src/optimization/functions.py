@@ -403,3 +403,23 @@ def trajectory_estimation(configs: Config,
                                           ignore_index=True)
     
     return created_trajectory_df
+
+
+def find_indices_of_trajectory_changes(dataset: torch.utils.data.Dataset) -> List[int]:
+
+    if not isinstance(dataset, torch.utils.data.Dataset):
+        raise TypeError("Input 'dataset' in find_indices_of_trajectory_changes function must be a torch data loader object.")
+    
+    indices_of_changes = []
+    previous_value = None
+
+    # second indices of each sample is the trajectory number (check dataset_loader.py __getitem__ for more info)
+    for idx, sample in enumerate(dataset):
+        current_value = sample[2]
+
+        if previous_value is None or current_value == previous_value + 1:
+            indices_of_changes.append(idx)
+
+        previous_value = current_value
+
+    return indices_of_changes
