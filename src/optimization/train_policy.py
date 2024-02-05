@@ -62,7 +62,8 @@ if __name__ == "__main__":
                                  device=configs.device)
 
     updater = Updater(configs=configs,
-                      policy_network=policy_network)
+                      policy_network=policy_network,
+                      reward_network=None)
     updater.initialize_optimizers()
 
     # parameters for early stopping criteria
@@ -93,7 +94,7 @@ if __name__ == "__main__":
                                                                     y_pred=action_mu_and_std)
             
             # backward pass and optimization
-            updater.run_optimizers(bc_loss=nll_train_loss)
+            updater.run_policy_optimizer(bc_loss=nll_train_loss)
 
             cummulative_train_loss += nll_train_loss.item()
         

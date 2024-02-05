@@ -7,13 +7,16 @@ class Updater(object):
 
     def __init__(self,
                  configs,
-                 policy_network) -> object:
+                 policy_network,
+                 reward_network) -> object:
         
         self.configs = configs
         self.device = configs.device
 
         self.policy_network = policy_network
+        self.reward_network = reward_network
         self.policy_optimizer = None
+        self.reward_optimizer = None
 
     def calculate_bc_loss(self,
                           action_dist,
@@ -52,7 +55,7 @@ class Updater(object):
                            demo_traj_reward,
                            robot_traj_reward,
                            probability,
-                           nu_factor):
+                           nu_factor) -> float:
         
         loss = - torch.mean(demo_traj_reward) + \
             torch.log(torch.exp(nu_factor) * (torch.mean(torch.exp(robot_traj_reward) / (probability + 1e-7))))
@@ -63,11 +66,20 @@ class Updater(object):
         
         self.policy_optimizer = torch.optim.Adam(self.policy_network.parameters(),
                                                  lr=self.configs.policy_lr)
+        self.reward_optimizer = torch.optim.Adam(self.reward_network.parameters(),
+                                                 lr=self.configs.reward_lr)
     
-    def run_optimizers(self,
-                       bc_loss):
+    def run_policy_optimizer(self,
+                             bc_loss) -> None:
         
         self.policy_optimizer.zero_grad()
         bc_loss.backward()
         self.policy_optimizer.step()
+    
+    def run_reward_optimizer(self,
+                             irl_loss) -> None:
+        
+        self.reward_optimizer.zero_grad()
+        irl_loss.backward()
+        self.reward_optimizer.step()
     

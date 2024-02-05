@@ -28,6 +28,7 @@ class Config(object):
         self.hidden_size = 32
         self.action_size = 3
         self.reward_size = 1
+        self.state_action_size = self.state_size + self.action_size
 
         # strategy for batch sampling
         self.batch_size = 32
@@ -39,8 +40,9 @@ class Config(object):
         self.policy_log_std_max = 1.4 # exp(1.1) = 4.0
         self.policy_log_std_init = 0.0 # exp(0.0) = 1.0
         
-        # learning rate
+        # learning rates
         self.policy_lr = 1e-3
+        self.reward_lr = 1e-3
 
         # 15% of the dataset will be used for validation
         self.validation_split = 0.15
