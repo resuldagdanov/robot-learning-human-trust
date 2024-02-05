@@ -7,8 +7,8 @@ class RobotPolicy(torch.nn.Module):
                  state_size: int = 4,
                  hidden_size: int = 64, 
                  out_size: int = 3,
-                 log_std_min: float = -11,
-                 log_std_max: float = 1.1,
+                 log_std_min: float = -14,
+                 log_std_max: float = 1.4,
                  log_std_init: float = 0.0,
                  device: str = "cpu") -> object:
         
@@ -92,7 +92,7 @@ class RobotPolicy(torch.nn.Module):
                                                       torch.Tensor,
                                                       torch.Tensor,
                                                       torch.distributions.Normal):
-           
+        
         # forward pass to get mean of Gaussian distribution
         if is_inference:
             self.eval()
