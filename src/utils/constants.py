@@ -63,7 +63,7 @@ DEMO_COLLECTION_DATE = "2024_01_23" # year_month_day NOTE: make sure that data d
 TEST_COLLECTION_DATE = "2024_02_02_Test" # year_month_day NOTE: make sure folder name is correct
 
 # experiment obstacle location x, y, z coordinates
-OBSTACLE_LOCATION = [0.4, 0.0, 0.554] # meters NOTE: make sure the alignment with experiment
+OBSTACLE_LOCATION = [-0.4, 0.0, 0.554] # meters NOTE: make sure the alignment with experiment
 
 # altitute of the base of the robot from the ground as a focal point
 ROBOT_BASE_HEIGHT = 0.1685 # meters NOTE: make sure the alignment with robot experiment
