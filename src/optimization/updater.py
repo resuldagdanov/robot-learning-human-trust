@@ -6,9 +6,9 @@ import numpy as np
 class Updater(object):
 
     def __init__(self,
-                 configs,
-                 policy_network,
-                 reward_network) -> object:
+                 configs: object,
+                 policy_network: torch.nn.Module,
+                 reward_network: torch.nn.Module) -> object:
         
         self.configs = configs
         self.device = configs.device
@@ -19,8 +19,8 @@ class Updater(object):
         self.reward_optimizer = None
 
     def calculate_bc_loss(self,
-                          action_dist,
-                          output_action) -> float:
+                          action_dist: torch.Tensor,
+                          output_action: torch.Tensor) -> float:
         
         loss_nll = -action_dist.log_prob(output_action).sum(axis=-1)
         batch_loss = loss_nll.mean()
@@ -39,10 +39,10 @@ class Updater(object):
         
         # mean squared error given mean and standard deviation
         mse = 0.5 * torch.sum(torch.square((y_true - mu) / torch.exp(log_sigma)),
-                               axis=1)
+                              axis=1)
         # sum of predicted log standard deviations to penalize higher uncertainties in predictions
         sigma_trace = torch.sum(log_sigma,
-                                 axis=1)
+                                axis=1)
         # constant term related to the natural logarithm of 2 pi
         log_2_pi = 0.5 * n_dims * np.log(2 * np.pi)
         
@@ -52,13 +52,24 @@ class Updater(object):
         return torch.mean(log_likelihood)
     
     def calculate_irl_loss(self,
-                           demo_traj_reward,
-                           robot_traj_reward,
-                           probability,
-                           nu_factor) -> float:
+                           demo_traj_reward: torch.Tensor,
+                           robot_traj_reward: torch.Tensor,
+                           log_probability: torch.Tensor,
+                           nu_factor: torch.Tensor) -> float:
         
-        loss = - torch.mean(demo_traj_reward) + \
-            torch.log(torch.exp(nu_factor) * (torch.mean(torch.exp(robot_traj_reward) / (probability + 1e-7))))
+        # max-entropy inverse reinforcement learning loss function (similar to guided cost learning)
+        loss = -(
+            torch.mean(demo_traj_reward) - \
+            (
+                torch.exp(nu_factor) * \
+                (
+                    torch.logsumexp(robot_traj_reward - log_probability,
+                                    dim=0,
+                                    keepdim=True) - \
+                    torch.log(torch.Tensor([len(robot_traj_reward)]))
+                )
+            )
+        )
 
         return loss
 
@@ -70,14 +81,14 @@ class Updater(object):
                                                  lr=self.configs.reward_lr)
     
     def run_policy_optimizer(self,
-                             bc_loss) -> None:
+                             bc_loss: torch.Tensor) -> None:
         
         self.policy_optimizer.zero_grad()
         bc_loss.backward()
         self.policy_optimizer.step()
     
     def run_reward_optimizer(self,
-                             irl_loss) -> None:
+                             irl_loss: torch.Tensor) -> None:
         
         self.reward_optimizer.zero_grad()
         irl_loss.backward()
