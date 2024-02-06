@@ -623,6 +623,7 @@ def trajectory_generation(configs: Config,
                           reward_network: Union[torch.nn.Module, None],
                           average_initial_state_denorm: np.ndarray,
                           initial_state_location: np.ndarray) -> Tuple[pd.DataFrame,
+                                                                       torch.Tensor,
                                                                        Union[torch.Tensor, None]]:
     
     if not isinstance(configs, Config):
@@ -655,6 +656,7 @@ def trajectory_generation(configs: Config,
     column_names += [constants.STATE_ESTIMATION_DENORMALIZED_NAME + f"_{i+1}" for i in range(len(state_norms))]
     column_names += [constants.ACTION_PREDICTION_NAME + f"_{i+1}" for i in range(len(action_norms))]
     column_names += [constants.ACTION_PREDICTION_DENORMALIZED_NAME + f"_{i+1}" for i in range(len(action_norms))]
+    column_names += [constants.ACTION_PREDICTION_LOGPROB_NAME + f"_{i+1}" for i in range(len(action_norms))]
     column_names += [constants.NEXT_STATE_ESTIMATION_NORMALIZED_NAME + f"_{i+1}" for i in range(len(state_norms))]
     column_names += [constants.NEXT_STATE_ESTIMATION_DENORMALIZED_NAME + f"_{i+1}" for i in range(len(state_norms))]
     
@@ -688,11 +690,20 @@ def trajectory_generation(configs: Config,
         created_trajectory_df.loc[
             state_number, constants.ACTION_PREDICTION_DENORMALIZED_NAME + "_1" : constants.ACTION_PREDICTION_DENORMALIZED_NAME + "_" + str(len(action_norms))] = output_action_denorm[0]
         created_trajectory_df.loc[
+            state_number, constants.ACTION_PREDICTION_LOGPROB_NAME + "_1" : constants.ACTION_PREDICTION_LOGPROB_NAME + "_" + str(len(action_norms))] = action_log_prob.detach().numpy()[0]
+        created_trajectory_df.loc[
             state_number, constants.NEXT_STATE_ESTIMATION_NORMALIZED_NAME + "_1" : constants.NEXT_STATE_ESTIMATION_NORMALIZED_NAME + "_" + str(len(state_norms))] = next_state_norm
         created_trajectory_df.loc[
             state_number, constants.NEXT_STATE_ESTIMATION_DENORMALIZED_NAME + "_1" : constants.NEXT_STATE_ESTIMATION_DENORMALIZED_NAME + "_" + str(len(state_norms))] = next_state_denorm
         
         input_state_norm = torch.from_numpy(next_state_norm).unsqueeze(0).float().to(configs.device)
+    
+    logprob_action_estim_df = created_trajectory_df[[
+        f"{constants.ACTION_PREDICTION_LOGPROB_NAME}_{i}" for i in range(1, len(action_norms) + 1)]]
+    logprob_action_estim_avg_df = logprob_action_estim_df.mean(axis=1)
+    logprob_action_avg_tensor = torch.tensor(logprob_action_estim_avg_df.values,
+                                             dtype=torch.float64,
+                                             device=configs.device).unsqueeze(1)
     
     if reward_network is not None:
 
@@ -713,4 +724,4 @@ def trajectory_generation(configs: Config,
     else:
         reward_values_tensor = None
 
-    return created_trajectory_df, reward_values_tensor
+    return created_trajectory_df, logprob_action_avg_tensor, reward_values_tensor
