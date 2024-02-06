@@ -614,3 +614,80 @@ def get_estimated_rewards(configs: Config,
                                                                    is_inference=is_inference_reward)
     
     return data_traj_df, reward_values_demonstration_data, reward_values_estimation_data, logprob_action_estim_avg_tensor
+
+
+def trajectory_generation(configs: Config,
+                          state_norms: List[float],
+                          action_norms: List[float],
+                          policy_network: torch.nn.Module,
+                          average_initial_state_denorm: np.ndarray,
+                          initial_state_location: np.ndarray) -> pd.DataFrame:
+    
+    if not isinstance(configs, Config):
+        raise TypeError("Input 'configs' in trajectory_generation function must be an instance of Config.")
+    if not isinstance(state_norms, list):
+        raise TypeError("Input 'state_norms' in trajectory_generation function must be a list.")
+    if not isinstance(action_norms, list):
+        raise TypeError("Input 'action_norms' in trajectory_generation function must be a list.")
+    if not isinstance(policy_network, torch.nn.Module):
+        raise TypeError("Input 'policy_network' in trajectory_generation function must be a torch neural network module.")
+    if not isinstance(average_initial_state_denorm, np.ndarray):
+        raise TypeError("Input 'average_initial_state_denorm' in trajectory_generation function must be a numpy array.")
+    if not isinstance(initial_state_location, np.ndarray):
+        raise TypeError("Input 'initial_state_location' in trajectory_generation function must be a numpy array.")
+    
+    # normal random denormalized state vector of initial state
+    variances = np.array([state_norms[0] / 8.0,
+                          state_norms[1] / 8.0,
+                          state_norms[2] / 8.0,
+                          state_norms[3] / 8.0])
+    initial_state_denorm = common.generate_gaussian_random_variables(means=average_initial_state_denorm,
+                                                                     variances=variances)[0]
+    input_state_norm = torch.from_numpy(common.normalize_state(state=initial_state_denorm,
+                                                               norm_value_list=state_norms)).unsqueeze(0).float().to(configs.device)
+    
+    column_names = [constants.STATE_NUMBER_COLUMN]
+    column_names += [constants.STATE_ESTIMATION_NORMALIZED_NAME + f"_{i+1}" for i in range(len(state_norms))]
+    column_names += [constants.STATE_ESTIMATION_DENORMALIZED_NAME + f"_{i+1}" for i in range(len(state_norms))]
+    column_names += [constants.ACTION_PREDICTION_NAME + f"_{i+1}" for i in range(len(action_norms))]
+    column_names += [constants.ACTION_PREDICTION_DENORMALIZED_NAME + f"_{i+1}" for i in range(len(action_norms))]
+    column_names += [constants.NEXT_STATE_ESTIMATION_NORMALIZED_NAME + f"_{i+1}" for i in range(len(state_norms))]
+    column_names += [constants.NEXT_STATE_ESTIMATION_DENORMALIZED_NAME + f"_{i+1}" for i in range(len(state_norms))]
+    
+    created_trajectory_df = pd.DataFrame(index=range(constants.TRAJECTORY_SIZE),
+                                         columns=column_names)
+
+    for state_number in range(constants.TRAJECTORY_SIZE):
+        output_action_norm, action_std, action_log_prob, action_entropy, action_mu_and_std, action_dist = policy_network.estimate_action(state=input_state_norm,
+                                                                                                                                         is_inference=True)
+        
+        input_state_denorm = common.denormalize_state(state_norm=input_state_norm.numpy(),
+                                                      norm_value_list=state_norms)
+        output_action_denorm = common.denormalize_action(action_norm=output_action_norm.detach().numpy(),
+                                                         norm_range_list=action_norms)
+        
+        next_state_denorm = calculate_next_state(action_denorm=output_action_denorm[0],
+                                                 obstacle_location=np.array(constants.OBSTACLE_LOCATION),
+                                                 initial_state_location=initial_state_location,
+                                                 target_location=np.array(constants.TARGET_LOCATION))
+        next_state_norm = common.normalize_state(state=next_state_denorm,
+                                                 norm_value_list=state_norms)
+        
+        created_trajectory_df.loc[
+            state_number, constants.STATE_NUMBER_COLUMN] = state_number
+        created_trajectory_df.loc[
+            state_number, constants.STATE_ESTIMATION_NORMALIZED_NAME + "_1" : constants.STATE_ESTIMATION_NORMALIZED_NAME + "_" + str(len(state_norms))] = input_state_norm.numpy()[0]
+        created_trajectory_df.loc[
+            state_number, constants.STATE_ESTIMATION_DENORMALIZED_NAME + "_1" : constants.STATE_ESTIMATION_DENORMALIZED_NAME + "_" + str(len(state_norms))] = input_state_denorm[0]
+        created_trajectory_df.loc[
+            state_number, constants.ACTION_PREDICTION_NAME + "_1" : constants.ACTION_PREDICTION_NAME + "_" + str(len(action_norms))] = output_action_norm.detach().numpy()[0]
+        created_trajectory_df.loc[
+            state_number, constants.ACTION_PREDICTION_DENORMALIZED_NAME + "_1" : constants.ACTION_PREDICTION_DENORMALIZED_NAME + "_" + str(len(action_norms))] = output_action_denorm[0]
+        created_trajectory_df.loc[
+            state_number, constants.NEXT_STATE_ESTIMATION_NORMALIZED_NAME + "_1" : constants.NEXT_STATE_ESTIMATION_NORMALIZED_NAME + "_" + str(len(state_norms))] = next_state_norm
+        created_trajectory_df.loc[
+            state_number, constants.NEXT_STATE_ESTIMATION_DENORMALIZED_NAME + "_1" : constants.NEXT_STATE_ESTIMATION_DENORMALIZED_NAME + "_" + str(len(state_norms))] = next_state_denorm
+        
+        input_state_norm = torch.from_numpy(next_state_norm).unsqueeze(0).float().to(configs.device)
+    
+    return created_trajectory_df

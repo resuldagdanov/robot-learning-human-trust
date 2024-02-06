@@ -62,9 +62,8 @@ class Updater(object):
                     (torch.exp(nu_factor) * \
                         (torch.logsumexp(robot_traj_reward - log_probability,
                                          dim=0,
-                                         keepdim=True) - \
+                                         keepdim=True)) - \
                         torch.log(torch.Tensor([len(robot_traj_reward)]))
-                        )
                     )
 
         return loss

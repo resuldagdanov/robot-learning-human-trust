@@ -333,3 +333,22 @@ def shift_action_label(df: pd.DataFrame,
     df = df.dropna()
 
     return df
+
+
+def generate_gaussian_random_variables(means: np.ndarray,
+                                       variances: np.ndarray,
+                                       num_samples: int = 1) -> np.ndarray:
+    
+    if not isinstance(means, np.ndarray):
+        raise TypeError("Input 'means' in generate_gaussian_random_variables function must be a numpy array.")
+    if not isinstance(variances, np.ndarray):
+        raise TypeError("Input 'variances' in generate_gaussian_random_variables function must be a numpy array.")
+    if not isinstance(num_samples, int):
+        raise TypeError("Input 'num_samples' in generate_gaussian_random_variables function must be an integer.")
+    
+    covariance_matrix = np.diag(variances)
+    samples = np.random.multivariate_normal(means,
+                                            covariance_matrix,
+                                            num_samples)
+    
+    return samples
