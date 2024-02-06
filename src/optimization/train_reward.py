@@ -16,7 +16,7 @@ from utils import constants
 from utils.dataset_loader import PolicyDatasetLoader
 
 from optimization.updater import Updater
-from optimization.functions import setup_config, get_directories, create_directories, save_policy, load_policy_from_path
+from optimization.functions import setup_config, get_directories, create_directories, save_reward, load_policy_from_path
 from optimization.functions import find_indices_of_trajectory_changes, get_estimated_rewards
 
 from models.policy_model import RobotPolicy
@@ -37,6 +37,11 @@ if __name__ == "__main__":
                                                      data_folder_name=constants.DEMO_COLLECTION_DATE)
     json_paths_validate, _ = get_directories(parent_directory=parent_directory,
                                              data_folder_name=constants.TEST_COLLECTION_DATE)
+    
+    _, reward_saving_path = create_directories(configs=configs,
+                                               results_path=results_path,
+                                               saving_policy=False,
+                                               saving_reward=True)
     
     # load train-validation dataset of demonstrations
     all_train_data = PolicyDatasetLoader(demo_data_json_paths=json_paths_train)
@@ -80,7 +85,7 @@ if __name__ == "__main__":
     policy_network = policy_network.eval()
 
     # parameters for early stopping criteria
-    best_bc_val_loss = float("inf")
+    best_rf_val_loss = float("inf")
     early_stopping_counter = 0
 
     # currently nu weight is zero; will be updated later
@@ -95,7 +100,7 @@ if __name__ == "__main__":
         cummulative_train_loss = 0.0
 
         # loop through each separate trajectory inside the training dataset
-        for traj_start_index_train in trajectory_indices_train:
+        for traj_start_index_train in range(len(trajectory_indices_train)):
 
             traj_df, reward_values_demo_data, reward_values_estim_data, logprob_action_estim_avg = get_estimated_rewards(configs=configs,
                                                                                                                          updater_obj=updater_obj,
@@ -117,5 +122,48 @@ if __name__ == "__main__":
             cummulative_train_loss += irl_train_loss.item()
         
         # calculate average training loss in the current epoch
-        avg_bc_train_loss_value = round(cummulative_train_loss / len(trajectory_indices_train), 5)
+        avg_rf_train_loss_value = round(cummulative_train_loss / len(trajectory_indices_train), 5)
+
+        print("================== Validation Phase ==================")
+        reward_network.eval()
+        cummulative_val_loss = 0.0
+
+        # freeze neural network parameters during validation
+        with torch.no_grad():
+            # loop through each separate trajectory inside the validation dataset
+            for traj_start_index_valid in range(len(trajectory_indices_valid)):
+                traj_df, reward_values_demo_data, reward_values_estim_data, logprob_action_estim_avg = get_estimated_rewards(configs=configs,
+                                                                                                                             updater_obj=updater_obj,
+                                                                                                                             data_loader=all_validate_data,
+                                                                                                                             policy_network=policy_network,
+                                                                                                                             reward_network=reward_network,
+                                                                                                                             trajectory_indices=trajectory_indices_valid,
+                                                                                                                             traj_start_index=traj_start_index_valid)
+                irl_valid_loss = updater_obj.calculate_irl_loss(demo_traj_reward=reward_values_demo_data,
+                                                                robot_traj_reward=reward_values_estim_data,
+                                                                log_probability=logprob_action_estim_avg,
+                                                                nu_factor=nu_factor)
+                cummulative_val_loss += irl_valid_loss.item()
         
+        # calculate average validation loss in the current epoch
+        avg_rf_val_loss_value = round(cummulative_val_loss / len(trajectory_indices_valid), 5)
+
+        print(f"Epoch {epoch + 1}/{constants.RF_NUMBER_EPOCHS}, Batch Train Loss: {avg_rf_train_loss_value}, Batch Validation Loss: {avg_rf_val_loss_value}")
+
+        # check for early stopping
+        if avg_rf_val_loss_value < best_rf_val_loss:
+            best_rf_val_loss = avg_rf_val_loss_value
+
+            # save action reward network parameters after every epoch
+            save_reward(epoch=epoch,
+                        reward_network=reward_network,
+                        saving_path=reward_saving_path,
+                        loss_value_str=str(avg_rf_train_loss_value).replace(".", "_"))
+        else:
+            early_stopping_counter += 1
+        
+        if early_stopping_counter >= configs.early_stopping_patience:
+            print(f"Early stopping at epoch {epoch + 1} due to no improvement in validation loss!")
+            break
+
+    print("\n================== Training Finished (choo choo) ==================\n")

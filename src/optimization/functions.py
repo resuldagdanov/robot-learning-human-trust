@@ -65,21 +65,41 @@ def get_directories(parent_directory: str,
 
 
 def create_directories(configs: Config,
-                       results_path: str) -> str:
+                       results_path: str,
+                       saving_policy: bool,
+                       saving_reward: bool) -> Tuple[Union[str, None],
+                                                     Union[str, None]]:
     
     if not isinstance(configs, Config):
         raise TypeError("Input 'configs' in create_directories function must be an object of Config() class.")
     if not isinstance(results_path, str):
         raise TypeError("Input 'results_path' in create_directories function must be a string.")
+    if not isinstance(saving_policy, bool):
+        raise TypeError("Input 'saving_policy' in create_directories function must be a boolean.")
+    if not isinstance(saving_reward, bool):
+        raise TypeError("Input 'saving_reward' in create_directories function must be a boolean.")
     
     policy_model_directory = os.path.join(results_path,
                                           "policy_network_params")
+    reward_model_directory = os.path.join(results_path,
+                                          "reward_network_params")
+    
     if not os.path.exists(policy_model_directory):
         os.makedirs(policy_model_directory)
+    if not os.path.exists(reward_model_directory):
+        os.makedirs(reward_model_directory)
     
-    policy_saving_path = configs.model_saving_path(directory=policy_model_directory)
+    if saving_policy:
+        policy_saving_path = configs.model_saving_path(directory=policy_model_directory)
+    else:
+        policy_saving_path = None
+    
+    if saving_reward:
+        reward_saving_path = configs.model_saving_path(directory=reward_model_directory)
+    else:
+        reward_saving_path = None
 
-    return policy_saving_path
+    return policy_saving_path, reward_saving_path
 
 
 def load_policy_from_path(policy_network: torch.nn.Module,
@@ -144,6 +164,28 @@ def load_policy(policy_network: torch.nn.Module,
     policy_network.eval()
     
     return policy_network
+
+
+def save_reward(epoch: int,
+                reward_network: torch.nn.Module,
+                saving_path: str,
+                loss_value_str: str) -> None:
+    
+    if not isinstance(epoch, int):
+        raise TypeError("Input 'epoch' in save_reward function must be an integer.")
+    if not isinstance(reward_network, torch.nn.Module):
+        raise TypeError("Input 'reward_network' in save_reward function must be torch neural network module.")
+    if not isinstance(saving_path, str):
+        raise TypeError("Input 'saving_path' in save_reward function must be a valid string path.")
+    if not isinstance(loss_value_str, str):
+        raise TypeError("Input 'loss_value_str' in save_reward function must be a string.")
+    
+    # save the action prediction model after each epoch
+    filename = f"reward_network_epoch_{epoch + 1}_loss_{loss_value_str}.pt"
+    torch.save(obj=reward_network.state_dict(),
+               f=os.path.join(saving_path, filename))
+    
+    print(f"Saved Reward Network Model: {filename}")
 
 
 def read_each_loader(configs: Config,

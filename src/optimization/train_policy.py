@@ -33,8 +33,10 @@ if __name__ == "__main__":
 
     # create and return preliminary base paths
     json_paths, results_path = get_directories(parent_directory=parent_directory)
-    policy_saving_path = create_directories(configs=configs,
-                                            results_path=results_path)
+    policy_saving_path, _ = create_directories(configs=configs,
+                                               results_path=results_path,
+                                               saving_policy=True,
+                                               saving_reward=False)
     
     # load demonstrations dataset
     all_data = PolicyDatasetLoader(demo_data_json_paths=json_paths)
