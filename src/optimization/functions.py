@@ -166,6 +166,34 @@ def load_policy(policy_network: torch.nn.Module,
     return policy_network
 
 
+def load_reward_from_path(reward_network: torch.nn.Module,
+                          results_path: str,
+                          reward_loading_folder_name: str,
+                          reward_params_name: str) -> torch.nn.Module:
+    
+    if not isinstance(reward_network, torch.nn.Module):
+        raise TypeError("Input 'reward_network' in load_reward_from_path function must be torch neural network module.")
+    if not isinstance(results_path, str):
+        raise TypeError("Input 'results_path' in load_reward_from_path function must be a string.")
+    if not isinstance(reward_loading_folder_name, str):
+        raise TypeError("Input 'reward_loading_folder_name' in load_reward_from_path function must be a string.")
+    if not isinstance(reward_params_name, str):
+        raise TypeError("Input 'reward_params_name' in load_reward_from_path function must be a string.")
+    
+    # location of the trained model parameters (make sure that the folder exists where model is trained priorly)
+    reward_model_folder_path = os.path.join(results_path,
+                                            "reward_network_params",
+                                            reward_loading_folder_name)
+    reward_model_path = os.path.join(reward_model_folder_path,
+                                     reward_params_name)
+    
+    # set trained parameters to neural network
+    reward_network = load_reward(reward_network=reward_network,
+                                 model_path=reward_model_path)
+    
+    return reward_network
+
+
 def save_reward(epoch: int,
                 reward_network: torch.nn.Module,
                 saving_path: str,
@@ -186,6 +214,20 @@ def save_reward(epoch: int,
                f=os.path.join(saving_path, filename))
     
     print(f"Saved Reward Network Model: {filename}")
+
+
+def load_reward(reward_network: torch.nn.Module,
+                model_path: str) -> torch.nn.Module:
+    
+    if not isinstance(reward_network, torch.nn.Module):
+        raise TypeError("Input 'reward_network' in load_reward function must be torch neural network module.")
+    if not isinstance(model_path, str):
+        raise TypeError("Input 'model_path' in load_reward function must be a valid string path.")
+    
+    reward_network.load_state_dict(torch.load(model_path))
+    reward_network.eval()
+    
+    return reward_network
 
 
 def read_each_loader(configs: Config,
