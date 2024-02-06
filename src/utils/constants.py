@@ -39,9 +39,13 @@ ACTION_DENORMALIZED_LABEL_NAME = "action_label_denorm" # denormalized action vec
 ACTION_PREDICTION_NAME = "action_pred_norm" # mean of distribution
 ACTION_PREDICTION_DENORMALIZED_NAME = "action_pred_denorm" # x, y, z locations
 ACTION_PREDICTION_STD_NAME = "action_pred_std" # standard deviation
+ACTION_LABEL_LOGPROB_NAME = "action_label_logprob" # log probability of demonstration action
+ACTION_LABEL_ENTROPY_NAME = "action_label_entropy" # entropy of demonstration action
 ACTION_PREDICTION_LOGPROB_NAME = "action_pred_logprob" # log probability of action prediction
 ACTION_PREDICTION_ENTROPY_NAME = "action_pred_entropy" # entropy of action prediction
-ACTION_LABEL_LOGPROB_NAME = "action_label_logprob" # log probability of demonstration action
+ACTION_PREDICTION_AVG_LOGPROB_NAME = "action_pred_avg_logprob" # average log probability of actions
+REWARD_DEMONSTRATION_TRAJECTORY_NAME = "reward_demo_traj" # reward of demonstration trajectory
+REWARD_ROBOT_TRAJECTORY_NAME = "reward_robot_traj" # reward of robot estimated trajectory
 
 # column name to represent number index of the state in a trajectory
 STATE_NUMBER_COLUMN = "state_number"
