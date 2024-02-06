@@ -58,18 +58,14 @@ class Updater(object):
                            nu_factor: torch.Tensor) -> float:
         
         # max-entropy inverse reinforcement learning loss function (similar to guided cost learning)
-        loss = -(
-            torch.mean(demo_traj_reward) - \
-            (
-                torch.exp(nu_factor) * \
-                (
-                    torch.logsumexp(robot_traj_reward - log_probability,
-                                    dim=0,
-                                    keepdim=True) - \
-                    torch.log(torch.Tensor([len(robot_traj_reward)]))
-                )
-            )
-        )
+        loss = -torch.mean(demo_traj_reward) + \
+                    (torch.exp(nu_factor) * \
+                        (torch.logsumexp(robot_traj_reward - log_probability,
+                                         dim=0,
+                                         keepdim=True) - \
+                        torch.log(torch.Tensor([len(robot_traj_reward)]))
+                        )
+                    )
 
         return loss
 
