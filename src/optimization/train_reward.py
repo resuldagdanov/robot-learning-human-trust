@@ -17,7 +17,7 @@ from utils.dataset_loader import PolicyDatasetLoader
 
 from optimization.updater import Updater
 from optimization.functions import setup_config, get_directories, create_directories, save_reward, load_policy_from_path
-from optimization.functions import find_indices_of_trajectory_changes, get_estimated_rewards
+from optimization.functions import find_indices_of_trajectory_changes, get_estimated_rewards, trajectory_generation
 
 from models.policy_model import RobotPolicy
 from models.reward_model import RewardFunction
@@ -97,11 +97,14 @@ if __name__ == "__main__":
 
         print("================== Training Phase ==================")
         reward_network.train()
-        cummulative_train_loss = 0.0
+        demo_reward_train, samp_reward_train = 0.0, 0.0
+        N_train = len(trajectory_indices_train)
+        M_train = N_train
 
         # loop through each separate trajectory inside the training dataset
         for traj_start_index_train in range(len(trajectory_indices_train)):
 
+            # return demonstrator trajectories and expert reward predictions under currently training reward model
             traj_df, reward_values_demo_data, reward_values_estim_data, logprob_action_estim_avg = get_estimated_rewards(configs=configs,
                                                                                                                          updater_obj=updater_obj,
                                                                                                                          data_loader=all_train_data,
@@ -111,23 +114,43 @@ if __name__ == "__main__":
                                                                                                                          traj_start_index=traj_start_index_train,
                                                                                                                          is_inference_reward=False)
             
-            # calculate irl loss function value of the particilar trajectories
-            irl_train_loss = updater_obj.calculate_irl_loss(demo_traj_reward=reward_values_demo_data,
-                                                            robot_traj_reward=reward_values_estim_data,
-                                                            log_probability=logprob_action_estim_avg,
-                                                            nu_factor=nu_factor)
+            # first denormalized state vector and initial end-effector position of corresponding state vector
+            average_initial_state_denorm = traj_df[[
+                constants.STATE_DENORMALIZED_LABEL_NAME + f"_{i+1}" for i in range(len(all_train_data.state_norms))]].values[0]
+            initial_state_location = traj_df[[
+                constants.ACTION_DENORMALIZED_LABEL_NAME + f"_{i+1}" for i in range(len(all_train_data.action_norms))]].values[0]
             
-            # backward pass and optimization
-            updater_obj.run_reward_optimizer(irl_loss=irl_train_loss)
-
-            cummulative_train_loss += irl_train_loss.item()
+            # trajectory generation given the learned policy within initial state randomness
+            sample_traj_df, sample_action_logprobs, sample_reward_values = trajectory_generation(configs=configs,
+                                                                                                state_norms=all_train_data.state_norms,
+                                                                                                action_norms=all_train_data.action_norms,
+                                                                                                policy_network=policy_network,
+                                                                                                reward_network=reward_network,                                              
+                                                                                                average_initial_state_denorm=average_initial_state_denorm,
+                                                                                                initial_state_location=initial_state_location)
+            
+            # max-entropy inverse reinforcement learning loss function (similar to guided cost learning)
+            demo_reward_train += torch.mean(reward_values_demo_data)
+            samp_reward_train += updater_obj.calculate_sample_traj_loss(nu_factor=nu_factor,
+                                                                        robot_traj_reward=sample_reward_values,
+                                                                        log_probability=sample_action_logprobs)
         
+        # maximum entropy irl loss function for given trajectories
+        avg_demo_reward_train = demo_reward_train / N_train
+        avg_samp_reward_train = samp_reward_train / M_train
+        irl_train_loss = -avg_demo_reward_train + avg_samp_reward_train
+        
+        # backward pass and optimization only after all trajectories are processed
+        updater_obj.run_reward_optimizer(irl_loss=irl_train_loss)
+
         # calculate average training loss in the current epoch
-        avg_rf_train_loss_value = round(cummulative_train_loss / len(trajectory_indices_train), 5)
+        avg_rf_train_loss_value = round(irl_train_loss.item() / len(trajectory_indices_train), 5)
 
         print("================== Validation Phase ==================")
         reward_network.eval()
-        cummulative_val_loss = 0.0
+        demo_reward_val, samp_reward_val = 0.0, 0.0
+        N_val = len(trajectory_indices_valid)
+        M_val = N_val
 
         # freeze neural network parameters during validation
         with torch.no_grad():
@@ -141,14 +164,26 @@ if __name__ == "__main__":
                                                                                                                              trajectory_indices=trajectory_indices_valid,
                                                                                                                              traj_start_index=traj_start_index_valid,
                                                                                                                              is_inference_reward=True)
-                irl_valid_loss = updater_obj.calculate_irl_loss(demo_traj_reward=reward_values_demo_data,
-                                                                robot_traj_reward=reward_values_estim_data,
-                                                                log_probability=logprob_action_estim_avg,
-                                                                nu_factor=nu_factor)
-                cummulative_val_loss += irl_valid_loss.item()
+                average_initial_state_denorm = traj_df[[
+                    constants.STATE_DENORMALIZED_LABEL_NAME + f"_{i+1}" for i in range(len(all_validate_data.state_norms))]].values[0]
+                initial_state_location = traj_df[[
+                    constants.ACTION_DENORMALIZED_LABEL_NAME + f"_{i+1}" for i in range(len(all_validate_data.action_norms))]].values[0]
+                sample_traj_df, sample_action_logprobs, sample_reward_values = trajectory_generation(configs=configs,
+                                                                                                     state_norms=all_validate_data.state_norms,
+                                                                                                     action_norms=all_validate_data.action_norms,
+                                                                                                     policy_network=policy_network,
+                                                                                                     reward_network=reward_network,                                              
+                                                                                                     average_initial_state_denorm=average_initial_state_denorm,
+                                                                                                     initial_state_location=initial_state_location)
+                demo_reward_val += torch.mean(reward_values_demo_data)
+                samp_reward_val += updater_obj.calculate_sample_traj_loss(nu_factor=nu_factor,
+                                                                          robot_traj_reward=sample_reward_values,
+                                                                          log_probability=sample_action_logprobs)
+        avg_demo_reward_valid = demo_reward_val / N_val
+        avg_samp_reward_valid = samp_reward_val / M_val
+        irl_valid_loss = -avg_demo_reward_valid + avg_samp_reward_valid
         
-        # calculate average validation loss in the current epoch
-        avg_rf_val_loss_value = round(cummulative_val_loss / len(trajectory_indices_valid), 5)
+        avg_rf_val_loss_value = round(irl_valid_loss.item() / len(trajectory_indices_valid), 5)
 
         print(f"Epoch {epoch + 1}/{constants.RF_NUMBER_EPOCHS}, Batch Train Loss: {avg_rf_train_loss_value}, Batch Validation Loss: {avg_rf_val_loss_value}")
 
