@@ -459,7 +459,8 @@ def get_estimated_rewards(configs: Config,
                           policy_network: torch.nn.Module,
                           reward_network: torch.nn.Module,
                           trajectory_indices: List[int],
-                          traj_start_index: int) -> Tuple[torch.Tensor,
+                          traj_start_index: int) -> Tuple[pd.DataFrame,
+                                                          torch.Tensor,
                                                           torch.Tensor,
                                                           torch.Tensor]:
     
@@ -525,4 +526,4 @@ def get_estimated_rewards(configs: Config,
     reward_values_estimation_data = reward_network.estimate_reward(state_action=state_action_estim_tensor.float(),
                                                                    is_inference=False)
     
-    return reward_values_demonstration_data, reward_values_estimation_data, logprob_action_estim_avg_tensor
+    return data_traj_df, reward_values_demonstration_data, reward_values_estimation_data, logprob_action_estim_avg_tensor
