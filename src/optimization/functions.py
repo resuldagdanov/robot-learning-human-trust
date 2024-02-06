@@ -70,7 +70,7 @@ def create_directories(configs: Config,
     if not isinstance(configs, Config):
         raise TypeError("Input 'configs' in create_directories function must be an object of Config() class.")
     if not isinstance(results_path, str):
-        raise TypeError("Input 'parent_directory' in create_directories function must be a string.")
+        raise TypeError("Input 'results_path' in create_directories function must be a string.")
     
     policy_model_directory = os.path.join(results_path,
                                           "policy_network_params")
@@ -80,6 +80,34 @@ def create_directories(configs: Config,
     policy_saving_path = configs.model_saving_path(directory=policy_model_directory)
 
     return policy_saving_path
+
+
+def load_policy_from_path(policy_network: torch.nn.Module,
+                          results_path: str,
+                          policy_loading_folder_name: str,
+                          policy_params_name: str) -> torch.nn.Module:
+    
+    if not isinstance(policy_network, torch.nn.Module):
+        raise TypeError("Input 'policy_network' in load_policy_from_path function must be torch neural network module.")
+    if not isinstance(results_path, str):
+        raise TypeError("Input 'results_path' in load_policy_from_path function must be a string.")
+    if not isinstance(policy_loading_folder_name, str):
+        raise TypeError("Input 'policy_loading_folder_name' in load_policy_from_path function must be a string.")
+    if not isinstance(policy_params_name, str):
+        raise TypeError("Input 'policy_params_name' in load_policy_from_path function must be a string.")
+    
+    # location of the trained model parameters (make sure that the folder exists where model is trained priorly)
+    policy_model_folder_path = os.path.join(results_path,
+                                            "policy_network_params",
+                                            policy_loading_folder_name)
+    policy_model_path = os.path.join(policy_model_folder_path,
+                                     policy_params_name)
+    
+    # set trained parameters to neural network
+    policy_network = load_policy(policy_network=policy_network,
+                                 model_path=policy_model_path)
+    
+    return policy_network
 
 
 def save_policy(epoch: int,
@@ -423,3 +451,78 @@ def find_indices_of_trajectory_changes(dataset: torch.utils.data.Dataset) -> Lis
         previous_value = current_value
 
     return indices_of_changes
+
+
+def get_estimated_rewards(configs: Config,
+                          updater_obj: object,
+                          data_loader: torch.utils.data.Dataset,
+                          policy_network: torch.nn.Module,
+                          reward_network: torch.nn.Module,
+                          trajectory_indices: List[int],
+                          traj_start_index: int) -> Tuple[torch.Tensor,
+                                                          torch.Tensor,
+                                                          torch.Tensor]:
+    
+    if not isinstance(configs, Config):
+        raise TypeError("Input 'configs' in get_estimated_rewards function must be an instance of Config.")
+    if not isinstance(updater_obj, object):
+        raise TypeError("Input 'updater_obj' in get_estimated_rewards function must be an object of Updater class.")
+    if not isinstance(data_loader, torch.utils.data.Dataset):
+        raise TypeError("Input 'data_loader' in get_estimated_rewards function must be a torch data loader object.")
+    if not isinstance(policy_network, torch.nn.Module):
+        raise TypeError("Input 'policy_network' in get_estimated_rewards function must be a torch neural network module.")
+    if not isinstance(reward_network, torch.nn.Module):
+        raise TypeError("Input 'reward_network' in get_estimated_rewards function must be a torch neural network module.")
+    if not isinstance(trajectory_indices, list):
+        raise TypeError("Input 'trajectory_indices' in get_estimated_rewards function must be a list.")
+    if not isinstance(traj_start_index, int):
+        raise TypeError("Input 'traj_start_index' in get_estimated_rewards function must be an integer.")
+    
+    # get trajectory dataframe with estimated state and actions
+    data_traj_df = trajectory_estimation(configs=configs,
+                                        updater_obj=updater_obj,
+                                        data_loader=data_loader,
+                                        policy_network=policy_network,
+                                        trajectory_length=constants.TRAJECTORY_SIZE,
+                                        traj_start_index=trajectory_indices[traj_start_index],
+                                        is_inference=True)
+
+    # extract estimated and actual state and action values from the trajectory dataframe
+    norm_state_label_df = data_traj_df[[
+        f"{constants.STATE_NORMALIZED_LABEL_NAME}_{i}" for i in range(1, len(constants.STATE_COLUMNS) + 1)]]
+    norm_state_estim_df = data_traj_df[[
+        f"{constants.STATE_ESTIMATION_NORMALIZED_NAME}_{i}" for i in range(1, len(constants.STATE_COLUMNS) + 1)]]
+    norm_action_label_df = data_traj_df[[
+        f"{constants.ACTION_NORMALIZED_LABEL_NAME}_{i}" for i in range(1, len(constants.ACTION_COLUMNS) + 1)]]
+    norm_action_estim_df = data_traj_df[[
+        f"{constants.ACTION_PREDICTION_NAME}_{i}" for i in range(1, len(constants.ACTION_COLUMNS) + 1)]]
+
+    # get log probabilities of each predicted action in the trajectory and take average of log probabilities
+    logprob_action_estim_df = data_traj_df[[
+        f"{constants.ACTION_PREDICTION_LOGPROB_NAME}_{i}" for i in range(1, len(constants.ACTION_COLUMNS) + 1)]]
+    logprob_action_estim_avg_df = logprob_action_estim_df.mean(axis=1)
+
+    # concatenate states and actions in the trajectory for both estimations and demonstrations
+    state_action_label_df = pd.concat([norm_state_label_df, norm_action_label_df],
+                                      axis=1)
+    state_action_estim_df = pd.concat([norm_state_estim_df, norm_action_estim_df],
+                                      axis=1)
+    
+    # convert dataframes into tensor format to forward through neural network
+    state_action_label_tensor = torch.tensor(state_action_label_df.values,
+                                             dtype=torch.float64,
+                                             device=configs.device)
+    state_action_estim_tensor = torch.tensor(state_action_estim_df.values,
+                                             dtype=torch.float64,
+                                             device=configs.device)
+    logprob_action_estim_avg_tensor = torch.tensor(logprob_action_estim_avg_df.values,
+                                                   dtype=torch.float64,
+                                                   device=configs.device).unsqueeze(1)
+    
+    # forward propagation through neural network
+    reward_values_demonstration_data = reward_network.estimate_reward(state_action=state_action_label_tensor.float(),
+                                                                      is_inference=False)
+    reward_values_estimation_data = reward_network.estimate_reward(state_action=state_action_estim_tensor.float(),
+                                                                   is_inference=False)
+    
+    return reward_values_demonstration_data, reward_values_estimation_data, logprob_action_estim_avg_tensor
