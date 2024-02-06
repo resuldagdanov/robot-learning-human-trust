@@ -108,7 +108,8 @@ if __name__ == "__main__":
                                                                                                                          policy_network=policy_network,
                                                                                                                          reward_network=reward_network,
                                                                                                                          trajectory_indices=trajectory_indices_train,
-                                                                                                                         traj_start_index=traj_start_index_train)
+                                                                                                                         traj_start_index=traj_start_index_train,
+                                                                                                                         is_inference_reward=False)
             
             # calculate irl loss function value of the particilar trajectories
             irl_train_loss = updater_obj.calculate_irl_loss(demo_traj_reward=reward_values_demo_data,
@@ -138,7 +139,8 @@ if __name__ == "__main__":
                                                                                                                              policy_network=policy_network,
                                                                                                                              reward_network=reward_network,
                                                                                                                              trajectory_indices=trajectory_indices_valid,
-                                                                                                                             traj_start_index=traj_start_index_valid)
+                                                                                                                             traj_start_index=traj_start_index_valid,
+                                                                                                                             is_inference_reward=True)
                 irl_valid_loss = updater_obj.calculate_irl_loss(demo_traj_reward=reward_values_demo_data,
                                                                 robot_traj_reward=reward_values_estim_data,
                                                                 log_probability=logprob_action_estim_avg,
@@ -158,7 +160,7 @@ if __name__ == "__main__":
             save_reward(epoch=epoch,
                         reward_network=reward_network,
                         saving_path=reward_saving_path,
-                        loss_value_str=str(avg_rf_train_loss_value).replace(".", "_"))
+                        loss_value_str=str(abs(avg_rf_train_loss_value)).replace(".", "_"))
         else:
             early_stopping_counter += 1
         

@@ -543,7 +543,8 @@ def get_estimated_rewards(configs: Config,
                           policy_network: torch.nn.Module,
                           reward_network: torch.nn.Module,
                           trajectory_indices: List[int],
-                          traj_start_index: int) -> Tuple[pd.DataFrame,
+                          traj_start_index: int,
+                          is_inference_reward: bool) -> Tuple[pd.DataFrame,
                                                           torch.Tensor,
                                                           torch.Tensor,
                                                           torch.Tensor]:
@@ -562,6 +563,8 @@ def get_estimated_rewards(configs: Config,
         raise TypeError("Input 'trajectory_indices' in get_estimated_rewards function must be a list.")
     if not isinstance(traj_start_index, int):
         raise TypeError("Input 'traj_start_index' in get_estimated_rewards function must be an integer.")
+    if not isinstance(is_inference_reward, bool):
+        raise TypeError("Input 'is_inference_reward' in get_estimated_rewards function must be a boolean.")
     
     # get trajectory dataframe with estimated state and actions
     data_traj_df = trajectory_estimation(configs=configs,
@@ -606,8 +609,8 @@ def get_estimated_rewards(configs: Config,
     
     # forward propagation through neural network
     reward_values_demonstration_data = reward_network.estimate_reward(state_action=state_action_label_tensor.float(),
-                                                                      is_inference=False)
+                                                                      is_inference=is_inference_reward)
     reward_values_estimation_data = reward_network.estimate_reward(state_action=state_action_estim_tensor.float(),
-                                                                   is_inference=False)
+                                                                   is_inference=is_inference_reward)
     
     return data_traj_df, reward_values_demonstration_data, reward_values_estimation_data, logprob_action_estim_avg_tensor
