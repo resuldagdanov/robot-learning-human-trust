@@ -182,7 +182,7 @@ if __name__ == "__main__":
         avg_demo_reward_valid = demo_reward_val / N_val
         avg_samp_reward_valid = samp_reward_val / M_val
         irl_valid_loss = -avg_demo_reward_valid + avg_samp_reward_valid
-        
+
         avg_rf_val_loss_value = round(irl_valid_loss.item() / len(trajectory_indices_valid), 5)
 
         print(f"Epoch {epoch + 1}/{constants.RF_NUMBER_EPOCHS}, Batch Train Loss: {avg_rf_train_loss_value}, Batch Validation Loss: {avg_rf_val_loss_value}")
@@ -198,6 +198,11 @@ if __name__ == "__main__":
                         loss_value_str=str(abs(avg_rf_train_loss_value)).replace(".", "_"))
         else:
             early_stopping_counter += 1
+
+            save_reward(epoch=epoch,
+                        reward_network=reward_network,
+                        saving_path=reward_saving_path,
+                        loss_value_str=str(abs(avg_rf_train_loss_value)).replace(".", "_"))
         
         if early_stopping_counter >= configs.early_stopping_patience:
             print(f"Early stopping at epoch {epoch + 1} due to no improvement in validation loss!")

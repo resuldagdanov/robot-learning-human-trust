@@ -42,13 +42,13 @@ class Config(object):
         
         # learning rates
         self.policy_lr = 1e-3
-        self.reward_lr = 1e-3
+        self.reward_lr = 1e-2
 
         # 15% of the dataset will be used for validation
         self.validation_split = 0.15
 
         # patience for early stopping (number of epochs with no improvement on validation loss)
-        self.early_stopping_patience = 5
+        self.early_stopping_patience = 20
     
     def model_saving_path(self,
                           directory: str) -> str:

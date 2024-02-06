@@ -89,5 +89,5 @@ POLICY_LOADING_FOLDER = "Feb_05_2024-16_45_05" # year_month_day-hh_mm_ss NOTE: m
 POLICY_PARAMS_NAME = "policy_network_epoch_100_loss_0_30367.pt" # NOTE: make sure that file name exists
 
 # folder name where parameters are located ("results \\ reward_network_params \\ reward_loading_folder")
-REWARD_LOADING_FOLDER = "Feb_06_2024-11_47_16" # year_month_day-hh_mm_ss NOTE: make sure that folder name is correct
-REWARD_PARAMS_NAME = "reward_network_epoch_50_loss_1_90198.pt" # NOTE: make sure that file name exists
+REWARD_LOADING_FOLDER = "Feb_06_2024-21_16_26" # year_month_day-hh_mm_ss NOTE: make sure that folder name is correct
+REWARD_PARAMS_NAME = "reward_network_epoch_14_loss_0_032.pt" # NOTE: make sure that file name exists
