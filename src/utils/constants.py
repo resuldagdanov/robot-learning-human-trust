@@ -73,3 +73,13 @@ TARGET_LOCATION = [-0.36, 0.77, -ROBOT_BASE_HEIGHT] # meters NOTE: make sure the
 
 # number of training epoch for behavior cloning
 BC_NUMBER_EPOCHS = 100
+
+# number of training epoch for reward function
+RF_NUMBER_EPOCHS = 100
+
+# number of training epoch for IRL algorithm
+IRL_NUMBER_EPOCHS = 100
+
+# folder name where parameters are located ("results \\ policy_network_params \\ policy_leading_folder")
+POLICY_LOADING_FOLDER = "Feb_05_2024-16_45_05" # year_month_day-hh_mm_ss NOTE: make sure that folder name is correct
+POLICY_PARAMS_NAME = "policy_network_epoch_100_loss_0_30367.pt" # NOTE: make sure that file name exists
