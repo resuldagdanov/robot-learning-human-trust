@@ -620,8 +620,10 @@ def trajectory_generation(configs: Config,
                           state_norms: List[float],
                           action_norms: List[float],
                           policy_network: torch.nn.Module,
+                          reward_network: Union[torch.nn.Module, None],
                           average_initial_state_denorm: np.ndarray,
-                          initial_state_location: np.ndarray) -> pd.DataFrame:
+                          initial_state_location: np.ndarray) -> Tuple[pd.DataFrame,
+                                                                       Union[torch.Tensor, None]]:
     
     if not isinstance(configs, Config):
         raise TypeError("Input 'configs' in trajectory_generation function must be an instance of Config.")
@@ -631,6 +633,8 @@ def trajectory_generation(configs: Config,
         raise TypeError("Input 'action_norms' in trajectory_generation function must be a list.")
     if not isinstance(policy_network, torch.nn.Module):
         raise TypeError("Input 'policy_network' in trajectory_generation function must be a torch neural network module.")
+    if not isinstance(reward_network, (torch.nn.Module, type(None))):
+        raise TypeError("reward_network must be an instance of torch.nn.Module or None.")
     if not isinstance(average_initial_state_denorm, np.ndarray):
         raise TypeError("Input 'average_initial_state_denorm' in trajectory_generation function must be a numpy array.")
     if not isinstance(initial_state_location, np.ndarray):
@@ -690,4 +694,23 @@ def trajectory_generation(configs: Config,
         
         input_state_norm = torch.from_numpy(next_state_norm).unsqueeze(0).float().to(configs.device)
     
-    return created_trajectory_df
+    if reward_network is not None:
+
+        norm_state_estim_df = created_trajectory_df[[
+            f"{constants.STATE_ESTIMATION_NORMALIZED_NAME}_{i}" for i in range(1, len(state_norms) + 1)]]
+        norm_action_estim_df = created_trajectory_df[[
+            f"{constants.ACTION_PREDICTION_NAME}_{i}" for i in range(1, len(action_norms) + 1)]]
+        
+        state_action_estim_df = pd.concat([norm_state_estim_df, norm_action_estim_df],
+                                          axis=1)
+        state_action_estim_tensor = torch.tensor(state_action_estim_df.values.astype(np.float64),
+                                                 dtype=torch.float64,
+                                                 device=configs.device)
+        
+        reward_values_tensor = reward_network.estimate_reward(state_action=state_action_estim_tensor.float(),
+                                                              is_inference=True)
+    
+    else:
+        reward_values_tensor = None
+
+    return created_trajectory_df, reward_values_tensor
