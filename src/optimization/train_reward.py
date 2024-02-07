@@ -130,21 +130,20 @@ if __name__ == "__main__":
                                                                                                 initial_state_location=initial_state_location)
             
             # max-entropy inverse reinforcement learning loss function (similar to guided cost learning)
-            demo_reward_train += torch.mean(reward_values_demo_data)
+            demo_reward_train += torch.mean(reward_values_demo_data) / N_train
             samp_reward_train += updater_obj.calculate_sample_traj_loss(nu_factor=nu_factor,
                                                                         robot_traj_reward=sample_reward_values,
-                                                                        log_probability=sample_action_logprobs)
+                                                                        log_probability=sample_action_logprobs,
+                                                                        M_num=M_train)
         
         # maximum entropy irl loss function for given trajectories
-        avg_demo_reward_train = demo_reward_train / N_train
-        avg_samp_reward_train = samp_reward_train / M_train
-        irl_train_loss = -avg_demo_reward_train + avg_samp_reward_train
-        
-        # backward pass and optimization only after all trajectories are processed
-        updater_obj.run_reward_optimizer(irl_loss=irl_train_loss)
+        irl_train_loss = -demo_reward_train + samp_reward_train
 
         # calculate average training loss in the current epoch
         avg_rf_train_loss_value = round(irl_train_loss.item() / len(trajectory_indices_train), 5)
+
+        # backward pass and optimization only after all trajectories are processed
+        updater_obj.run_reward_optimizer(irl_loss=irl_train_loss)
 
         print("================== Validation Phase ==================")
         reward_network.eval()
@@ -175,13 +174,12 @@ if __name__ == "__main__":
                                                                                                      reward_network=reward_network,                                              
                                                                                                      average_initial_state_denorm=average_initial_state_denorm,
                                                                                                      initial_state_location=initial_state_location)
-                demo_reward_val += torch.mean(reward_values_demo_data)
+                demo_reward_val += torch.mean(reward_values_demo_data) / N_val
                 samp_reward_val += updater_obj.calculate_sample_traj_loss(nu_factor=nu_factor,
                                                                           robot_traj_reward=sample_reward_values,
-                                                                          log_probability=sample_action_logprobs)
-        avg_demo_reward_valid = demo_reward_val / N_val
-        avg_samp_reward_valid = samp_reward_val / M_val
-        irl_valid_loss = -avg_demo_reward_valid + avg_samp_reward_valid
+                                                                          log_probability=sample_action_logprobs,
+                                                                          M_num=M_val)
+        irl_valid_loss = -demo_reward_val + samp_reward_val
 
         avg_rf_val_loss_value = round(irl_valid_loss.item() / len(trajectory_indices_valid), 5)
 

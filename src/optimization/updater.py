@@ -71,15 +71,16 @@ class Updater(object):
     def calculate_sample_traj_loss(self,
                                    nu_factor: torch.Tensor,
                                    robot_traj_reward: torch.Tensor,
-                                   log_probability: torch.Tensor) -> float:
+                                   log_probability: torch.Tensor,
+                                   M_num: int) -> float:
         
         # loss value estimated from approximation of the background distribution (Z) in max-entropy IRL
         loss = torch.exp(nu_factor) * \
             (
-                torch.logsumexp(robot_traj_reward - log_probability,
+                torch.logsumexp(torch.mean(robot_traj_reward) - log_probability,
                                 dim=0,
                                 keepdim=True)) - \
-                torch.log(torch.Tensor([len(robot_traj_reward)])
+                torch.log(torch.Tensor([M_num])
             )
         
         return loss
