@@ -4,10 +4,10 @@ import torch
 class RewardFunction(torch.nn.Module):
 
     def __init__(self,
-                 state_action_size: int = 7,
-                 hidden_size: int = 64, 
-                 out_size: int = 1,
-                 device: str = "cpu") -> object:
+                 state_action_size: int=6,
+                 hidden_size: int=64, 
+                 out_size: int=1,
+                 device: str="cpu") -> object:
         
         super(RewardFunction,
               self).__init__()
@@ -20,7 +20,7 @@ class RewardFunction(torch.nn.Module):
                                             torch.nn.Linear(hidden_size, hidden_size, bias=True),
                                             torch.nn.ReLU())
         
-        # reward function output being a squashed (with Tanh) to result in a value between -1 and -1
+        # reward function output being a squashed (with Tanh) to result in a value between -1 and +1
         self.reward = torch.nn.Sequential(torch.nn.Linear(hidden_size, out_size, bias=True),
                                           torch.nn.Tanh())
         
@@ -35,13 +35,14 @@ class RewardFunction(torch.nn.Module):
     
     def estimate_reward(self,
                         state_action: torch.Tensor,
-                        is_inference: bool = False) -> torch.Tensor:
+                        is_inference: bool=False) -> torch.Tensor:
         
         if is_inference:
             self.eval()
-            # inference
+
             with torch.no_grad():
                 reward_value = self.forward(x=state_action)
+        
         else:
             reward_value = self.forward(x=state_action)
         
