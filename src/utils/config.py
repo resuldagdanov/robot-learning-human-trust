@@ -20,18 +20,17 @@ class Config(object):
     
     def parameters(self):
 
-        self.seed = 1234
+        self.seed = 1773
         self.device = "cpu"
 
         # neural network optimization parameters
-        self.state_size = 4
-        self.hidden_size = 32
+        self.state_size = 3
+        self.hidden_size = 16
         self.action_size = 3
         self.reward_size = 1
-        self.state_action_size = self.state_size + self.action_size
 
         # strategy for batch sampling
-        self.batch_size = 32
+        self.batch_size = 128
         self.data_shuffle = True
         self.num_workers = 0
 
@@ -42,7 +41,9 @@ class Config(object):
         
         # learning rates
         self.policy_lr = 1e-3
-        self.reward_lr = 1e-2
+        self.reward_lr = 1e-4
+        self.policy_scheduler_gamma = 0.9
+        self.reward_scheduler_gamma = 0.9
 
         # 15% of the dataset will be used for validation
         self.validation_split = 0.15
