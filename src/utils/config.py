@@ -37,11 +37,14 @@ class Config(object):
         # min-max log standard deviations for policy network output
         self.policy_log_std_min = -14 # exp(11.0) = 0.0
         self.policy_log_std_max = 1.4 # exp(1.1) = 4.0
-        self.policy_log_std_init = 0.0 # exp(0.0) = 1.0
         
         # learning rates
         self.policy_lr = 1e-3
         self.reward_lr = 1e-4
+
+        # optimizer scheduler parameters
+        self.policy_scheduler_step_size = 1000
+        self.reward_scheduler_step_size = 1000
         self.policy_scheduler_gamma = 0.9
         self.reward_scheduler_gamma = 0.9
 
