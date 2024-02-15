@@ -2,6 +2,7 @@ import torch
 
 from typing import Tuple
 
+
 class RobotPolicy(torch.nn.Module):
 
     def __init__(self,
@@ -51,12 +52,9 @@ class RobotPolicy(torch.nn.Module):
     
     def estimate_action(self,
                         state: torch.Tensor,
-                        is_policy_inference: bool=False) -> Tuple[torch.Tensor,
-                                                                  torch.Tensor,
-                                                                  torch.Tensor,
-                                                                  torch.Tensor,
-                                                                  torch.Tensor,
-                                                                  torch.distributions.Normal]:
+                        is_policy_inference: bool = False) -> Tuple[torch.Tensor,
+                                                                    torch.Tensor,
+                                                                    torch.Tensor]:
         
         # forward pass to get mean and std of Gaussian distribution
         if is_policy_inference:
@@ -88,4 +86,4 @@ class RobotPolicy(torch.nn.Module):
         # squashed (with tanh) action [-1, 1]
         action = torch.tanh(pi_action)
         
-        return action, action_log_prob
+        return action, action_std, action_log_prob
