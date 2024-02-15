@@ -1,15 +1,15 @@
 import torch
 
+from typing import Tuple
 
 class RobotPolicy(torch.nn.Module):
 
     def __init__(self,
-                 state_size: int = 4,
-                 hidden_size: int = 64, 
+                 state_size: int = 3,
+                 hidden_size: int = 64,
                  out_size: int = 3,
                  log_std_min: float = -14,
                  log_std_max: float = 1.4,
-                 log_std_init: float = 0.0,
                  device: str = "cpu") -> object:
         
         super(RobotPolicy,
@@ -25,91 +25,67 @@ class RobotPolicy(torch.nn.Module):
                                             torch.nn.Linear(hidden_size, hidden_size, bias=True),
                                             torch.nn.ReLU())
         
-        # action policy of squashed (with tanh) Gaussian distribution
-        self.policy_mu = torch.nn.Sequential(torch.nn.Linear(hidden_size, out_size, bias=True),
-                                             torch.nn.Tanh())
-        
-        # log standard deviation is the same size as action vector
-        self.policy_log_std = torch.nn.Parameter(torch.full((1, out_size),
-                                                            float(log_std_init)))
-        self.apply(self.init_weights)
+        # mean and log standard deviation of Gaussian policy
+        self.policy_mu = torch.nn.Linear(hidden_size, out_size, bias=True)
+        self.policy_logstd = torch.nn.Linear(hidden_size, out_size, bias=True)
     
     def forward(self,
-                x: torch.Tensor) -> (torch.Tensor,
-                                     torch.Tensor):
+                x: torch.Tensor) -> Tuple[torch.Tensor,
+                                          torch.Tensor]:
         
         # propagate through policy network backbone
         x = self.backbone(x)
-        action_mu = self.policy_mu(x)
 
-        # action_log_std = self.policy_log_std(x)
-        action_log_std = self.policy_log_std.expand_as(action_mu)
+        # mean and log standard deviation of Gaussian policy
+        action_mu = self.policy_mu(x)
+        action_log_std = self.policy_logstd(x)
         
         # constrain logits to reasonable values to match with demonstration distribution variance
-        action_log_std = torch.clamp(input=action_log_std,
-                                     min=self.log_std_min,
-                                     max=self.log_std_max)
-        action_std = torch.exp(action_log_std)
+        act_log_std = torch.clamp(input=action_log_std,
+                                  min=self.log_std_min,
+                                  max=self.log_std_max)
+        action_std = torch.exp(act_log_std)
         
         # deterministic action resembling mean of Gaussian distribution
         return action_mu, action_std
-
-    def calculate_distribution(self,
-                               action_mu: torch.Tensor,
-                               action_std: torch.Tensor) -> (torch.Tensor,
-                                                             torch.distributions.Normal):
-        
-        # action distibution is assumed to be Gaussian with mean and std
-        action_distribution = torch.distributions.Normal(action_mu,
-                                                         action_std)
-        
-        # log probability of given policy action
-        log_probability = action_distribution.log_prob(value=action_mu)
-
-        # reparameterization trick (comment this to output deterministic action)
-        # sampled_action = action_distribution.rsample()
-        
-        return log_probability, action_distribution
-    
-    def init_weights(self,
-                     hidden_layer: torch.nn.Linear,
-                     gain: float=1.0) -> None:
-        
-        # xavier_normal_ is used when activation functions is tanh or sigmoid
-        # orthogonal_ is used when activation functions is relu
-        if isinstance(hidden_layer, torch.nn.Linear):
-            torch.nn.init.xavier_normal_(hidden_layer.weight,
-                                         gain=gain)
-            hidden_layer.bias.data.fill_(0.0)
-        else:
-            pass
     
     def estimate_action(self,
                         state: torch.Tensor,
-                        is_inference: bool=False) -> (torch.Tensor,
-                                                      torch.Tensor,
-                                                      torch.Tensor,
-                                                      torch.Tensor,
-                                                      torch.Tensor,
-                                                      torch.distributions.Normal):
+                        is_policy_inference: bool=False) -> Tuple[torch.Tensor,
+                                                                  torch.Tensor,
+                                                                  torch.Tensor,
+                                                                  torch.Tensor,
+                                                                  torch.Tensor,
+                                                                  torch.distributions.Normal]:
         
-        # forward pass to get mean of Gaussian distribution
-        if is_inference:
+        # forward pass to get mean and std of Gaussian distribution
+        if is_policy_inference:
             self.eval()
-            # inference
+            
             with torch.no_grad():
-                action_pred, action_std = self.forward(x=state)
+                action_mu, action_std = self.forward(x=state)
+        
         else:
-            action_pred, action_std = self.forward(x=state)
-
-        action_log_prob, action_dist = self.calculate_distribution(action_mu=action_pred,
-                                                                   action_std=action_std)
+            action_mu, action_std = self.forward(x=state)
         
+        # pre-squashed action distibution is assumed to be normal with mean and std
+        action_distibution = torch.distributions.Normal(loc=action_mu,
+                                                        scale=action_std)
+        
+        if not is_policy_inference:
+            # sampling using reparameterization trick
+            pi_action = action_distibution.rsample()
+        else:
+            # deterministic action
+            pi_action = action_mu
+        
+        # log probability of the action
+        action_log_prob = action_distibution.log_prob(value=pi_action).sum(axis=-1)
+
         # policy distribution entropy
-        action_entropy = action_dist.entropy().mean()
-
-        # concatenate mean and standard deviation to output
-        action_mu_and_std = torch.cat((action_pred, action_std),
-                                      dim=-1)
+        action_entropy = action_distibution.entropy().mean()
         
-        return action_pred, action_std, action_log_prob, action_entropy, action_mu_and_std, action_dist
+        # squashed (with tanh) action [-1, 1]
+        action = torch.tanh(pi_action)
+        
+        return action, action_log_prob
