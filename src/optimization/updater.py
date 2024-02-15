@@ -1,6 +1,6 @@
-import torch
-
 import numpy as np
+
+import torch
 
 
 class Updater(object):
@@ -76,12 +76,48 @@ class Updater(object):
         
         # loss value estimated from approximation of the background distribution (Z) in max-entropy IRL
         loss = torch.exp(nu_factor) * \
-            (
-                torch.logsumexp(torch.mean(robot_traj_reward) - log_probability,
-                                dim=0,
-                                keepdim=True)) - \
-                torch.log(torch.Tensor([M_num])
-            )
+            (torch.logsumexp(torch.mean(robot_traj_reward) - log_probability,
+                             dim=0,
+                             keepdim=True)) - \
+            torch.log(torch.Tensor([M_num]))
+        
+        return loss
+    
+    def calculate_partition_function(self,
+                                     nu_factor: torch.Tensor,
+                                     robot_traj_reward: torch.Tensor,
+                                     log_probability: torch.Tensor) -> float:
+        
+        # loss value estimated from approximation of the background distribution (Z) in max-entropy IRL
+        loss = torch.exp(nu_factor) * \
+            (torch.exp(torch.mean(robot_traj_reward)) / torch.prod(torch.exp(log_probability)))
+        
+        return loss
+
+    def calculate_max_margin_loss(self,
+                                  demo_traj_reward: torch.Tensor,
+                                  robot_traj_reward: torch.Tensor,
+                                  nu_factor: torch.Tensor) -> float:
+        
+        # max-margin loss function
+        loss = torch.max(torch.zeros_like(demo_traj_reward),
+                         robot_traj_reward[:-1] - demo_traj_reward + 1)
+        
+        return torch.sum(loss)
+    
+    def calculate_policy_gradient_loss(self,
+                                       cumulative_log_probs: torch.Tensor,
+                                       advantages: torch.Tensor,
+                                       entropy_weight: int = 1e-2):
+        
+        # negative log-likelihood multiplied by cummulative rewards (advantage values)
+        weighted_log_probs = cumulative_log_probs * advantages
+        policy_loss = - torch.mean(weighted_log_probs, dim=0)
+
+        # entropy regularization
+        entropy = - torch.mean(torch.exp(cumulative_log_probs) * cumulative_log_probs, dim=0)
+        
+        loss = policy_loss + entropy_weight * entropy
         
         return loss
 
@@ -91,18 +127,26 @@ class Updater(object):
                                                  lr=self.configs.policy_lr)
         self.reward_optimizer = torch.optim.Adam(self.reward_network.parameters(),
                                                  lr=self.configs.reward_lr)
+        
+        self.policy_scheduler = torch.optim.lr_scheduler.StepLR(self.policy_optimizer,
+                                                                step_size=self.configs.policy_scheduler_step_size,
+                                                                gamma=self.configs.policy_scheduler_gamma)
+        self.reward_scheduler = torch.optim.lr_scheduler.StepLR(self.reward_optimizer,
+                                                                step_size=self.configs.reward_scheduler_step_size,
+                                                                gamma=self.configs.reward_scheduler_gamma)
     
     def run_policy_optimizer(self,
-                             bc_loss: torch.Tensor) -> None:
+                             policy_loss: torch.Tensor) -> None:
         
         self.policy_optimizer.zero_grad()
-        bc_loss.backward()
+        policy_loss.backward()
         self.policy_optimizer.step()
+        self.policy_scheduler.step()
     
     def run_reward_optimizer(self,
-                             irl_loss: torch.Tensor) -> None:
+                             reward_loss: torch.Tensor) -> None:
         
         self.reward_optimizer.zero_grad()
-        irl_loss.backward()
+        reward_loss.backward()
         self.reward_optimizer.step()
-    
+        self.reward_scheduler.step()
