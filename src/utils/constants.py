@@ -1,18 +1,22 @@
 # state vector normalization parameters
-MAX_DISTANCE_TO_OBJECT = 2.0 # meters
-MAX_DISTANCE_TO_TARGET = 2.0 # meters
-MAX_DISTANCE_TO_START = 2.0 # meters
-MAX_DISTANCE_TO_GROUND = 2.0 # meters
+MAX_DISTANCE_TO_OBJECT = 3.0 # meters
+MAX_DISTANCE_TO_TARGET = 3.0 # meters
+MAX_DISTANCE_TO_GROUND = 3.0 # meters
 
 # action vector normalization parameters
 END_EFFECTOR_POSITION_RANGE_X = [-2.0, 2.0] # meters
 END_EFFECTOR_POSITION_RANGE_Y = [-2.0, 2.0] # meters
-END_EFFECTOR_POSITION_RANGE_Z = [-2.0, 2.0] # meters
+END_EFFECTOR_POSITION_RANGE_Z = [0.00, 2.0] # meters
+
+# initial state generation parameters (normalized)
+INITIAL_STATE_MEANS = [0.175, 0.5, 0.3]
+INITIAL_STATE_VARIANCES = [0.075, 0.05, 0.1]
+INITIAL_STATE_MIN_RANGES = [0.10, 0.45, 0.20]
+INITIAL_STATE_MAX_RANGES = [0.25, 0.55, 0.40]
 
 # state vector column names
 STATE_COLUMNS = ["distance_to_object",
                  "distance_to_target",
-                 "distance_to_start",
                  "distance_to_ground"]
 
 # action vector column names
@@ -60,7 +64,7 @@ GAUSSIAN_NLL_LOSS_COLUMN = "gnll_loss"
 ACTION_LABEL_SHIFT_IDX = -1
 
 # number of state action pairs to discritize in each trajectory
-TRAJECTORY_SIZE = 30 # equally spaced number of points
+TRAJECTORY_SIZE = 20 # equally spaced number of points
 
 # collected dataset folder name in ("dataset \\ human_demonstrations \\ collection_date")
 DEMO_COLLECTION_DATE = "2024_01_23" # year_month_day NOTE: make sure that data date is correct
@@ -79,15 +83,15 @@ TARGET_LOCATION = [-0.36, 0.77, -ROBOT_BASE_HEIGHT] # meters NOTE: make sure the
 BC_NUMBER_EPOCHS = 100
 
 # number of training epoch for reward function
-RF_NUMBER_EPOCHS = 100
+RF_NUMBER_EPOCHS = 200
 
 # number of training epoch for IRL algorithm
 IRL_NUMBER_EPOCHS = 100
 
 # folder name where parameters are located ("results \\ policy_network_params \\ policy_loading_folder")
-POLICY_LOADING_FOLDER = "Feb_05_2024-16_45_05" # year_month_day-hh_mm_ss NOTE: make sure that folder name is correct
-POLICY_PARAMS_NAME = "policy_network_epoch_100_loss_0_30367.pt" # NOTE: make sure that file name exists
+POLICY_LOADING_FOLDER = "Feb_10_2024-13_37_23" # year_month_day-hh_mm_ss NOTE: make sure that folder name is correct
+POLICY_PARAMS_NAME = "policy_network_epoch_91_loss_0_263936078006571.pt" # NOTE: make sure that file name exists
 
 # folder name where parameters are located ("results \\ reward_network_params \\ reward_loading_folder")
-REWARD_LOADING_FOLDER = "Feb_06_2024-21_16_26" # year_month_day-hh_mm_ss NOTE: make sure that folder name is correct
-REWARD_PARAMS_NAME = "reward_network_epoch_14_loss_0_032.pt" # NOTE: make sure that file name exists
+REWARD_LOADING_FOLDER = "Feb_09_2024-00_09_46" # year_month_day-hh_mm_ss NOTE: make sure that folder name is correct
+REWARD_PARAMS_NAME = "reward_network_epoch_200_loss_441_05668.pt" # NOTE: make sure that file name exists

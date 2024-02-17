@@ -20,6 +20,7 @@ class RobotEnvironment(object):
 
     def __init__(self) -> object:
         
+        # state and action normalization parameters
         self.state_norms = [constants.MAX_DISTANCE_TO_OBJECT,
                             constants.MAX_DISTANCE_TO_TARGET,
                             constants.MAX_DISTANCE_TO_GROUND]
@@ -27,16 +28,16 @@ class RobotEnvironment(object):
                              constants.END_EFFECTOR_POSITION_RANGE_Y,
                              constants.END_EFFECTOR_POSITION_RANGE_Z]
         
-        self.max_steps = constants.TRAJECTORY_SIZE
-        self.state_counter = 0
-        
         # define initial state means and variances
-        self.initial_state_means = [0.175, 0.5, 0.3]
-        self.initial_state_variances = [0.075, 0.05, 0.1]
+        self.initial_state_means = constants.INITIAL_STATE_MEANS
+        self.initial_state_variances = constants.INITIAL_STATE_VARIANCES
 
         # define specific ranges for squashing
-        self.min_ranges = [0.10, 0.45, 0.20]
-        self.max_ranges = [0.25, 0.55, 0.40]
+        self.min_ranges = constants.INITIAL_STATE_MIN_RANGES
+        self.max_ranges = constants.INITIAL_STATE_MAX_RANGES
+
+        self.max_steps = constants.TRAJECTORY_SIZE
+        self.state_counter = 0
 
         self.reward_network = None
         self.is_reward_inference = True
@@ -73,7 +74,7 @@ class RobotEnvironment(object):
                                     next_state_denorm=next_state_denorm)
 
         return next_state, reward, done
-
+    
     def get_reward(self,
                    state: torch.Tensor) -> torch.Tensor:
         
@@ -148,3 +149,27 @@ class RobotEnvironment(object):
                            reward_network: torch.nn.Module) -> None:
         
         self.reward_network = reward_network
+    
+    def calculate_continuous_reward(self,
+                                    state_vector: torch.Tensor) -> torch.Tensor:
+        
+        # extract state values
+        distance_to_obstacle, distance_to_target, distance_to_ground = state_vector
+
+        # define scaling factors based on the problem requirements
+        scale_obstacle = 0.1
+        scale_target = 0.5
+        scale_ground = 0.2
+
+        # calculate individual rewards
+        reward_obstacle = torch.exp(-scale_obstacle * distance_to_obstacle)
+        
+        # use negative distance as the reward term for the target
+        reward_target = -distance_to_target * scale_target
+        
+        reward_ground = torch.exp(-scale_ground * distance_to_ground)
+
+        # combine individual rewards into a total reward
+        total_reward = reward_target * reward_ground / (reward_obstacle + 1e-8)
+
+        return total_reward.unsqueeze(0)
