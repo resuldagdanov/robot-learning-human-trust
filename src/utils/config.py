@@ -19,34 +19,36 @@ class Config(object):
         print("Current Time: ", self.time_info)
     
     def parameters(self):
-
-        self.seed = 1773
+        
+        self.seed = 42
         self.device = "cpu"
 
         # neural network optimization parameters
         self.state_size = 3
-        self.hidden_size = 16
+        self.hidden_size = 32
         self.action_size = 3
         self.reward_size = 1
 
         # strategy for batch sampling
-        self.batch_size = 128
+        self.batch_size_policy = 32
+        self.batch_size_reward = 128
         self.data_shuffle = True
         self.num_workers = 0
 
         # min-max log standard deviations for policy network output
-        self.policy_log_std_min = -14 # exp(11.0) = 0.0
-        self.policy_log_std_max = 1.4 # exp(1.1) = 4.0
+        self.policy_log_std_min = -24 # exp(-24.0) = 0.0
+        self.policy_log_std_max = 2.4 # exp(2.4) = 11.0
         
         # learning rates
-        self.policy_lr = 1e-3
-        self.reward_lr = 1e-4
-
+        self.policy_lr = 1e-4
+        self.reward_lr = 5e-4
+        
         # optimizer scheduler parameters
         self.policy_scheduler_step_size = 1000
         self.reward_scheduler_step_size = 1000
         self.policy_scheduler_gamma = 0.9
         self.reward_scheduler_gamma = 0.9
+        self.reward_weight_decay = 1e-4
 
         # 15% of the dataset will be used for validation
         self.validation_split = 0.15
