@@ -38,8 +38,6 @@ class RewardFunction(torch.nn.Module):
                         is_reward_inference: bool = False) -> torch.Tensor:
         
         if is_reward_inference:
-            self.eval()
-
             with torch.no_grad():
                 value = self.forward(x=state)
         
