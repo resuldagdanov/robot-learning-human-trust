@@ -30,7 +30,8 @@ class Updater(object):
     def multivariate_gaussian_nll_loss(self,
                                        action_true: torch.FloatTensor,
                                        action_pred_mu: torch.FloatTensor,
-                                       action_log_std: torch.FloatTensor) -> torch.Tensor:
+                                       action_log_std: torch.FloatTensor,
+                                       std_weight: float = 1.0) -> torch.Tensor:
         
         # size of action space
         n_dims = action_true.shape[1]
@@ -45,7 +46,7 @@ class Updater(object):
         log_2_pi = 0.5 * n_dims * np.log(2 * np.pi)
         
         # multivariate Gaussian negative log-likelihood loss function
-        log_likelihood = mse + sigma_trace + log_2_pi
+        log_likelihood = mse + log_2_pi + std_weight * sigma_trace
 
         # batch loss summed to apply different weights to different samples in the future
         total_loss = torch.sum(log_likelihood, dim=0)
