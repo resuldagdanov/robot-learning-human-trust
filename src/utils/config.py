@@ -48,6 +48,7 @@ class Config(object):
         self.reward_scheduler_step_size = 1000
         self.policy_scheduler_gamma = 0.9
         self.reward_scheduler_gamma = 0.9
+        self.policy_weight_decay = 1e-4
         self.reward_weight_decay = 1e-4
 
         # 15% of the dataset will be used for validation

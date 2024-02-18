@@ -127,7 +127,8 @@ class Updater(object):
     def initialize_optimizers(self) -> None:
         
         self.policy_optimizer = torch.optim.Adam(self.policy_network.parameters(),
-                                                 lr=self.configs.policy_lr)
+                                                 lr=self.configs.policy_lr,
+                                                 weight_decay=self.configs.policy_weight_decay)
         self.reward_optimizer = torch.optim.Adam(self.reward_network.parameters(),
                                                  lr=self.configs.reward_lr,
                                                  weight_decay=self.configs.reward_weight_decay)
