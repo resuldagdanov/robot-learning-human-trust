@@ -3,7 +3,7 @@ import pandas as pd
 
 import torch
 
-from typing import List
+from typing import List, Tuple
 from torch.utils.data import Dataset
 from utils import common, constants
 
@@ -18,9 +18,7 @@ class PolicyDatasetLoader(Dataset):
 
         self.state_norms = [constants.MAX_DISTANCE_TO_OBJECT,
                             constants.MAX_DISTANCE_TO_TARGET,
-                            constants.MAX_DISTANCE_TO_START,
                             constants.MAX_DISTANCE_TO_GROUND]
-        
         self.action_norms = [constants.END_EFFECTOR_POSITION_RANGE_X,
                              constants.END_EFFECTOR_POSITION_RANGE_Y,
                              constants.END_EFFECTOR_POSITION_RANGE_Z]
@@ -44,10 +42,10 @@ class PolicyDatasetLoader(Dataset):
         return self.dataset_size
     
     def __getitem__(self,
-                    idx: int) -> (torch.FloatTensor,
-                                  torch.FloatTensor,
-                                  int,
-                                  int):
+                    idx: int) -> Tuple[torch.FloatTensor,
+                                       torch.FloatTensor,
+                                       int,
+                                       int]:
         
         # get normalized state and action vectors as dataframe
         sample_states = self.demo_state_data[self.state_columns].iloc[idx].astype(np.float64)
@@ -65,8 +63,8 @@ class PolicyDatasetLoader(Dataset):
     
     def load_data(self,
                   json_paths: List[str],
-                  column_names: List[str]) -> (pd.DataFrame,
-                                               pd.DataFrame):
+                  column_names: List[str]) -> Tuple[pd.DataFrame,
+                                                    pd.DataFrame]:
         
         state_dfs, action_dfs = [], []
 
@@ -123,8 +121,6 @@ class PolicyDatasetLoader(Dataset):
         trajectory_df = self.correct_distance_to_object(df=trajectory_df) if "distance_to_object" in self.state_columns else trajectory_df
         # manually update distance to the target location as state vector is not realiable, but action vector is reliable
         trajectory_df = self.correct_distance_to_target(df=trajectory_df) if "distance_to_target" in self.state_columns else trajectory_df
-        # manually update distance to the start location as state vector is not realiable, but action vector is reliable
-        trajectory_df = self.correct_distance_to_start(df=trajectory_df) if "distance_to_start" in self.state_columns else trajectory_df
         # manually correct distance to the ground as state vector is not realiable, but action vector is reliable
         trajectory_df = self.correct_distance_to_ground(df=trajectory_df) if "distance_to_ground" in self.state_columns else trajectory_df
         
@@ -132,6 +128,7 @@ class PolicyDatasetLoader(Dataset):
     
     def correct_distance_to_object(self,
                                    df: pd.DataFrame) -> pd.DataFrame:
+        
         # correct Euclideandistance to the object given constant location of the object (obstacle)
         distances = np.linalg.norm(np.array(constants.OBSTACLE_LOCATION) - np.array(df[self.action_columns],
                                                                                     dtype=np.float64), axis=1)
@@ -150,29 +147,11 @@ class PolicyDatasetLoader(Dataset):
 
         return df
     
-    def correct_distance_to_start(self,
-                                  df: pd.DataFrame) -> pd.DataFrame:
-        
-        # initialize the state vector (normalized) from initial state value which is known
-        state_0_idx = 0
-
-        # initial position (x, y, z w.r.t robot base) is constant throughout the trajectory
-        initial_state_location = np.array(df.iloc[state_0_idx][self.action_columns].values,
-                                          dtype=np.float64)
-        
-        # calculate the Euclidean distance for each row
-        distances = np.linalg.norm(initial_state_location - np.array(df[self.action_columns],
-                                                                     dtype=np.float64), axis=1)
-        # correct distance to the start
-        df[self.state_columns[2]] = distances
-
-        return df
-    
     def correct_distance_to_ground(self,
                                    df: pd.DataFrame) -> pd.DataFrame:
         
         # correct distance to the ground given the base height of the robot
         distances = df[self.action_columns[2]] + constants.ROBOT_BASE_HEIGHT
-        df[self.state_columns[3]] = distances
+        df[self.state_columns[2]] = distances
 
         return df
