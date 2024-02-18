@@ -7,10 +7,10 @@ class RobotPolicy(torch.nn.Module):
 
     def __init__(self,
                  state_size: int = 3,
-                 hidden_size: int = 64,
+                 hidden_size: int = 32,
                  out_size: int = 3,
-                 log_std_min: float = -14,
-                 log_std_max: float = 1.4,
+                 log_std_min: float = -24,
+                 log_std_max: float = 2.4,
                  device: str = "cpu") -> object:
         
         super(RobotPolicy,
@@ -22,8 +22,6 @@ class RobotPolicy(torch.nn.Module):
 
         # policy network backbone linear layers
         self.backbone = torch.nn.Sequential(torch.nn.Linear(state_size, hidden_size, bias=True),
-                                            torch.nn.ReLU(),
-                                            torch.nn.Linear(hidden_size, hidden_size, bias=True),
                                             torch.nn.ReLU())
         
         # mean and log standard deviation of Gaussian policy
@@ -52,14 +50,14 @@ class RobotPolicy(torch.nn.Module):
     
     def estimate_action(self,
                         state: torch.Tensor,
-                        is_policy_inference: bool = False) -> Tuple[torch.Tensor,
-                                                                    torch.Tensor,
-                                                                    torch.Tensor]:
+                        is_policy_inference: bool = False,
+                        is_deterministic: bool = True) -> Tuple[torch.Tensor,
+                                                                torch.Tensor,
+                                                                torch.Tensor,
+                                                                torch.Tensor]:
         
         # forward pass to get mean and std of Gaussian distribution
         if is_policy_inference:
-            self.eval()
-            
             with torch.no_grad():
                 action_mu, action_std = self.forward(x=state)
         
@@ -70,12 +68,12 @@ class RobotPolicy(torch.nn.Module):
         action_distibution = torch.distributions.Normal(loc=action_mu,
                                                         scale=action_std)
         
-        if not is_policy_inference:
-            # sampling using reparameterization trick
-            pi_action = action_distibution.rsample()
-        else:
+        if is_deterministic:
             # deterministic action
             pi_action = action_mu
+        else:
+            # sampling using reparameterization trick
+            pi_action = action_distibution.rsample()
         
         # log probability of the action
         action_log_prob = action_distibution.log_prob(value=pi_action).sum(axis=-1)
@@ -83,7 +81,7 @@ class RobotPolicy(torch.nn.Module):
         # policy distribution entropy
         action_entropy = action_distibution.entropy().mean()
         
-        # squashed (with tanh) action [-1, 1]
+        # squashed (with Tanh) action [-1, 1]
         action = torch.tanh(pi_action)
-        
-        return action, action_std, action_log_prob
+
+        return action, action_std, action_log_prob, action_entropy
