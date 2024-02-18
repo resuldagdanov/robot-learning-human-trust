@@ -28,28 +28,29 @@ class Updater(object):
         return batch_loss
     
     def multivariate_gaussian_nll_loss(self,
-                                       y_true: torch.FloatTensor,
-                                       y_pred: torch.FloatTensor) -> float:
+                                       action_true: torch.FloatTensor,
+                                       action_pred_mu: torch.FloatTensor,
+                                       action_log_std: torch.FloatTensor) -> torch.Tensor:
         
         # size of action space
-        n_dims = int(int(y_pred.shape[1]) / 2)
-        
-        mu = y_pred[:, 0:n_dims]
-        log_sigma = y_pred[:, n_dims:]
+        n_dims = action_true.shape[1]
         
         # mean squared error given mean and standard deviation
-        mse = 0.5 * torch.sum(torch.square((y_true - mu) / torch.exp(log_sigma)),
-                              axis=1)
+        mse = 0.5 * torch.sum(torch.square((action_true - action_pred_mu) / torch.exp(action_log_std)),
+                              dim=1)
         # sum of predicted log standard deviations to penalize higher uncertainties in predictions
-        sigma_trace = torch.sum(log_sigma,
-                                axis=1)
+        sigma_trace = torch.sum(action_log_std,
+                                dim=1)
         # constant term related to the natural logarithm of 2 pi
         log_2_pi = 0.5 * n_dims * np.log(2 * np.pi)
         
         # multivariate Gaussian negative log-likelihood loss function
-        log_likelihood = mse + sigma_trace # + log_2_pi
+        log_likelihood = mse + sigma_trace + log_2_pi
 
-        return torch.mean(log_likelihood)
+        # batch loss summed to apply different weights to different samples in the future
+        total_loss = torch.sum(log_likelihood, dim=0)
+
+        return total_loss
     
     def calculate_irl_loss(self,
                            demo_traj_reward: torch.Tensor,
@@ -108,16 +109,17 @@ class Updater(object):
     def calculate_policy_gradient_loss(self,
                                        cumulative_log_probs: torch.Tensor,
                                        advantages: torch.Tensor,
-                                       entropy_weight: int = 1e-2):
+                                       entropy: torch.Tensor,
+                                       entropy_weight: int = 1e-2) -> torch.Tensor:
         
         # negative log-likelihood multiplied by cummulative rewards (advantage values)
         weighted_log_probs = cumulative_log_probs * advantages
         policy_loss = - torch.mean(weighted_log_probs, dim=0)
 
         # entropy regularization
-        entropy = - torch.mean(torch.exp(cumulative_log_probs) * cumulative_log_probs, dim=0)
-        
-        loss = policy_loss + entropy_weight * entropy
+        entropy_loss = - entropy_weight * torch.mean(entropy, dim=0)
+
+        loss = policy_loss + entropy_loss
         
         return loss
 
@@ -126,7 +128,8 @@ class Updater(object):
         self.policy_optimizer = torch.optim.Adam(self.policy_network.parameters(),
                                                  lr=self.configs.policy_lr)
         self.reward_optimizer = torch.optim.Adam(self.reward_network.parameters(),
-                                                 lr=self.configs.reward_lr)
+                                                 lr=self.configs.reward_lr,
+                                                 weight_decay=self.configs.reward_weight_decay)
         
         self.policy_scheduler = torch.optim.lr_scheduler.StepLR(self.policy_optimizer,
                                                                 step_size=self.configs.policy_scheduler_step_size,
