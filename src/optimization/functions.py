@@ -37,8 +37,8 @@ def setup_config(device: torch.device) -> Config:
 
 
 def get_directories(parent_directory: str,
-                    data_folder_name: str = constants.DEMO_COLLECTION_DATE) -> (List[str],
-                                                                                str):
+                    data_folder_name: str = constants.DEMO_COLLECTION_DATE) -> Tuple[List[str],
+                                                                                     str]:
     
     if not isinstance(parent_directory, str):
         raise TypeError("Input 'parent_directory' in get_directories function must be a string.")
@@ -293,13 +293,13 @@ def convert_sample_2_df(input_state: torch.Tensor,
     data = {}
 
     # add array elements to the dictionary
-    data.update({constants.STATE_NORMALIZED_LABEL_NAME + f"_{i+1}": input_state.numpy()[i] for i in range(len(input_state))})
+    data.update({constants.STATE_NORMALIZED_LABEL_NAME + f"_{i+1}": input_state.numpy()[i] for i in range(input_state.shape[0])})
     data.update({constants.STATE_DENORMALIZED_LABEL_NAME + f"_{i+1}": real_state_input[i] for i in range(len(real_state_input))})
-    data.update({constants.ACTION_NORMALIZED_LABEL_NAME + f"_{i+1}": output_action.numpy()[i] for i in range(len(output_action))})
+    data.update({constants.ACTION_NORMALIZED_LABEL_NAME + f"_{i+1}": output_action.numpy()[i] for i in range(output_action.shape[0])})
     data.update({constants.ACTION_DENORMALIZED_LABEL_NAME + f"_{i+1}": real_action_output[i] for i in range(len(real_action_output))})
-    data.update({constants.ACTION_PREDICTION_LOGPROB_NAME + f"_{i+1}": action_log_prob.detach().numpy()[i] for i in range(len(action_log_prob))})
-    data.update({constants.ACTION_PREDICTION_NAME + f"_{i+1}": action_pred.detach().numpy()[i] for i in range(len(action_pred))})
-    data.update({constants.ACTION_PREDICTION_STD_NAME + f"_{i+1}": action_std.detach().numpy()[i] for i in range(len(action_std))})
+    data.update({constants.ACTION_PREDICTION_LOGPROB_NAME + f"_{i+1}": action_log_prob.detach().numpy()[i] for i in range(action_log_prob.shape[0])})
+    data.update({constants.ACTION_PREDICTION_NAME + f"_{i+1}": action_pred.detach().numpy()[i] for i in range(action_pred.shape[0])})
+    data.update({constants.ACTION_PREDICTION_STD_NAME + f"_{i+1}": action_std.detach().numpy()[i] for i in range(action_std.shape[0])})
     data.update({constants.ACTION_PREDICTION_DENORMALIZED_NAME + f"_{i+1}": real_action_pred[i] for i in range(len(real_action_pred))})
 
     # add non-array elements to the dictionary
@@ -354,35 +354,14 @@ def extend_df_4_next_states(data_df: pd.DataFrame,
     return data_df
 
 
-def get_initial_position(data_loader: torch.utils.data.Dataset,
-                         traj_start_index: int) -> np.ndarray:
-
-    if not isinstance(data_loader, torch.utils.data.Dataset):
-        raise TypeError("Input 'data_loader' in get_initial_position function must be a torch data loader object.")
-    if not isinstance(traj_start_index, int):
-        raise TypeError("Input 'traj_start_index' in get_initial_position function must be an integer.")
-    
-    # get the first sample in the dataset
-    sample_data = data_loader[traj_start_index]
-
-    # get initial end-effector position
-    ee_location = common.denormalize_action(action_norm=sample_data[1].unsqueeze(0).numpy(),
-                                            norm_range_list=data_loader.action_norms)[0]
-    
-    return ee_location
-
-
 def calculate_next_state(action_denorm: np.ndarray,
                          obstacle_location: np.ndarray,
-                         initial_state_location: np.ndarray,
                          target_location: np.ndarray) -> np.ndarray:
     
     if not isinstance(action_denorm, np.ndarray):
         raise TypeError("Input 'action_denorm' in calculate_next_state function must be a numpy array.")
     if not isinstance(obstacle_location, np.ndarray):
         raise TypeError("Input 'obstacle_location' in calculate_next_state function must be a numpy array.")
-    if not isinstance(initial_state_location, np.ndarray):
-        raise TypeError("Input 'initial_state_location' in calculate_next_state function must be a numpy array.")
     if not isinstance(target_location, np.ndarray):
         raise TypeError("Input 'target_location' in calculate_next_state function must be a numpy array.")
     if len(action_denorm) != len(constants.ACTION_COLUMNS):
@@ -392,12 +371,10 @@ def calculate_next_state(action_denorm: np.ndarray,
     # we could direcly calculate euclidean distance between them without any transformation
     object_distance = np.linalg.norm(obstacle_location - action_denorm)
     target_distance = np.linalg.norm(target_location - action_denorm)
-    start_distance = np.linalg.norm(initial_state_location - action_denorm)
     ground_distance = action_denorm[2] + constants.ROBOT_BASE_HEIGHT
     
     next_state_denorm = np.array([object_distance,
                                   target_distance,
-                                  start_distance,
                                   ground_distance])
     
     return next_state_denorm
@@ -409,7 +386,8 @@ def trajectory_estimation(configs: Config,
                           policy_network: torch.nn.Module,
                           trajectory_length: int,
                           traj_start_index: int,
-                          is_inference: bool=False) -> pd.DataFrame:
+                          is_inference_policy: bool = False,
+                          is_deterministic: bool = True) -> pd.DataFrame:
     
     if not isinstance(configs, Config):
         raise TypeError("Input 'configs' in trajectory_estimation function must be an instance of Config.")
@@ -423,13 +401,11 @@ def trajectory_estimation(configs: Config,
         raise TypeError("Input 'trajectory_length' in trajectory_estimation function must be an integer.")
     if not isinstance(traj_start_index, int):
         raise TypeError("Input 'traj_start_index' in trajectory_estimation function must be an integer.")
-    if not isinstance(is_inference, bool):
-        raise TypeError("Input 'is_inference' in trajectory_estimation function must be a boolean.")
+    if not isinstance(is_inference_policy, bool):
+        raise TypeError("Input 'is_inference_policy' in trajectory_estimation function must be a boolean.")
+    if not isinstance(is_deterministic, bool):
+        raise TypeError("Input 'is_deterministic' in trajectory_estimation function must be a boolean.")
     
-    # position (x, y, z w.r.t robot base) is constant throughout the trajectory
-    initial_state_location = get_initial_position(data_loader=data_loader,
-                                                  traj_start_index=traj_start_index)
-
     # initialize the state vector (normalized) from initial state value which is known
     state_0_idx = 0
     state_norm_estimation_vector = data_loader[traj_start_index + state_0_idx][0].unsqueeze(0).float().to(configs.device)
@@ -445,11 +421,15 @@ def trajectory_estimation(configs: Config,
                                                                                     sample_data=tuple(data_loader[traj_start_index + state_number]))
         
         # estimate the action given the current state
-        action_pred, action_std, action_log_prob, action_entropy, action_mu_and_std, action_dist = policy_network.estimate_action(state=state_norm_estimation_vector,
-                                                                                                                                  is_inference=is_inference)
-        nll_loss = updater_obj.multivariate_gaussian_nll_loss(y_true=action_label_norm,
-                                                              y_pred=action_mu_and_std)
+        action_pred, action_std, action_log_prob, action_entropy = policy_network.estimate_action(state=state_norm_estimation_vector,
+                                                                                                  is_policy_inference=is_inference_policy,
+                                                                                                  is_deterministic=is_deterministic)
         
+        # calculate the negative log-likelihood loss of the action prediction
+        nll_loss = updater_obj.multivariate_gaussian_nll_loss(action_true=action_label_norm.unsqueeze(0),
+                                                              action_pred_mu=action_pred,
+                                                              action_log_std=torch.log(action_std))
+
         # denormalize the state vector to get distances to object, target, start, and ground
         current_state_denorm_label = common.denormalize_state(state_norm=state_label_norm.numpy(),
                                                               norm_value_list=data_loader.state_norms)
@@ -470,7 +450,6 @@ def trajectory_estimation(configs: Config,
         # calculate the next denormalized actual state as given the current state and actual action
         next_state_denorm_label = calculate_next_state(action_denorm=action_denorm_label[0],
                                                        obstacle_location=np.array(constants.OBSTACLE_LOCATION),
-                                                       initial_state_location=initial_state_location,
                                                        target_location=target_location)
         
         # normalize calculated actual next state
@@ -480,7 +459,6 @@ def trajectory_estimation(configs: Config,
         # calculate the next denormalized estimation state as given the current state and action prediction
         next_state_denorm_estimation = calculate_next_state(action_denorm=action_denorm_prediction[0],
                                                             obstacle_location=np.array(constants.OBSTACLE_LOCATION),
-                                                            initial_state_location=initial_state_location,
                                                             target_location=target_location)
         
         # normalize calculated next state estimation
@@ -492,7 +470,7 @@ def trajectory_estimation(configs: Config,
                                          real_state_input=current_state_denorm_label,
                                          output_action=action_label_norm.squeeze(0),
                                          real_action_output=action_denorm_label[0],
-                                         action_log_prob=action_log_prob.squeeze(0),
+                                         action_log_prob=action_log_prob,
                                          action_pred=action_pred.squeeze(0),
                                          action_std=action_std.squeeze(0),
                                          real_action_pred=action_denorm_prediction[0],
@@ -544,10 +522,12 @@ def get_estimated_rewards(configs: Config,
                           reward_network: torch.nn.Module,
                           trajectory_indices: List[int],
                           traj_start_index: int,
-                          is_inference_reward: bool) -> Tuple[pd.DataFrame,
-                                                          torch.Tensor,
-                                                          torch.Tensor,
-                                                          torch.Tensor]:
+                          is_inference_reward: bool,
+                          is_inference_policy: bool,
+                          is_deterministic: bool) -> Tuple[pd.DataFrame,
+                                                           torch.Tensor,
+                                                           torch.Tensor,
+                                                           torch.Tensor]:
     
     if not isinstance(configs, Config):
         raise TypeError("Input 'configs' in get_estimated_rewards function must be an instance of Config.")
@@ -565,55 +545,50 @@ def get_estimated_rewards(configs: Config,
         raise TypeError("Input 'traj_start_index' in get_estimated_rewards function must be an integer.")
     if not isinstance(is_inference_reward, bool):
         raise TypeError("Input 'is_inference_reward' in get_estimated_rewards function must be a boolean.")
+    if not isinstance(is_inference_policy, bool):
+        raise TypeError("Input 'is_inference_policy' in get_estimated_rewards function must be a boolean.")
+    if not isinstance(is_deterministic, bool):
+        raise TypeError("Input 'is_deterministic' in get_estimated_rewards function must be a boolean.")
     
     # get trajectory dataframe with estimated state and actions
     data_traj_df = trajectory_estimation(configs=configs,
-                                        updater_obj=updater_obj,
-                                        data_loader=data_loader,
-                                        policy_network=policy_network,
-                                        trajectory_length=constants.TRAJECTORY_SIZE,
-                                        traj_start_index=trajectory_indices[traj_start_index],
-                                        is_inference=True)
+                                         updater_obj=updater_obj,
+                                         data_loader=data_loader,
+                                         policy_network=policy_network,
+                                         trajectory_length=constants.TRAJECTORY_SIZE,
+                                         traj_start_index=trajectory_indices[traj_start_index],
+                                         is_inference_policy=is_inference_policy,
+                                         is_deterministic=is_deterministic)
 
     # extract estimated and actual state and action values from the trajectory dataframe
     norm_state_label_df = data_traj_df[[
         f"{constants.STATE_NORMALIZED_LABEL_NAME}_{i}" for i in range(1, len(constants.STATE_COLUMNS) + 1)]]
     norm_state_estim_df = data_traj_df[[
         f"{constants.STATE_ESTIMATION_NORMALIZED_NAME}_{i}" for i in range(1, len(constants.STATE_COLUMNS) + 1)]]
-    norm_action_label_df = data_traj_df[[
-        f"{constants.ACTION_NORMALIZED_LABEL_NAME}_{i}" for i in range(1, len(constants.ACTION_COLUMNS) + 1)]]
-    norm_action_estim_df = data_traj_df[[
-        f"{constants.ACTION_PREDICTION_NAME}_{i}" for i in range(1, len(constants.ACTION_COLUMNS) + 1)]]
-
+    
     # get log probabilities of each predicted action in the trajectory and take average of log probabilities
     logprob_action_estim_df = data_traj_df[[
-        f"{constants.ACTION_PREDICTION_LOGPROB_NAME}_{i}" for i in range(1, len(constants.ACTION_COLUMNS) + 1)]]
-    logprob_action_estim_avg_df = logprob_action_estim_df.mean(axis=1)
-
-    # concatenate states and actions in the trajectory for both estimations and demonstrations
-    state_action_label_df = pd.concat([norm_state_label_df, norm_action_label_df],
-                                      axis=1)
-    state_action_estim_df = pd.concat([norm_state_estim_df, norm_action_estim_df],
-                                      axis=1)
+        f"{constants.ACTION_PREDICTION_LOGPROB_NAME}_{1}"]]
+    logprob_action_estim_sum_df = logprob_action_estim_df.sum(axis=1)
     
     # convert dataframes into tensor format to forward through neural network
-    state_action_label_tensor = torch.tensor(state_action_label_df.values,
-                                             dtype=torch.float64,
-                                             device=configs.device)
-    state_action_estim_tensor = torch.tensor(state_action_estim_df.values,
-                                             dtype=torch.float64,
-                                             device=configs.device)
-    logprob_action_estim_avg_tensor = torch.tensor(logprob_action_estim_avg_df.values,
+    state_label_tensor = torch.tensor(norm_state_label_df.values,
+                                      dtype=torch.float64,
+                                      device=configs.device)
+    state_estim_tensor = torch.tensor(norm_state_estim_df.values,
+                                      dtype=torch.float64,
+                                      device=configs.device)
+    logprob_action_estim_sum_tensor = torch.tensor(logprob_action_estim_sum_df.values,
                                                    dtype=torch.float64,
                                                    device=configs.device).unsqueeze(1)
     
     # forward propagation through neural network
-    reward_values_demonstration_data = reward_network.estimate_reward(state_action=state_action_label_tensor.float(),
-                                                                      is_inference=is_inference_reward)
-    reward_values_estimation_data = reward_network.estimate_reward(state_action=state_action_estim_tensor.float(),
-                                                                   is_inference=is_inference_reward)
+    reward_values_demonstration_data = reward_network.estimate_reward(state=state_label_tensor.float(),
+                                                                      is_reward_inference=is_inference_reward)
+    reward_values_estimation_data = reward_network.estimate_reward(state=state_estim_tensor.float(),
+                                                                   is_reward_inference=is_inference_reward)
     
-    return data_traj_df, reward_values_demonstration_data, reward_values_estimation_data, logprob_action_estim_avg_tensor
+    return data_traj_df, reward_values_demonstration_data, reward_values_estimation_data, logprob_action_estim_sum_tensor
 
 
 def trajectory_generation(configs: Config,
@@ -621,10 +596,9 @@ def trajectory_generation(configs: Config,
                           action_norms: List[float],
                           policy_network: torch.nn.Module,
                           reward_network: Union[torch.nn.Module, None],
-                          average_initial_state_denorm: np.ndarray,
-                          initial_state_location: np.ndarray) -> Tuple[pd.DataFrame,
-                                                                       torch.Tensor,
-                                                                       Union[torch.Tensor, None]]:
+                          input_state_norm: torch.Tensor) -> Tuple[pd.DataFrame,
+                                                                   torch.Tensor,
+                                                                   Union[torch.Tensor, None]]:
     
     if not isinstance(configs, Config):
         raise TypeError("Input 'configs' in trajectory_generation function must be an instance of Config.")
@@ -636,20 +610,6 @@ def trajectory_generation(configs: Config,
         raise TypeError("Input 'policy_network' in trajectory_generation function must be a torch neural network module.")
     if not isinstance(reward_network, (torch.nn.Module, type(None))):
         raise TypeError("reward_network must be an instance of torch.nn.Module or None.")
-    if not isinstance(average_initial_state_denorm, np.ndarray):
-        raise TypeError("Input 'average_initial_state_denorm' in trajectory_generation function must be a numpy array.")
-    if not isinstance(initial_state_location, np.ndarray):
-        raise TypeError("Input 'initial_state_location' in trajectory_generation function must be a numpy array.")
-    
-    # normal random denormalized state vector of initial state
-    variances = np.array([state_norms[0] / 8.0,
-                          state_norms[1] / 8.0,
-                          state_norms[2] / 8.0,
-                          state_norms[3] / 8.0])
-    initial_state_denorm = common.generate_gaussian_random_variables(means=average_initial_state_denorm,
-                                                                     variances=variances)[0]
-    input_state_norm = torch.from_numpy(common.normalize_state(state=initial_state_denorm,
-                                                               norm_value_list=state_norms)).unsqueeze(0).float().to(configs.device)
     
     column_names = [constants.STATE_NUMBER_COLUMN]
     column_names += [constants.STATE_ESTIMATION_NORMALIZED_NAME + f"_{i+1}" for i in range(len(state_norms))]
@@ -662,10 +622,11 @@ def trajectory_generation(configs: Config,
     
     created_trajectory_df = pd.DataFrame(index=range(constants.TRAJECTORY_SIZE),
                                          columns=column_names)
-
-    for state_number in range(constants.TRAJECTORY_SIZE):
-        output_action_norm, action_std, action_log_prob, action_entropy, action_mu_and_std, action_dist = policy_network.estimate_action(state=input_state_norm,
-                                                                                                                                         is_inference=True)
+    
+    for state_number in range(constants.TRAJECTORY_SIZE + constants.ACTION_LABEL_SHIFT_IDX):
+        output_action_norm, action_std, action_log_prob, action_entropy = policy_network.estimate_action(state=input_state_norm,
+                                                                                                         is_policy_inference=True,
+                                                                                                         is_deterministic=True)
         
         input_state_denorm = common.denormalize_state(state_norm=input_state_norm.numpy(),
                                                       norm_value_list=state_norms)
@@ -674,7 +635,6 @@ def trajectory_generation(configs: Config,
         
         next_state_denorm = calculate_next_state(action_denorm=output_action_denorm[0],
                                                  obstacle_location=np.array(constants.OBSTACLE_LOCATION),
-                                                 initial_state_location=initial_state_location,
                                                  target_location=np.array(constants.TARGET_LOCATION))
         next_state_norm = common.normalize_state(state=next_state_denorm,
                                                  norm_value_list=state_norms)
@@ -699,9 +659,9 @@ def trajectory_generation(configs: Config,
         input_state_norm = torch.from_numpy(next_state_norm).unsqueeze(0).float().to(configs.device)
     
     logprob_action_estim_df = created_trajectory_df[[
-        f"{constants.ACTION_PREDICTION_LOGPROB_NAME}_{i}" for i in range(1, len(action_norms) + 1)]]
-    logprob_action_estim_avg_df = logprob_action_estim_df.mean(axis=1)
-    logprob_action_avg_tensor = torch.tensor(logprob_action_estim_avg_df.values,
+        f"{constants.ACTION_PREDICTION_LOGPROB_NAME}_{1}"]]
+    logprob_action_estim_sum_df = logprob_action_estim_df.sum(axis=1)
+    logprob_action_sum_tensor = torch.tensor(logprob_action_estim_sum_df.values,
                                              dtype=torch.float64,
                                              device=configs.device).unsqueeze(1)
     
@@ -709,19 +669,15 @@ def trajectory_generation(configs: Config,
 
         norm_state_estim_df = created_trajectory_df[[
             f"{constants.STATE_ESTIMATION_NORMALIZED_NAME}_{i}" for i in range(1, len(state_norms) + 1)]]
-        norm_action_estim_df = created_trajectory_df[[
-            f"{constants.ACTION_PREDICTION_NAME}_{i}" for i in range(1, len(action_norms) + 1)]]
         
-        state_action_estim_df = pd.concat([norm_state_estim_df, norm_action_estim_df],
-                                          axis=1)
-        state_action_estim_tensor = torch.tensor(state_action_estim_df.values.astype(np.float64),
-                                                 dtype=torch.float64,
-                                                 device=configs.device)
+        state_estim_tensor = torch.tensor(norm_state_estim_df.values.astype(np.float64),
+                                          dtype=torch.float64,
+                                          device=configs.device)
         
-        reward_values_tensor = reward_network.estimate_reward(state_action=state_action_estim_tensor.float(),
-                                                              is_inference=True)
+        reward_values_tensor = reward_network.estimate_reward(state=state_estim_tensor.float(),
+                                                              is_reward_inference=True)
     
     else:
         reward_values_tensor = None
 
-    return created_trajectory_df, logprob_action_avg_tensor, reward_values_tensor
+    return created_trajectory_df, logprob_action_sum_tensor, reward_values_tensor
