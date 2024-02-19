@@ -525,6 +525,29 @@ def find_indices_of_trajectory_changes(dataset: torch.utils.data.Dataset) -> Lis
     return indices_of_changes
 
 
+def calculate_discounted_return(rewards: torch.Tensor,
+                                gamma: float = 0.99) -> torch.Tensor:
+    
+    if not isinstance(rewards, torch.Tensor):
+        raise TypeError("Input 'rewards' in calculate_discounted_return function must be an instance of torch.Tensor.")
+    if len(rewards.shape) != 2:
+        raise ValueError("Input 'rewards' in calculate_discounted_return function must have a shape of (batch_size, num_rows).")
+    if not isinstance(gamma, (int, float)):
+        raise TypeError("Input 'gamma' in calculate_discounted_return function must be an instance of int or float.")
+    
+    T = rewards.size(0)
+    discounted_returns = torch.zeros(T, 1)
+    
+    for t in range(T):
+        discounted_sum = 0
+
+        for t_prime in range(t, T):
+            discounted_sum += (gamma ** (t_prime - t)) * rewards[t_prime]
+        discounted_returns[t] = discounted_sum
+    
+    return discounted_returns
+
+
 def get_estimated_rewards(configs: Config,
                           updater_obj: object,
                           data_loader: torch.utils.data.Dataset,
@@ -691,3 +714,84 @@ def trajectory_generation(configs: Config,
         reward_values_tensor = None
 
     return created_trajectory_df, logprob_action_sum_tensor, reward_values_tensor
+
+
+def generate_session(env: object,
+                     t_max: int,
+                     updater_obj: object,
+                     replay_buffer: object,
+                     policy_network: torch.nn.Module,
+                     is_policy_inference: bool,
+                     is_policy_gradient_update: bool,
+                     is_deterministic: bool) -> Tuple[List[torch.Tensor],
+                                                      List[torch.Tensor],
+                                                      List[torch.Tensor],
+                                                      List[torch.Tensor],
+                                                      Union[float, None]]:
+    
+    if not isinstance(env, object):
+        raise TypeError("Input 'env' in generate_session function must be an instance of object.")
+    if not isinstance(t_max, int):
+        raise TypeError("Input 't_max' in generate_session function must be an instance of int.")
+    if not isinstance(updater_obj, object):
+        raise TypeError("Input 'updater_obj' in generate_session function must be an instance of object.")
+    if not isinstance(replay_buffer, object):
+        raise TypeError("Input 'replay_buffer' in generate_session function must be an instance of object.")
+    if not isinstance(policy_network, torch.nn.Module):
+        raise TypeError("Input 'policy_network' in generate_session function must be an instance of torch neural network module.")
+    if not isinstance(is_policy_inference, bool):
+        raise TypeError("Input 'is_policy_inference' in generate_session function must be an instance of bool.")
+    if not isinstance(is_policy_gradient_update, bool):
+        raise TypeError("Input 'is_policy_gradient_update' in generate_session function must be an instance of bool.")
+    if not isinstance(is_deterministic, bool):
+        raise TypeError("Input 'is_deterministic' in generate_session function must be an instance of bool.")
+    
+    states, traj_log_probs, actions, rewards, entropy_values = [], [], [], [], []
+    
+    state = env.reset()
+    
+    for t in range(t_max):
+        action, action_std, action_log_prob, entropy_value = policy_network.estimate_action(state=state,
+                                                                                            is_policy_inference=is_policy_inference,
+                                                                                            is_deterministic=is_deterministic)
+        next_state, reward, done = env.step(state=state,
+                                            action=action)
+        
+        states.append(state.clone())
+        actions.append(action.clone())
+        traj_log_probs.append(action_log_prob.clone())
+        rewards.append(reward.clone())
+        entropy_values.append(entropy_value.clone())
+        
+        replay_buffer.push(state=state,
+                           action=action,
+                           reward=reward,
+                           next_state=next_state,
+                           done=done,
+                           log_probability=action_log_prob)
+        
+        state = next_state.detach()
+        
+        if done:
+            if is_policy_gradient_update:
+                
+                entropy = torch.stack(entropy_values,
+                                      dim=0).float().clone()
+                cumulative_log_probs = torch.cumsum(torch.stack(traj_log_probs,
+                                                                dim=0).float().clone(), dim=0)
+
+                cumulative_returns = calculate_discounted_return(torch.stack(rewards,
+                                                                             dim=0).float().clone(), 0.5)
+
+                loss_policy = updater_obj.calculate_policy_gradient_loss(cumulative_log_probs=cumulative_log_probs.unsqueeze(1),
+                                                                         advantages=cumulative_returns,
+                                                                         entropy=entropy)
+                updater_obj.run_policy_optimizer(policy_loss=loss_policy)
+                policy_gradient_loss = loss_policy.detach().item()
+            
+            else:
+                policy_gradient_loss = None
+            
+            break
+    
+    return states, actions, traj_log_probs, rewards, policy_gradient_loss
