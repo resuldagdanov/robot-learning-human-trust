@@ -92,9 +92,9 @@ RF_NUMBER_EPOCHS = 200
 IRL_NUMBER_EPOCHS = 1000
 
 # folder name where parameters are located ("results \\ policy_network_params \\ policy_loading_folder")
-POLICY_LOADING_FOLDER = "Feb_10_2024-13_37_23" # year_month_day-hh_mm_ss NOTE: make sure that folder name is correct
-POLICY_PARAMS_NAME = "policy_network_epoch_91_loss_0_263936078006571.pt" # NOTE: make sure that file name exists
+POLICY_LOADING_FOLDER = "Feb_20_2024-08_41_28" # year_month_day-hh_mm_ss NOTE: make sure that folder name is correct
+POLICY_PARAMS_NAME = "policy_network_epoch_991_loss_8_04815723340278.pt" # NOTE: make sure that file name exists
 
 # folder name where parameters are located ("results \\ reward_network_params \\ reward_loading_folder")
-REWARD_LOADING_FOLDER = "Feb_09_2024-00_09_46" # year_month_day-hh_mm_ss NOTE: make sure that folder name is correct
-REWARD_PARAMS_NAME = "reward_network_epoch_200_loss_441_05668.pt" # NOTE: make sure that file name exists
+REWARD_LOADING_FOLDER = "Feb_20_2024-08_41_28" # year_month_day-hh_mm_ss NOTE: make sure that folder name is correct
+REWARD_PARAMS_NAME = "reward_network_epoch_991_loss_0_17438605813666125.pt" # NOTE: make sure that file name exists
