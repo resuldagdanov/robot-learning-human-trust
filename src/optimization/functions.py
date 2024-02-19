@@ -795,3 +795,36 @@ def generate_session(env: object,
             break
     
     return states, actions, traj_log_probs, rewards, policy_gradient_loss
+
+
+def preprocess_trajectories(traj_list: List,
+                            steps_tensor: torch.Tensor,
+                            is_demonstration: bool = False) -> torch.Tensor:
+    
+    if not isinstance(traj_list, list):
+        raise TypeError("Input 'traj_list' in preprocess_trajectories function must be an instance of list.")
+    if not isinstance(steps_tensor, torch.Tensor):
+        raise TypeError("Input 'steps_tensor' in preprocess_trajectories function must be an instance of torch.Tensor.")
+    if not isinstance(is_demonstration, bool):
+        raise TypeError("Input 'is_demonstration' in preprocess_trajectories function must be an instance of bool.")
+    
+    for traj_df in traj_list:
+        
+        if is_demonstration:
+            states = torch.tensor(traj_df[[
+                f"{constants.STATE_NORMALIZED_LABEL_NAME}_{i}" for i in range(1, len(constants.STATE_COLUMNS) + 1)]].values)
+            actions = torch.tensor(traj_df[[
+                f"{constants.ACTION_NORMALIZED_LABEL_NAME}_{i}" for i in range(1, len(constants.ACTION_COLUMNS) + 1)]].values)
+            log_probs = torch.tensor(np.zeros((actions.shape[0], 1)))
+        
+        else:
+            states = torch.stack(traj_df[0])
+            actions = torch.stack(traj_df[1])
+            log_probs = torch.stack(traj_df[3])
+        
+        mdp = torch.cat((states, log_probs, actions),
+                        dim=1)
+        steps_tensor = torch.cat((steps_tensor.clone(), mdp.clone()),
+                                 dim=0)
+    
+    return steps_tensor
