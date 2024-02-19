@@ -68,8 +68,8 @@ if __name__ == "__main__":
     
     # model optimizers and learning rate schedulers
     updater_obj = Updater(configs=configs,
-                        policy_network=policy_network,
-                        reward_network=reward_network)
+                          policy_network=policy_network,
+                          reward_network=reward_network)
     updater_obj.initialize_optimizers()
 
     # construct custom environment for reward function training
@@ -232,17 +232,17 @@ if __name__ == "__main__":
     plt.figure(figsize=[16, 12])
     plt.subplot(3, 1, 1)
     plt.title(f"Reward Function Max-Entropy Mean Loss Per Training Epoch")
-    plt.plot(loss_reward_list)
+    plt.plot(loss_reward_list, "r+")
     plt.grid()
 
     plt.subplot(3, 1, 2)
     plt.title(f"Policy Model Gaussian Negative Log-Likelihood Batch Loss Per Training Epoch")
-    plt.plot(loss_policy_list)
+    plt.plot(loss_policy_list, "b+")
     plt.grid()
 
     plt.subplot(3, 1, 3)
     plt.title(f"Average Reward on Robot Trajectory Per Training Epoch")
-    plt.plot(mean_reward_list)
+    plt.plot(mean_reward_list, "g+")
     plt.grid()
 
     plt.show()
