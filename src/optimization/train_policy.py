@@ -20,8 +20,6 @@ from utils.dataset_loader import PolicyDatasetLoader
 from optimization import functions
 from optimization.updater import Updater
 
-from environment.environment import RobotEnvironment
-
 from models.policy_model import RobotPolicy
 from models.reward_model import RewardFunction
 
@@ -83,17 +81,12 @@ if __name__ == "__main__":
                           policy_network=policy_network,
                           reward_network=reward_network)
     updater_obj.initialize_optimizers()
-
-    # construct custom environment while the reward function is in evaluation mode
-    env = RobotEnvironment()
-    env.set_reward_network(reward_network)
-    env.is_reward_inference = True
-
-    loss_policy_list = []
-
+    
     # currently nu weight is zero; will be updated later
     nu_factor = torch.tensor(0.0)
 
+    loss_policy_list = []
+    
     print("\n================== Training Initialized (chuff chuff) ==================\n")
 
     for epoch in range(constants.BC_NUMBER_EPOCHS):
