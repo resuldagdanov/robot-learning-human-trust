@@ -52,15 +52,14 @@ def json2dataframe(json_path: str,
             column_names[0]: int(sample[4]["timestamp"]),
             column_names[1]: sample[0]["message"],
             column_names[2]: sample[1]["message"],
-            column_names[3]: sample[2]["message"],
-            column_names[4]: sample[3]["message"],
+            column_names[3]: sample[3]["message"],
         }
 
         arm_action = sample[4]["message"]["position"]
         entry.update({
-            column_names[5]: arm_action["x"],
-            column_names[6]: arm_action["y"],
-            column_names[7]: arm_action["z"]
+            column_names[4]: arm_action["x"],
+            column_names[5]: arm_action["y"],
+            column_names[6]: arm_action["z"]
         })
 
         df.loc[traj_idx] = entry
@@ -352,3 +351,22 @@ def generate_gaussian_random_variables(means: np.ndarray,
                                             num_samples)
     
     return samples
+
+
+def compute_annealing_factor(epoch: int,
+                             max_epochs: int) -> float:
+    
+    if not isinstance(epoch, int):
+        raise TypeError("Input 'epoch' in compute_annealing_factor function must be an instance of int.")
+    if not isinstance(max_epochs, int):
+        raise TypeError("Input 'max_epochs' in compute_annealing_factor function must be an instance of int.")
+    
+    initial_std_weight = 0.05
+    final_std_weight = 1.0
+    
+    fraction = min(1.0,
+                   epoch / max_epochs)
+    
+    annealing_factor = initial_std_weight + fraction * (final_std_weight - initial_std_weight)
+
+    return annealing_factor
