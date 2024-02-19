@@ -53,6 +53,17 @@ class Updater(object):
 
         return total_loss
     
+    def calculate_max_entropy_loss(self,
+                                   demonstration_rewards: torch.Tensor,
+                                   robot_rewards: torch.Tensor,
+                                   log_probability: torch.Tensor) -> torch.Tensor:
+        
+        # max-entropy loss function
+        loss = - torch.mean(demonstration_rewards) + \
+            torch.log(torch.mean(torch.exp(robot_rewards) / (torch.exp(log_probability) + 1e-7)))
+        
+        return loss
+    
     def calculate_irl_loss(self,
                            demo_traj_reward: torch.Tensor,
                            robot_traj_reward: torch.Tensor,
