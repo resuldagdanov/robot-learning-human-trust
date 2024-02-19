@@ -56,6 +56,9 @@ class Config(object):
 
         # patience for early stopping (number of epochs with no improvement on validation loss)
         self.early_stopping_patience = 20
+
+        # maximum size of replay buffer
+        self.replay_buffer_capacity = 10000
     
     def model_saving_path(self,
                           directory: str) -> str:
