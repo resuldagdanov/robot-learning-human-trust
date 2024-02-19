@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 
 import torch
+import random
 
 from typing import List, Tuple, Union
 from torch.utils.tensorboard import SummaryWriter
@@ -31,7 +32,10 @@ def setup_config(device: torch.device) -> Config:
 
     configs.device = device
 
+    # setup and fix all seeds for reproducibility
     torch.manual_seed(configs.seed)
+    np.random.seed(configs.seed)
+    random.seed(configs.seed)
 
     return configs
 
@@ -123,11 +127,14 @@ def load_policy_from_path(policy_network: torch.nn.Module,
     policy_model_path = os.path.join(policy_model_folder_path,
                                      policy_params_name)
     
-    # set trained parameters to neural network
-    policy_network = load_policy(policy_network=policy_network,
-                                 model_path=policy_model_path)
-    
-    return policy_network
+    if not os.path.exists(policy_model_path):
+        print("NOTE: Policy model could not be loaded! The pre-trained model path does not exist: ", policy_model_path)
+        return policy_network
+    else:
+        # set trained parameters to neural network
+        policy_network = load_policy(policy_network=policy_network,
+                                     model_path=policy_model_path)
+        return policy_network
 
 
 def save_policy(epoch: int,
@@ -187,11 +194,14 @@ def load_reward_from_path(reward_network: torch.nn.Module,
     reward_model_path = os.path.join(reward_model_folder_path,
                                      reward_params_name)
     
-    # set trained parameters to neural network
-    reward_network = load_reward(reward_network=reward_network,
-                                 model_path=reward_model_path)
-    
-    return reward_network
+    if not os.path.exists(reward_model_path):
+        print("NOTE: Reward model could not be loaded! The pre-trained model path does not exist: ", reward_model_path)
+        return reward_network
+    else:
+        # set trained parameters to neural network
+        reward_network = load_reward(reward_network=reward_network,
+                                     model_path=reward_model_path)
+        return reward_network
 
 
 def save_reward(epoch: int,
