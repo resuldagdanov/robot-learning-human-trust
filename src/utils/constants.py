@@ -66,6 +66,9 @@ ACTION_LABEL_SHIFT_IDX = -1
 # number of state action pairs to discritize in each trajectory
 TRAJECTORY_SIZE = 20 # equally spaced number of points
 
+# number of episodes to run the robot for data collection at each epoch for exploration
+EPISODES_ROBOT_RUN = 3
+
 # collected dataset folder name in ("dataset \\ human_demonstrations \\ collection_date")
 DEMO_COLLECTION_DATE = "2024_01_23" # year_month_day NOTE: make sure that data date is correct
 TEST_COLLECTION_DATE = "2024_02_02_Test" # year_month_day NOTE: make sure folder name is correct
@@ -80,13 +83,13 @@ ROBOT_BASE_HEIGHT = 0.1685 # meters NOTE: make sure the alignment with robot exp
 TARGET_LOCATION = [-0.36, 0.77, -ROBOT_BASE_HEIGHT] # meters NOTE: make sure the alignment with robot experiment
 
 # number of training epoch for behavior cloning
-BC_NUMBER_EPOCHS = 100
+BC_NUMBER_EPOCHS = 50
 
 # number of training epoch for reward function
 RF_NUMBER_EPOCHS = 200
 
 # number of training epoch for IRL algorithm
-IRL_NUMBER_EPOCHS = 100
+IRL_NUMBER_EPOCHS = 1000
 
 # folder name where parameters are located ("results \\ policy_network_params \\ policy_loading_folder")
 POLICY_LOADING_FOLDER = "Feb_10_2024-13_37_23" # year_month_day-hh_mm_ss NOTE: make sure that folder name is correct
