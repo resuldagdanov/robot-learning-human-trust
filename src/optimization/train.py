@@ -2,6 +2,7 @@ import os
 import sys
 
 import numpy as np
+import matplotlib.pyplot as plt
 
 import torch
 
@@ -107,7 +108,7 @@ if __name__ == "__main__":
     activate_stopping = False
     is_early_stop = False
     early_stopping_counter = 0
-    loss_reward_list, loss_policy_list = [], []
+    loss_reward_list, loss_policy_list, mean_reward_list = [], [], []
 
     # currently nu weight is zero; will be updated later
     nu_factor = torch.tensor(0.0)
@@ -131,6 +132,7 @@ if __name__ == "__main__":
         
         # objein list of all rewards from the robot trajectories generated
         robot_reward_values = [robot_reward.item() for robot_trajectory in robot_trajectories for robot_reward in robot_trajectory[3]]
+        mean_reward_list.append(np.mean(robot_reward_values))
 
         # convert robot execution trajectories to tensor format and stack them
         data_robo_tensor = functions.preprocess_trajectories(traj_list=robot_trajectories,
@@ -226,3 +228,21 @@ if __name__ == "__main__":
             break
     
     print("\n================== Training Finished (choo choo) ==================\n")
+
+    plt.figure(figsize=[16, 12])
+    plt.subplot(3, 1, 1)
+    plt.title(f"Reward Function Max-Entropy Mean Loss Per Training Epoch")
+    plt.plot(loss_reward_list)
+    plt.grid()
+
+    plt.subplot(3, 1, 2)
+    plt.title(f"Policy Model Gaussian Negative Log-Likelihood Batch Loss Per Training Epoch")
+    plt.plot(loss_policy_list)
+    plt.grid()
+
+    plt.subplot(3, 1, 3)
+    plt.title(f"Average Reward on Robot Trajectory Per Training Epoch")
+    plt.plot(mean_reward_list)
+    plt.grid()
+
+    plt.show()
