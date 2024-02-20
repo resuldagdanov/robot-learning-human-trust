@@ -58,9 +58,14 @@ def get_directories(parent_directory: str,
     
     json_folder = os.path.join(dataset_folder,
                                "jsons")
-    json_files = os.listdir(json_folder)
-    json_paths = [os.path.join(json_folder, file)
-                  for file in json_files if file.endswith(".json")]
+    
+    if os.path.exists(json_folder):
+        json_files = os.listdir(json_folder)
+        json_paths = [os.path.join(json_folder, file)
+                      for file in json_files if file.endswith(".json")]
+    else:
+        json_paths = []
+        print("NOTE: No JSON files found in the given folder: ", json_folder)
     
     results_path = os.path.join(grand_parent_path,
                                 "results")
