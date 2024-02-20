@@ -370,3 +370,14 @@ def compute_annealing_factor(epoch: int,
     annealing_factor = initial_std_weight + fraction * (final_std_weight - initial_std_weight)
 
     return annealing_factor
+
+
+def squash_reward_to_performance(value: float) -> float:
+
+    if not isinstance(value, float):
+        raise TypeError("Input 'value' in squash_reward_to_performance function must be an instance of float.")
+    
+    # goal is to squash an input value from range [0 & 1] to [-1 & 1]
+    squashed = (2 * value) - 1
+
+    return squashed
