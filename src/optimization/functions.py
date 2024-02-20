@@ -797,7 +797,7 @@ def generate_session(env: object,
     return states, actions, traj_log_probs, rewards, policy_gradient_loss
 
 
-def preprocess_trajectories(traj_list: List,
+def preprocess_trajectories(traj_list: list,
                             steps_tensor: torch.Tensor,
                             is_demonstration: bool = False) -> torch.Tensor:
     
