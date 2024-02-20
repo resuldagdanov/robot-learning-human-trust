@@ -59,6 +59,17 @@ class Config(object):
 
         # maximum size of replay buffer
         self.replay_buffer_capacity = 10000
+
+        # continuous beta distibution parameters
+        self.initial_alpha = 1.0
+        self.initial_beta = 1.0
+
+        # discount factor to store cumulative history of trust values
+        self.gamma = 0.1
+
+        # weights for success and failure updates
+        self.initial_w_success = 1.0 / 20.0
+        self.initial_w_failure = 1.0 / 20.0
     
     def model_saving_path(self,
                           directory: str) -> str:
