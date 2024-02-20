@@ -4,7 +4,7 @@ import rosbag
 import numpy as np
 import pandas as pd
 
-from typing import List
+from typing import List, Union
 
 
 def read_json(json_path: str) -> list:
@@ -372,12 +372,17 @@ def compute_annealing_factor(epoch: int,
     return annealing_factor
 
 
-def squash_reward_to_performance(value: float) -> float:
+def squash_reward_to_performance(value: Union[float, np.ndarray]) -> Union[float, np.ndarray]:
 
-    if not isinstance(value, float):
-        raise TypeError("Input 'value' in squash_reward_to_performance function must be an instance of float.")
+    if isinstance(value, float):
+        # squash a single float value
+        squashed = (2 * value) - 1
     
-    # goal is to squash an input value from range [0 & 1] to [-1 & 1]
-    squashed = (2 * value) - 1
-
+    elif isinstance(value, np.ndarray):
+        # squash each element of the array
+        squashed = (2 * value) - 1
+    
+    else:
+        raise TypeError("Input 'value' in squash_reward_to_performance function must be either a float or a NumPy array.")
+    
     return squashed
