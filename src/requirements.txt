@@ -2,6 +2,7 @@ torch
 bagpy
 pandas
 numpy
+scipy
 matplotlib
 mpl-tools
 tqdm
