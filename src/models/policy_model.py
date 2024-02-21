@@ -8,7 +8,7 @@ class RobotPolicy(torch.nn.Module):
     def __init__(self,
                  state_size: int = 3,
                  hidden_size: int = 32,
-                 out_size: int = 3,
+                 out_size: int = 7,
                  log_std_min: float = -24,
                  log_std_max: float = 2.4,
                  device: str = "cpu") -> object:

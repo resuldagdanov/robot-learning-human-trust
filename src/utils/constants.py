@@ -6,7 +6,7 @@ MAX_DISTANCE_TO_GROUND = 3.0 # meters
 # action vector normalization parameters
 END_EFFECTOR_POSITION_RANGE_X = [-2.0, 2.0] # meters
 END_EFFECTOR_POSITION_RANGE_Y = [-2.0, 2.0] # meters
-END_EFFECTOR_POSITION_RANGE_Z = [0.00, 2.0] # meters
+END_EFFECTOR_POSITION_RANGE_Z = [-0.1685, 2.0] # meters
 
 # initial state generation parameters (normalized)
 INITIAL_STATE_MEANS = [0.175, 0.5, 0.3]
@@ -22,7 +22,11 @@ STATE_COLUMNS = ["distance_to_object",
 # action vector column names
 ACTION_COLUMNS = ["arm_action_x",
                   "arm_action_y",
-                  "arm_action_z"]
+                  "arm_action_z",
+                  "arm_rotation_x",
+                  "arm_rotation_y",
+                  "arm_rotation_z",
+                  "arm_rotation_w"]
 
 # behavior cloning policy model trajectories column names
 COLUMN_NAMES = ["time_seconds"] + \
@@ -67,7 +71,7 @@ ACTION_LABEL_SHIFT_IDX = -1
 TRAJECTORY_SIZE = 20 # equally spaced number of points
 
 # number of episodes to run the robot for data collection at each epoch for exploration
-EPISODES_ROBOT_RUN = 3
+EPISODES_ROBOT_RUN = 20
 
 # collected dataset folder name in ("dataset \\ human_demonstrations \\ collection_date")
 DEMO_COLLECTION_DATE = "2024_01_23" # year_month_day NOTE: make sure that data date is correct
@@ -89,12 +93,12 @@ BC_NUMBER_EPOCHS = 50
 RF_NUMBER_EPOCHS = 200
 
 # number of training epoch for IRL algorithm
-IRL_NUMBER_EPOCHS = 1000
+IRL_NUMBER_EPOCHS = 150
 
 # folder name where parameters are located ("results \\ policy_network_params \\ policy_loading_folder")
-POLICY_LOADING_FOLDER = "Feb_20_2024-08_41_28" # year_month_day-hh_mm_ss NOTE: make sure that folder name is correct
-POLICY_PARAMS_NAME = "policy_network_epoch_991_loss_8_04815723340278.pt" # NOTE: make sure that file name exists
+POLICY_LOADING_FOLDER = "Feb_22_2024-09_04_42" # year_month_day-hh_mm_ss NOTE: make sure that folder name is correct
+POLICY_PARAMS_NAME = "policy_network_epoch_131_loss_36_03432412911918.pt" # NOTE: make sure that file name exists
 
 # folder name where parameters are located ("results \\ reward_network_params \\ reward_loading_folder")
-REWARD_LOADING_FOLDER = "Feb_20_2024-08_41_28" # year_month_day-hh_mm_ss NOTE: make sure that folder name is correct
-REWARD_PARAMS_NAME = "reward_network_epoch_991_loss_0_17438605813666125.pt" # NOTE: make sure that file name exists
+REWARD_LOADING_FOLDER = "Feb_22_2024-09_04_42" # year_month_day-hh_mm_ss NOTE: make sure that folder name is correct
+REWARD_PARAMS_NAME = "reward_network_epoch_133_loss_0_10756006983719572.pt" # NOTE: make sure that file name exists

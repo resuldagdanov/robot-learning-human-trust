@@ -15,13 +15,15 @@ class PolicyDatasetLoader(Dataset):
         
         self.state_columns = constants.STATE_COLUMNS
         self.action_columns = constants.ACTION_COLUMNS
+        self.end_effector_pose_columns = constants.ACTION_COLUMNS[:3]
 
         self.state_norms = [constants.MAX_DISTANCE_TO_OBJECT,
                             constants.MAX_DISTANCE_TO_TARGET,
                             constants.MAX_DISTANCE_TO_GROUND]
         self.action_norms = [constants.END_EFFECTOR_POSITION_RANGE_X,
                              constants.END_EFFECTOR_POSITION_RANGE_Y,
-                             constants.END_EFFECTOR_POSITION_RANGE_Z]
+                             constants.END_EFFECTOR_POSITION_RANGE_Z,
+                             [-1, 1], [-1, 1], [-1, 1], [-1, 1]]
         
         self.state_number_column = constants.STATE_NUMBER_COLUMN
         self.traj_index_column = constants.NUMBER_TRAJECTORY_COLUMN
@@ -130,7 +132,7 @@ class PolicyDatasetLoader(Dataset):
                                    df: pd.DataFrame) -> pd.DataFrame:
         
         # correct Euclideandistance to the object given constant location of the object (obstacle)
-        distances = np.linalg.norm(np.array(constants.OBSTACLE_LOCATION) - np.array(df[self.action_columns],
+        distances = np.linalg.norm(np.array(constants.OBSTACLE_LOCATION) - np.array(df[self.end_effector_pose_columns],
                                                                                     dtype=np.float64), axis=1)
         df[self.state_columns[0]] = distances
         
@@ -140,7 +142,7 @@ class PolicyDatasetLoader(Dataset):
                                    df: pd.DataFrame) -> pd.DataFrame:
         
         # calculate the Euclidean distance for each row
-        distances = np.linalg.norm(np.array(constants.TARGET_LOCATION) - np.array(df[self.action_columns],
+        distances = np.linalg.norm(np.array(constants.TARGET_LOCATION) - np.array(df[self.end_effector_pose_columns],
                                                                                   dtype=np.float64), axis=1)
         # correct distance to the target given constant location on the ground
         df[self.state_columns[1]] = distances
@@ -151,7 +153,7 @@ class PolicyDatasetLoader(Dataset):
                                    df: pd.DataFrame) -> pd.DataFrame:
         
         # correct distance to the ground given the base height of the robot
-        distances = df[self.action_columns[2]] + constants.ROBOT_BASE_HEIGHT
+        distances = df[self.end_effector_pose_columns[2]] + constants.ROBOT_BASE_HEIGHT
         df[self.state_columns[2]] = distances
 
         return df

@@ -26,7 +26,8 @@ class RobotEnvironment(object):
                             constants.MAX_DISTANCE_TO_GROUND]
         self.action_norms = [constants.END_EFFECTOR_POSITION_RANGE_X,
                              constants.END_EFFECTOR_POSITION_RANGE_Y,
-                             constants.END_EFFECTOR_POSITION_RANGE_Z]
+                             constants.END_EFFECTOR_POSITION_RANGE_Z,
+                             [-1, 1], [-1, 1], [-1, 1], [-1, 1]]
         
         # define initial state means and variances
         self.initial_state_means = constants.INITIAL_STATE_MEANS
@@ -90,8 +91,8 @@ class RobotEnvironment(object):
         
         # because both obstacle location and action prediction locations are computed w.r.t. the robot base,
         # we could direcly calculate euclidean distance between them without any transformation
-        object_distance = np.linalg.norm(obstacle_location - action_denorm)
-        target_distance = np.linalg.norm(target_location - action_denorm)
+        object_distance = np.linalg.norm(obstacle_location - action_denorm[:3])
+        target_distance = np.linalg.norm(target_location - action_denorm[:3])
         ground_distance = action_denorm[2] + constants.ROBOT_BASE_HEIGHT
         
         next_state_denorm = np.array([object_distance,

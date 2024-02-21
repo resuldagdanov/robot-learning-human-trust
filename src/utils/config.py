@@ -25,8 +25,8 @@ class Config(object):
 
         # neural network optimization parameters
         self.state_size = 3
-        self.hidden_size = 32
-        self.action_size = 3
+        self.hidden_size = 64
+        self.action_size = 7
         self.reward_size = 1
 
         # strategy for batch sampling

@@ -62,6 +62,14 @@ def json2dataframe(json_path: str,
             column_names[6]: arm_action["z"]
         })
 
+        arm_rotation = sample[4]["message"]["orientation"]
+        entry.update({
+            column_names[7]: arm_rotation["x"],
+            column_names[8]: arm_rotation["y"],
+            column_names[9]: arm_rotation["z"],
+            column_names[10]: arm_rotation["w"]
+        })
+
         df.loc[traj_idx] = entry
         traj_idx += 1
 
@@ -189,7 +197,7 @@ def normalize_action(action: np.ndarray,
     for i in range(len(norm_range_list)):
         min_val, max_val = norm_range_list[i]
         normed_action[:, i] = ((2 * (action[:, i] - min_val)) / (max_val - min_val)) - 1
-
+    
     return normed_action
 
 
