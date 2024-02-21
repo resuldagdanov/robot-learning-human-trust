@@ -16,14 +16,14 @@ class RewardFunction(torch.nn.Module):
         
         # reward network backbone linear layers
         self.backbone = torch.nn.Sequential(torch.nn.Linear(state_size, hidden_size, bias=True),
-                                            torch.nn.ReLU(),
+                                            torch.nn.LeakyReLU(),
                                             torch.nn.Linear(hidden_size, hidden_size, bias=True),
-                                            torch.nn.ReLU())
+                                            torch.nn.LeakyReLU())
         
-        # reward function output being a squashed (with Sigmoid) to result in a value between 0 and 1
+        # reward function output being a squashed (with Tanh) to result in a value between -1 and 1
         self.reward_value = torch.nn.Sequential(torch.nn.Linear(hidden_size, out_size, bias=True),
-                                                torch.nn.Sigmoid())
-        
+                                                torch.nn.Tanh())
+    
     def forward(self,
                 x: torch.Tensor) -> torch.Tensor:
 
