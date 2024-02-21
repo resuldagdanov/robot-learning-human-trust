@@ -133,7 +133,7 @@ if __name__ == "__main__":
         # objein list of all rewards from the robot trajectories generated
         robot_reward_values = [robot_reward.item() for robot_trajectory in robot_trajectories for robot_reward in robot_trajectory[3]]
         mean_reward_list.append(np.mean(robot_reward_values))
-
+        
         # convert robot execution trajectories to tensor format and stack them
         data_robo_tensor = functions.preprocess_trajectories(traj_list=robot_trajectories,
                                                              steps_tensor=data_robo_tensor,
@@ -141,7 +141,7 @@ if __name__ == "__main__":
         
         # randomly select a batch of data samples from the demonstration and robot trajectories
         selected_robo = np.random.choice(len(data_robo_tensor),
-                                         int(configs.batch_size_reward / 2),
+                                         int(configs.batch_size_reward),
                                          replace=True)
         selected_demo = np.random.choice(len(data_demo_tensor),
                                          int(configs.batch_size_reward),
@@ -213,7 +213,7 @@ if __name__ == "__main__":
 
         print(f"Epoch {epoch + 1}/{constants.IRL_NUMBER_EPOCHS}, Batch Policy Loss: {round(batch_loss, 5)}, Max-Ent Reward Loss: {round(maxent_loss.detach().item(), 5)}")
         
-        if epoch % 10 == 0:
+        if epoch % 2 == 0:
             functions.save_reward(epoch=epoch,
                                   reward_network=reward_network,
                                   saving_path=reward_saving_path,
