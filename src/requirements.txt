@@ -6,5 +6,4 @@ scipy
 matplotlib
 mpl-tools
 tqdm
-tensorboard
 scikit-learn
