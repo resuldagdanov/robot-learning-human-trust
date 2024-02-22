@@ -57,7 +57,8 @@ class RobotEnvironment(object):
                                             torch.Tensor,
                                             bool]:
         
-        reward = self.get_reward(state=state)
+        reward = self.get_reward(state=state,
+                                 action=action)
 
         action_denorm = common.denormalize_action(action_norm=action.unsqueeze(0).detach().numpy(),
                                                   norm_range_list=self.action_norms)
@@ -77,9 +78,11 @@ class RobotEnvironment(object):
         return next_state, reward, done
     
     def get_reward(self,
-                   state: torch.Tensor) -> torch.Tensor:
+                   state: torch.Tensor,
+                   action: torch.Tensor) -> torch.Tensor:
         
         reward_value = self.reward_network.estimate_reward(state=state,
+                                                           action=action,
                                                            is_reward_inference=self.is_reward_inference)
         
         return reward_value

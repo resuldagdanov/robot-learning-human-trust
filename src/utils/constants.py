@@ -90,15 +90,15 @@ TARGET_LOCATION = [-0.36, 0.77, -ROBOT_BASE_HEIGHT] # meters NOTE: make sure the
 BC_NUMBER_EPOCHS = 50
 
 # number of training epoch for reward function
-RF_NUMBER_EPOCHS = 200
+RF_NUMBER_EPOCHS = 100
 
 # number of training epoch for IRL algorithm
 IRL_NUMBER_EPOCHS = 150
 
 # folder name where parameters are located ("results \\ policy_network_params \\ policy_loading_folder")
-POLICY_LOADING_FOLDER = "Feb_22_2024-09_04_42" # year_month_day-hh_mm_ss NOTE: make sure that folder name is correct
-POLICY_PARAMS_NAME = "policy_network_epoch_131_loss_36_03432412911918.pt" # NOTE: make sure that file name exists
+POLICY_LOADING_FOLDER = "Feb_22_2024-13_44_28" # year_month_day-hh_mm_ss NOTE: make sure that folder name is correct
+POLICY_PARAMS_NAME = "policy_network_epoch_143_loss_0_6986771963693045.pt" # NOTE: make sure that file name exists
 
 # folder name where parameters are located ("results \\ reward_network_params \\ reward_loading_folder")
-REWARD_LOADING_FOLDER = "Feb_22_2024-09_04_42" # year_month_day-hh_mm_ss NOTE: make sure that folder name is correct
-REWARD_PARAMS_NAME = "reward_network_epoch_133_loss_0_10756006983719572.pt" # NOTE: make sure that file name exists
+REWARD_LOADING_FOLDER = "Feb_22_2024-13_44_28" # year_month_day-hh_mm_ss NOTE: make sure that folder name is correct
+REWARD_PARAMS_NAME = "reward_network_epoch_149_loss_0_11967237935000417.pt" # NOTE: make sure that file name exists

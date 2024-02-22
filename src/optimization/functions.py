@@ -8,7 +8,6 @@ import torch
 import random
 
 from typing import List, Tuple, Union
-from torch.utils.tensorboard import SummaryWriter
 
 # get the current script's directory
 current_directory = os.path.dirname(os.path.abspath(__file__)) if "__file__" in locals() else os.getcwd()
@@ -603,6 +602,10 @@ def get_estimated_rewards(configs: Config,
         f"{constants.STATE_NORMALIZED_LABEL_NAME}_{i}" for i in range(1, len(constants.STATE_COLUMNS) + 1)]]
     norm_state_estim_df = data_traj_df[[
         f"{constants.STATE_ESTIMATION_NORMALIZED_NAME}_{i}" for i in range(1, len(constants.STATE_COLUMNS) + 1)]]
+    norm_action_label_df = data_traj_df[[
+        f"{constants.ACTION_NORMALIZED_LABEL_NAME}_{i}" for i in range(1, len(constants.ACTION_COLUMNS) + 1)]]
+    norm_action_pred_df = data_traj_df[[
+        f"{constants.ACTION_PREDICTION_NAME}_{i}" for i in range(1, len(constants.ACTION_COLUMNS) + 1)]]
     
     # get log probabilities of each predicted action in the trajectory and take average of log probabilities
     logprob_action_estim_df = data_traj_df[[
@@ -616,14 +619,24 @@ def get_estimated_rewards(configs: Config,
     state_estim_tensor = torch.tensor(norm_state_estim_df.values,
                                       dtype=torch.float64,
                                       device=configs.device)
+    action_label_tensor = torch.tensor(norm_action_label_df.values,
+                                       dtype=torch.float64,
+                                       device=configs.device)
+    action_estim_tensor = torch.tensor(norm_action_pred_df.values,
+                                       dtype=torch.float64,
+                                       device=configs.device)
+    
+    # get the sum of log probabilities of each action prediction in the trajectory
     logprob_action_estim_sum_tensor = torch.tensor(logprob_action_estim_sum_df.values,
                                                    dtype=torch.float64,
                                                    device=configs.device).unsqueeze(1)
     
     # forward propagation through neural network
     reward_values_demonstration_data = reward_network.estimate_reward(state=state_label_tensor.float(),
+                                                                      action=action_label_tensor.float(),
                                                                       is_reward_inference=is_inference_reward)
     reward_values_estimation_data = reward_network.estimate_reward(state=state_estim_tensor.float(),
+                                                                   action=action_estim_tensor.float(),
                                                                    is_reward_inference=is_inference_reward)
     
     return data_traj_df, reward_values_demonstration_data, reward_values_estimation_data, logprob_action_estim_sum_tensor
@@ -707,12 +720,18 @@ def trajectory_generation(configs: Config,
 
         norm_state_estim_df = created_trajectory_df[[
             f"{constants.STATE_ESTIMATION_NORMALIZED_NAME}_{i}" for i in range(1, len(state_norms) + 1)]]
+        norm_action_pred_df = created_trajectory_df[[
+            f"{constants.ACTION_PREDICTION_NAME}_{i}" for i in range(1, len(action_norms) + 1)]]
         
         state_estim_tensor = torch.tensor(norm_state_estim_df.values.astype(np.float64),
                                           dtype=torch.float64,
                                           device=configs.device)
+        action_pred_tensor = torch.tensor(norm_action_pred_df.values.astype(np.float64),
+                                          dtype=torch.float64,
+                                          device=configs.device)
         
         reward_values_tensor = reward_network.estimate_reward(state=state_estim_tensor.float(),
+                                                              action=action_pred_tensor.float(),
                                                               is_reward_inference=True)
     
     else:

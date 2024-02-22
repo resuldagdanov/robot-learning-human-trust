@@ -58,6 +58,7 @@ if __name__ == "__main__":
                                  log_std_max=configs.policy_log_std_max,
                                  device=configs.device)
     reward_network = RewardFunction(state_size=configs.state_size,
+                                    action_size=configs.action_size,
                                     hidden_size=configs.hidden_size,
                                     out_size=configs.reward_size,
                                     device=configs.device)

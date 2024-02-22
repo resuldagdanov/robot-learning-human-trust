@@ -62,6 +62,7 @@ if __name__ == "__main__":
                                  log_std_max=configs.policy_log_std_max,
                                  device=configs.device)
     reward_network = RewardFunction(state_size=configs.state_size,
+                                    action_size=configs.action_size,
                                     hidden_size=configs.hidden_size,
                                     out_size=configs.reward_size,
                                     device=configs.device)
@@ -161,8 +162,10 @@ if __name__ == "__main__":
 
         # estimate rewards for the state from the merged batch
         robo_rewards = reward_network.estimate_reward(state=states_robot.float(),
+                                                      action=actions_robot.float(),
                                                       is_reward_inference=False)
         demo_rewards = reward_network.estimate_reward(state=states_expert.float(),
+                                                      action=actions_expert.float(),
                                                       is_reward_inference=False)
         
         # calculate the maximum entropy loss for the current batch similar to the work in Guided Cost Learning paper
