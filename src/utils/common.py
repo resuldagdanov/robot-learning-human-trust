@@ -336,9 +336,14 @@ def shift_action_label(df: pd.DataFrame,
     # shift the action label by the specified amount
     df[action_columns] = df[action_columns].shift(shift_amount)
 
-    # remove the first few rows that are NaN
+    # fill NaN parts with the corresponding values from the last valid row
+    for column in action_columns:
+        df[column].fillna(df[column],
+                          inplace=True)
+    
+    # remove the last shift amount of rows that are NaN
     df = df.dropna()
-
+    
     return df
 
 
