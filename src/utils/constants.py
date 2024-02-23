@@ -77,14 +77,14 @@ EPISODES_ROBOT_RUN = 20
 DEMO_COLLECTION_DATE = "2024_01_23" # year_month_day NOTE: make sure that data date is correct
 TEST_COLLECTION_DATE = "2024_02_02_Test" # year_month_day NOTE: make sure folder name is correct
 
-# experiment obstacle location x, y, z coordinates
-OBSTACLE_LOCATION = [-0.4, 0.0, 0.554] # meters NOTE: make sure the alignment with experiment
-
 # altitute of the base of the robot from the ground as a focal point
-ROBOT_BASE_HEIGHT = 0.1685 # meters NOTE: make sure the alignment with robot experiment
+ROBOT_BASE_HEIGHT = 0.425 # meters NOTE: make sure the alignment with robot experiment
+
+# experiment obstacle location x, y, z coordinates
+OBSTACLE_LOCATION = [-0.794, 0.267, 0.129] # meters NOTE: make sure the alignment with experiment
 
 # experiment target location x, y, z coordinates
-TARGET_LOCATION = [-0.36, 0.77, -ROBOT_BASE_HEIGHT] # meters NOTE: make sure the alignment with robot experiment
+TARGET_LOCATION = [-0.382, 0.792, -0.325] # meters NOTE: make sure the alignment with robot experiment
 
 # number of training epoch for behavior cloning
 BC_NUMBER_EPOCHS = 50
@@ -96,9 +96,9 @@ RF_NUMBER_EPOCHS = 100
 IRL_NUMBER_EPOCHS = 150
 
 # folder name where parameters are located ("results \\ policy_network_params \\ policy_loading_folder")
-POLICY_LOADING_FOLDER = "Feb_22_2024-13_44_28" # year_month_day-hh_mm_ss NOTE: make sure that folder name is correct
-POLICY_PARAMS_NAME = "policy_network_epoch_143_loss_0_6986771963693045.pt" # NOTE: make sure that file name exists
+POLICY_LOADING_FOLDER = "Feb_23_2024-11_50_17" # year_month_day-hh_mm_ss NOTE: make sure that folder name is correct
+POLICY_PARAMS_NAME = "policy_network_epoch_149_loss_5_343676877501827.pt" # NOTE: make sure that file name exists
 
 # folder name where parameters are located ("results \\ reward_network_params \\ reward_loading_folder")
-REWARD_LOADING_FOLDER = "Feb_22_2024-13_44_28" # year_month_day-hh_mm_ss NOTE: make sure that folder name is correct
-REWARD_PARAMS_NAME = "reward_network_epoch_149_loss_0_11967237935000417.pt" # NOTE: make sure that file name exists
+REWARD_LOADING_FOLDER = "Feb_23_2024-11_50_17" # year_month_day-hh_mm_ss NOTE: make sure that folder name is correct
+REWARD_PARAMS_NAME = "reward_network_epoch_149_loss_0_11607361724293322.pt" # NOTE: make sure that file name exists
