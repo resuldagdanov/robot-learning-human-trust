@@ -6,7 +6,7 @@ MAX_DISTANCE_TO_GROUND = 3.0 # meters
 # action vector normalization parameters
 END_EFFECTOR_POSITION_RANGE_X = [-2.0, 2.0] # meters
 END_EFFECTOR_POSITION_RANGE_Y = [-2.0, 2.0] # meters
-END_EFFECTOR_POSITION_RANGE_Z = [-0.1685, 2.0] # meters
+END_EFFECTOR_POSITION_RANGE_Z = [-1.0, 2.0] # meters
 
 # initial state generation parameters (normalized)
 INITIAL_STATE_MEANS = [0.175, 0.5, 0.3]
@@ -74,8 +74,12 @@ TRAJECTORY_SIZE = 20 # equally spaced number of points
 EPISODES_ROBOT_RUN = 20
 
 # collected dataset folder name in ("dataset \\ human_demonstrations \\ collection_date")
-DEMO_COLLECTION_DATE = "2024_01_23" # year_month_day NOTE: make sure that data date is correct
+DEMO_COLLECTION_DATE = "2024_01_23_Train" # year_month_day NOTE: make sure that data date is correct
 TEST_COLLECTION_DATE = "2024_02_02_Test" # year_month_day NOTE: make sure folder name is correct
+
+# experiment outcomes folder name in ("dataset \\ robot_executions \\ experiment_date")
+ROBOT_EXPERIMENT_DATE = "2024_02_23_HIL" # year_month_day NOTE: make sure that data date is correct
+ROBOT_INFERENCE_DATE = "2024_02_23_Inference" # year_month_day NOTE: make sure that data date is correct
 
 # altitute of the base of the robot from the ground as a focal point
 ROBOT_BASE_HEIGHT = 0.425 # meters NOTE: make sure the alignment with robot experiment
@@ -96,9 +100,9 @@ RF_NUMBER_EPOCHS = 100
 IRL_NUMBER_EPOCHS = 150
 
 # folder name where parameters are located ("results \\ policy_network_params \\ policy_loading_folder")
-POLICY_LOADING_FOLDER = "Feb_23_2024-11_50_17" # year_month_day-hh_mm_ss NOTE: make sure that folder name is correct
-POLICY_PARAMS_NAME = "policy_network_epoch_149_loss_5_343676877501827.pt" # NOTE: make sure that file name exists
+POLICY_LOADING_FOLDER = "Feb_23_2024-23_23_23" # year_month_day-hh_mm_ss NOTE: make sure that folder name is correct
+POLICY_PARAMS_NAME = "policy_network_epoch_65_best_model.pt" # NOTE: make sure that file name exists
 
 # folder name where parameters are located ("results \\ reward_network_params \\ reward_loading_folder")
-REWARD_LOADING_FOLDER = "Feb_23_2024-11_50_17" # year_month_day-hh_mm_ss NOTE: make sure that folder name is correct
-REWARD_PARAMS_NAME = "reward_network_epoch_149_loss_0_11607361724293322.pt" # NOTE: make sure that file name exists
+REWARD_LOADING_FOLDER = "Feb_23_2024-23_23_23" # year_month_day-hh_mm_ss NOTE: make sure that folder name is correct
+REWARD_PARAMS_NAME = "reward_network_epoch_99_loss_best_model.pt" # NOTE: make sure that file name exists
