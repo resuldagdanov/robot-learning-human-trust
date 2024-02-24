@@ -159,6 +159,7 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 
-# Remove ros bag files
+# Remove ros bag files and unnecessary files
 *.bag
 *.json
+*.xlsx
