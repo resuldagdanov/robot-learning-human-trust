@@ -81,6 +81,10 @@ TEST_COLLECTION_DATE = "2024_02_02_Test" # year_month_day NOTE: make sure folder
 ROBOT_EXPERIMENT_DATE = "2024_02_23_HIL" # year_month_day NOTE: make sure that data date is correct
 ROBOT_INFERENCE_DATE = "2024_02_23_Inference" # year_month_day NOTE: make sure that data date is correct
 
+# collected experiments with robot should be saved in the following folders ("results \\ experiments \\ ___")
+HIL_EXPERIMENT_FOLDER = "hil_experiments" # human-in-the-loop experiment results stored in this folder
+INFERENCE_EXPERIMENT_FOLDER = "inference_experiments" # inference experiment results stored in this folder
+
 # altitute of the base of the robot from the ground as a focal point
 ROBOT_BASE_HEIGHT = 0.425 # meters NOTE: make sure the alignment with robot experiment
 
