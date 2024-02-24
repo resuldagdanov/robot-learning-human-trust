@@ -20,10 +20,10 @@ from utils import common, constants
 from utils.config import Config
 
 
-def setup_config(device: torch.device) -> Config:
+def setup_config(device: Union[torch.device, str]) -> Config:
 
-    if not isinstance(device, torch.device):
-        raise TypeError("Input 'device' in setup_config function must be a torch.device.")
+    if not isinstance(device, (torch.device, str)):
+        raise TypeError("Input 'device' in setup_config function must be a torch.device or string.")
     
     configs = Config()
     # call the parameters method to set the parameters
@@ -64,7 +64,8 @@ def get_directories(parent_directory: str,
                       for file in json_files if file.endswith(".json")]
     else:
         json_paths = []
-        print("NOTE: No JSON files found in the given folder: ", json_folder)
+        if data_folder_name != "":
+            print("NOTE: No JSON files found in the given folder: ", json_folder)
     
     results_path = os.path.join(grand_parent_path,
                                 "results")
