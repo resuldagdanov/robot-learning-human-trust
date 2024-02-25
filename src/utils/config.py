@@ -70,6 +70,9 @@ class Config(object):
         # weights for success and failure updates
         self.initial_w_success = 1.0 / 20.0
         self.initial_w_failure = 1.0 / 20.0
+
+        # threshold of reward value for diferentiating success and failure
+        self.epsilon_reward = 0.3
     
     def model_saving_path(self,
                           directory: str) -> str:
