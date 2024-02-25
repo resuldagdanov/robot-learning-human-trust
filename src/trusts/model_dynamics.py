@@ -9,20 +9,25 @@ class TrustDistribution(object):
     def __init__(self,
                  initial_alpha : float = 1.0,
                  initial_beta : float = 1.0,
-                 gamma: float = 0.99,
-                 initial_w_success: float = 1.0,
-                 initial_w_failure: float = 1.0) -> object:
+                 gamma: float = 0.01,
+                 initial_w_success: float = 0.05,
+                 initial_w_failure: float = 0.05,
+                 epsilon_reward: float = 0.0) -> object:
         
         self.alpha = initial_alpha
         self.beta = initial_beta
         self.gamma = gamma
         self.w_success = initial_w_success
         self.w_failure = initial_w_failure
+        self.epsilon_reward = epsilon_reward
         
         self.list_alpha = [self.alpha]
         self.list_beta = [self.beta]
         self.list_w_success = [self.w_success]
         self.list_w_failure = [self.w_failure]
+
+        self.success_trust_threshold = 0.1
+        self.failure_trust_threshold = 0.9
 
         self.update_beta_distribution()
     
@@ -30,7 +35,7 @@ class TrustDistribution(object):
                           performance: float) -> None:
         
         # update only alpha parameter
-        if performance > 0.0:
+        if performance > self.epsilon_reward:
 
             # alpha parameter upgrade and extend the list of alpha parameters
             alpha_history = self.cumulative_value(self.list_alpha)
@@ -61,11 +66,11 @@ class TrustDistribution(object):
                        w_failure: Optional[float] = None) -> None:
         
         if w_success is not None:
-            self.w_success = w_success
+            self.w_success = abs(w_success)
             self.list_w_success.append(w_success)
         
         if w_failure is not None:
-            self.w_failure = w_failure
+            self.w_failure = abs(w_failure)
             self.list_w_failure.append(w_failure)
     
     def cumulative_value(self,
@@ -79,10 +84,30 @@ class TrustDistribution(object):
         
         return history
     
-    def update_beta_distribution(self) -> None:
+    def change_success_weight(self,
+                              true_value: float,
+                              last_performance: float) -> None:
+        
+        if true_value < self.success_trust_threshold:
+            raise ValueError("Error: trust measurement should be greater than or equal to success_trust_threshold for success.")
+        
+        alpha_history = self.cumulative_value(self.list_alpha)
 
-        self.distribution = stats.beta(self.alpha, self.beta)
+        w_success = ((true_value * (alpha_history + self.beta)) - alpha_history) / (last_performance * (1.0 - true_value + 1e-2))
+        self.update_weights(w_success=w_success)
+    
+    def change_failure_weight(self,
+                              true_value: float,
+                              last_performance: float) -> None:
+        
+        if true_value > self.failure_trust_threshold:
+            raise ValueError("Error: trust measurement should be less than or equal to failure_trust_threshold for failure.")
+        
+        beta_history = self.cumulative_value(self.list_beta)
 
+        w_failure = (self.alpha - (true_value * (self.alpha + beta_history))) / ((true_value + 1e-2) * np.exp(np.abs(last_performance)))
+        self.update_weights(w_failure=w_failure)
+    
     def get_trust_level(self) -> float:
 
         return self.distribution.mean()
@@ -90,3 +115,8 @@ class TrustDistribution(object):
     def get_beta_distribution_mean(self) -> float:
 
         return self.alpha / (self.alpha + self.beta)
+    
+    def update_beta_distribution(self) -> None:
+
+        self.distribution = stats.beta(self.alpha,
+                                       self.beta)
