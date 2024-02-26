@@ -7,27 +7,38 @@ from scipy import stats
 class TrustDistribution(object):
 
     def __init__(self,
-                 initial_alpha : float = 1.0,
-                 initial_beta : float = 1.0,
-                 gamma: float = 0.01,
-                 initial_w_success: float = 0.05,
-                 initial_w_failure: float = 0.05,
-                 epsilon_reward: float = 0.0) -> object:
+                 initial_alpha : float = 0.5,
+                 initial_beta : float = 0.5,
+                 gamma: float = 0.1,
+                 initial_w_success: float = 0.2,
+                 initial_w_failure: float = 0.2,
+                 epsilon_reward: float = 0.1) -> object:
         
+        self.initial_alpha = initial_alpha
+        self.initial_beta = initial_beta
+
         self.alpha = initial_alpha
         self.beta = initial_beta
+
         self.gamma = gamma
+
         self.w_success = initial_w_success
         self.w_failure = initial_w_failure
+
         self.epsilon_reward = epsilon_reward
         
         self.list_alpha = [self.alpha]
         self.list_beta = [self.beta]
+
         self.list_w_success = [self.w_success]
         self.list_w_failure = [self.w_failure]
 
+        # making sure that there are no suspicious values for trust
         self.success_trust_threshold = 0.1
         self.failure_trust_threshold = 0.9
+
+        # taken as a half of tthe scenario length after observations
+        self.history_buffer_length = 10
 
         self.update_beta_distribution()
     
@@ -38,25 +49,25 @@ class TrustDistribution(object):
         if performance > self.epsilon_reward:
 
             # alpha parameter upgrade and extend the list of alpha parameters
-            alpha_history = self.cumulative_value(self.list_alpha)
-            self.alpha = alpha_history + self.w_success * performance
+            alpha_history = self.cumulative_value(self.list_alpha[-self.history_buffer_length :])
+            self.alpha =  alpha_history + self.w_success * performance
             self.list_alpha.append(self.alpha)
 
             # beta parameter will be the same as before and
             # no need to extend the list of beta parameters
-            self.beta = self.cumulative_value(self.list_beta)
+            self.beta = self.cumulative_value(self.list_beta[-self.history_buffer_length :])
 
         # update only beta parameter
         else:
 
             # beta parameter upgrade and extend the list of beta parameters
-            beta_history = self.cumulative_value(self.list_beta)
+            beta_history = self.cumulative_value(self.list_beta[-self.history_buffer_length :])
             self.beta = beta_history + self.w_failure * float(np.exp(abs(performance)))
             self.list_beta.append(self.beta)
 
             # alpha parameter will be the same as before and
             # no need to extend the list of alpha parameters
-            self.alpha = self.cumulative_value(self.list_alpha)
+            self.alpha = self.cumulative_value(self.list_alpha[-self.history_buffer_length :])
         
         # update the underlying beta distribution based on current alpha and beta
         self.update_beta_distribution()
