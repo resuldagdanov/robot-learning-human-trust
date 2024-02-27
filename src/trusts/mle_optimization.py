@@ -85,9 +85,9 @@ class MLEOptimization(object):
                           x0=initial_params,
                           method="TNC",
                           bounds=self.bounds,
-                          options={"xtol": 1e-8,
-                                   "gtol": 1e-8,
-                                   "maxiter": 5000})
+                          options={"xtol": 1e-10,
+                                   "gtol": 1e-10,
+                                   "maxiter": 7000})
 
         if not result.success:
             print("NOTE: Optimization Did Not converge! :")
