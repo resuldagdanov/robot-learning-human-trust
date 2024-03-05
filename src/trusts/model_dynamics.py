@@ -9,9 +9,9 @@ class TrustDistribution(object):
     def __init__(self,
                  initial_alpha : float = 0.5,
                  initial_beta : float = 0.5,
-                 gamma: float = 0.1,
                  initial_w_success: float = 0.2,
                  initial_w_failure: float = 0.2,
+                 gamma: float = 0.1,
                  epsilon_reward: float = 0.1) -> object:
         
         self.initial_alpha = initial_alpha
@@ -20,11 +20,10 @@ class TrustDistribution(object):
         self.alpha = initial_alpha
         self.beta = initial_beta
 
-        self.gamma = gamma
-
         self.w_success = initial_w_success
         self.w_failure = initial_w_failure
-
+        
+        self.gamma = gamma
         self.epsilon_reward = epsilon_reward
         
         self.list_alpha = [self.alpha]
@@ -38,7 +37,7 @@ class TrustDistribution(object):
         self.failure_trust_threshold = 0.9
 
         # taken as a half of tthe scenario length after observations
-        self.history_buffer_length = 10
+        self.history_buffer_length = 100
 
         self.update_beta_distribution()
     
