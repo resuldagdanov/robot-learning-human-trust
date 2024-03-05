@@ -20,7 +20,7 @@ class Config(object):
     
     def parameters(self):
         
-        self.seed = 42
+        self.seed = 1773
         self.device = "cpu"
 
         # neural network optimization parameters

@@ -64,6 +64,9 @@ NUMBER_TRAJECTORY_COLUMN = "trajectory_index"
 # multivarate gaussian log likelihood loss value column name
 GAUSSIAN_NLL_LOSS_COLUMN = "gnll_loss"
 
+# random seed for reproducibility
+RANDOM_SEED = 1773
+
 # end-effector position is next action value for the given state (constant : -1)
 ACTION_LABEL_SHIFT_IDX = -1
 
