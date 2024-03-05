@@ -1,10 +1,10 @@
 import numpy as np
 import pandas as pd
 
-from typing import Tuple
+from typing import List, Tuple
 
 from scipy.stats import beta as beta_distribution
-from scipy.optimize import minimize
+from scipy.optimize import differential_evolution
 
 from trusts.model_dynamics import TrustDistribution
 
@@ -13,33 +13,37 @@ class MLEOptimization(object):
 
     def __init__(self,
                  hil_experiment_data: pd.DataFrame,
-                 epsilon_reward: float = 0.1) -> object:
+                 seed: int = 1773) -> object:
         
+        self.random_seed = seed
         self.hil_experiment_data = hil_experiment_data
-        self.epsilon_reward = epsilon_reward
 
         # min-max bounds for optimizing parameters
-        self.bounds = [(1e-1, 1.0), # initial_alpha
-                       (1e-1, 1.0), # initial_beta
-                       (1e-1, 1e3), # w_success
-                       (1e-1, 1e3), # w_failure
-                       (1e-4, 1.0)] # gamma
+        self.bounds = [(1e-1, 5e+1), # initial_alpha
+                       (1e-1, 5e+1), # initial_beta
+                       (5e-4, 1e+0), # w_success
+                       (5e-4, 6e+0), # w_failure
+                       (5e-3, 5e-1), # gamma
+                      (-5e-1, 5e-1)] # epsilon_reward
     
     def negative_log_likelihood(self,
                                 params: Tuple[float,
                                               float,
                                               float,
                                               float,
+                                              float,
                                               float]) -> float:
 
-        initial_alpha, initial_beta, w_success, w_failure, gamma = params
+        initial_alpha, initial_beta, \
+            w_success, w_failure, \
+                gamma, epsilon_reward = params
         
         self.trust_obj = TrustDistribution(initial_alpha=initial_alpha,
                                            initial_beta=initial_beta,
-                                           gamma=gamma,
                                            initial_w_success=w_success,
                                            initial_w_failure=w_failure,
-                                           epsilon_reward=self.epsilon_reward)
+                                           gamma=gamma,
+                                           epsilon_reward=epsilon_reward)
         
         # minimize sum of negative log likelihood
         log_likelihood = 0.0
@@ -63,37 +67,46 @@ class MLEOptimization(object):
                 continue
             
             else:
-                log_likelihood += -np.log(beta_distribution.pdf(trust_label,
-                                                                self.trust_obj.alpha,
-                                                                self.trust_obj.beta))
+                nll = -np.log(beta_distribution.pdf(trust_label,
+                                                    self.trust_obj.alpha,
+                                                    self.trust_obj.beta))
+                
+                if nll == np.inf:
+                    continue
+                log_likelihood += nll
         
         return log_likelihood
     
     def fit(self,
-            initial_params: list) -> Tuple[TrustDistribution,
-                                           float,
-                                           float,
-                                           float,
-                                           float,
-                                           float]:
+            initial_params: List[float]) -> Tuple[TrustDistribution,
+                                                  float,
+                                                  float,
+                                                  float,
+                                                  float,
+                                                  float,
+                                                  float]:
         
-        # initial guess for the parameters order:
-        # initial_alpha, initial_beta, w_success, w_failure, gamma
-
-        # use scipy minimize function to find the maximum likelihood estimation (MLE)
-        result = minimize(fun=self.negative_log_likelihood,
-                          x0=initial_params,
-                          method="TNC",
-                          bounds=self.bounds,
-                          options={"xtol": 1e-10,
-                                   "gtol": 1e-10,
-                                   "maxiter": 7000})
-
-        if not result.success:
-            print("NOTE: Optimization Did Not converge! :")
-            print(result.message)
+        result = differential_evolution(func=self.negative_log_likelihood, # function to minimize
+                                        x0=np.array(initial_params), # initial guess
+                                        bounds=self.bounds, # bounds for the parameters
+                                        seed=self.random_seed, # random seed
+                                        init="latinhypercube", # initialization method
+                                        strategy="best2bin", # strategy for selecting parents
+                                        maxiter=25, # maximum iterations
+                                        popsize=20, # population size
+                                        tol=0.5, # tolerance for early stopping
+                                        mutation=(0.5, 0.9), # mutation factor
+                                        recombination=0.8, # cross-over probability
+                                        workers=12, # number of workers (parallel)
+                                        polish=True, # polish (L-BFGS-B) after optimization
+                                        disp=False) # display the result after each iteration
         
         # extract the MLE parameters
-        mle_initial_alpha, mle_initial_beta, mle_w_success, mle_w_failure, mle_gamma = result.x
-
-        return self.trust_obj, mle_initial_alpha, mle_initial_beta, mle_w_success, mle_w_failure, mle_gamma
+        mle_initial_alpha, mle_initial_beta, \
+            mle_w_success, mle_w_failure, \
+                mle_gamma, mle_epsilon_reward = result.x
+        
+        return self.trust_obj, \
+            mle_initial_alpha, mle_initial_beta, \
+                mle_w_success, mle_w_failure, \
+                    mle_gamma, mle_epsilon_reward
