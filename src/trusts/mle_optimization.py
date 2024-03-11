@@ -12,11 +12,11 @@ from trusts.model_dynamics import TrustDistribution
 class MLEOptimization(object):
 
     def __init__(self,
-                 hil_experiment_data: pd.DataFrame,
+                 learning_experiment_data: pd.DataFrame,
                  seed: int = 1773) -> object:
         
         self.random_seed = seed
-        self.hil_experiment_data = hil_experiment_data
+        self.learning_experiment_data = learning_experiment_data
 
         # min-max bounds for optimizing parameters
         self.bounds = [(1e-1, 5e+1), # initial_alpha
@@ -48,7 +48,7 @@ class MLEOptimization(object):
         # minimize sum of negative log likelihood
         log_likelihood = 0.0
 
-        for _, row in self.hil_experiment_data.iterrows():
+        for _, row in self.learning_experiment_data.iterrows():
 
             trust_label = row["TrustLabel"]
             reward = row["Reward"]
