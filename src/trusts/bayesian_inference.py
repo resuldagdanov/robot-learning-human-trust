@@ -19,7 +19,7 @@ class BaselineTrustEstimator(object):
                  beta_0: float,
                  w_s: float,
                  w_f: float,
-                 r: float) -> object:
+                 r: float = 0.8) -> object:
         
         self.alpha_0 = alpha_0
         self.beta_0 = beta_0
@@ -31,7 +31,7 @@ class BaselineTrustEstimator(object):
         
         self.alpha = alpha_0
         self.beta = beta_0
-
+    
     def update_trust(self,
                      performance: int) -> None:
         
@@ -43,9 +43,13 @@ class BaselineTrustEstimator(object):
         else:
             self.beta += self.w_f
     
-    def estimate_trust(self) -> float:
-        
-        beta_mean = self.alpha / (self.alpha + self.beta)
+    def estimate_trust(self):
+
+        # suppress the specified warning
+        with np.errstate(divide="ignore",
+                         invalid="ignore"):
+            
+            beta_mean = self.alpha / (self.alpha + self.beta)
         
         return beta_mean
 
@@ -59,14 +63,15 @@ class BaselineTrustEstimator(object):
 class PriorParameterOptimizer(object):
     
     def __init__(self,
-                 old_agents_data: list) -> object:
+                 agents_data: list) -> object:
         
-        self.old_agents_data = old_agents_data
+        self.agents_data = agents_data
     
     def estimate_priors(self) -> tuple:
+
         alpha_0_values, beta_0_values, w_s_values, w_f_values = [], [], [], []
         
-        for agent_data in self.old_agents_data:
+        for agent_data in self.agents_data:
             agent_params = self._estimate_agent_params(trust_history=agent_data["trust_history"],
                                                        performance_history=agent_data["performance_history"])
             
@@ -141,7 +146,11 @@ if __name__ == "__main__":
 
     num_old_agents = 10
     num_interactions = 100
-    old_agents_data = []
+    
+    # create a trust estimator for a new agent
+    robot_reliability = 0.8
+
+    agents_data = []
 
     # create a dummy data from uniform distribution
     for agent_id in range(num_old_agents):
@@ -152,19 +161,16 @@ if __name__ == "__main__":
         
         # assume robot reliability = 0.8 [in the paper, it is set as %70, %80, and %90]
         performance_history = np.random.binomial(1,
-                                                 0.8,
+                                                 robot_reliability,
                                                  num_interactions)
         
-        old_agents_data.append({"trust_history": trust_history,
+        agents_data.append({"trust_history": trust_history,
                                 "performance_history": performance_history})
     
     # estimate prior distributions for parameters
-    prior_optimizer = PriorParameterOptimizer(old_agents_data=old_agents_data)
+    prior_optimizer = PriorParameterOptimizer(agents_data=agents_data)
 
     alpha_0_prior, beta_0_prior, w_s_prior, w_f_prior = prior_optimizer.estimate_priors()
-
-    # create a trust estimator for a new agent
-    robot_reliability = 0.8
 
     trust_predictor = BaselineTrustEstimator(alpha_0=alpha_0_prior[0],
                                              beta_0=beta_0_prior[0],
@@ -184,9 +190,7 @@ if __name__ == "__main__":
         performance = np.random.binomial(1,
                                          robot_reliability)
         performance_history.append(performance)
-        
         trust_predictor.update_trust(performance)
-        
         predicted_trust = trust_predictor.estimate_trust()
         trust_history.append(predicted_trust)
         
@@ -194,7 +198,8 @@ if __name__ == "__main__":
         if i % 10 == 0:  # get feedback every 10 interactions
             
             # dummy reported trust
-            reported_trust = np.random.uniform(0, 1)
+            reported_trust = np.random.uniform(0,
+                                               1)
             
             # analyze the predicted trust history and performance
             trust_predictor.reset_params()
@@ -204,5 +209,6 @@ if __name__ == "__main__":
                                                      w_f=w_f_prior[0],
                                                      r=robot_reliability)
         
+        print("\n")
         print("Predicted Trust History:", trust_history)
         print("Performance History:", performance_history)
