@@ -56,15 +56,14 @@ A codebase of paper "A Continuous Probabilistic Model for Learning Trust Behavio
     <p align="center">
         <img src="presentation/videos/IROS_Video_Submission_Inference_Stage_GIF.gif" width="640px" alt="Video Submission GIF"/>
     </p>
-    <figcaption style="text-align: center; font-style: italic;">
-        Video 3: Reward and Trust Estimation Values during Inference Experiment #2 (4x speed-up) <a href="https://youtu.be/qJnhyp-dHg0">[Full Video]</a>
+    <figcaption style="text-align: center; font-style: italic;">Video 3: Reward and Trust Estimation Values during Inference Experiment #2 (4x speed-up) <a href="https://youtu.be/qJnhyp-dHg0">[Full Video]</a>
     </figcaption>
 </figure>
+
 <figure>
     <p align="center">
         <iframe width="640" height="360" src="https://www.youtube.com/embed/qJnhyp-dHg0" frameborder="0" allowfullscreen></iframe>
     </p>
-    <figcaption style="text-align: center; font-style: italic;">
-        Video 4: Short Illustration (1 minute) of 3 Stages of the Proposed Methodology <a href="https://youtu.be/qJnhyp-dHg0">[YouTube Video]</a>
+    <figcaption style="text-align: center; font-style: italic;">Video 4: Short Illustration (1 minute) of 3 Stages of the Proposed Methodology <a href="https://youtu.be/qJnhyp-dHg0">[YouTube Video]</a>
     </figcaption>
 </figure>
