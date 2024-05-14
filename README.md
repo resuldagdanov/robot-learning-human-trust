@@ -8,7 +8,7 @@ A codebase of paper "A Continuous Probabilistic Model for Learning Trust Behavio
 ## Methodology
 <figure>
     <p align="center">
-        <img src="presentation/images/methodology.JPG" width="640px" alt="Methodology"/>
+        <img src="presentation/images/methodology.jpg" width="640px" alt="Methodology"/>
     </p>
     <figcaption style="text-align: center; font-style: italic;">Figure 1: Illustration of an Iterative Human Trust Modeling Process (Proposed Framework)</figcaption>
 </figure>
@@ -36,7 +36,7 @@ A codebase of paper "A Continuous Probabilistic Model for Learning Trust Behavio
 ## Data Collection Process
 <figure>
     <p align="center">
-        <img src="presentation/images/human_interaction.PNG" width="640px" alt="Human Interaction"/>
+        <img src="presentation/images/human_interaction.png" width="640px" alt="Human Interaction"/>
     </p>
     <figcaption style="text-align: center; font-style: italic;">Figure 2: Data Collection by Human Demonstrator in <a href="https://www.uts.edu.au/research/robotics-institute">UTS Robotics Institute</a> Lab Environment</figcaption>
 </figure>

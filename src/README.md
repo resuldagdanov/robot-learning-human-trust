@@ -29,7 +29,7 @@
 * `cd src/environment`
 <figure>
     <p align="center">
-        <img src="../presentation/images/experiment_environment.JPG" width="600px" alt="Operation Environment"/>
+        <img src="../presentation/images/experiment_environment.jpg" width="600px" alt="Operation Environment"/>
     </p>
     <figcaption style="text-align: center; font-style: italic;">Figure 1: Environment of Tiling Operation with Cobot (@ UTS - Robotics Institute)</figcaption>
 </figure>
@@ -38,13 +38,13 @@
 # Experiments
 <figure>
     <p align="center">
-        <img src="../presentation/images/operation_environment.PNG" width="600px" alt="Operation Environment"/>
+        <img src="../presentation/images/operation_environment.png" width="600px" alt="Operation Environment"/>
     </p>
     <figcaption style="text-align: center; font-style: italic;">Figure 2: Environment of Human-Robot Teaming in Construction (@ UTS - Robotics Institute)</figcaption>
 </figure>
 <figure>
     <p align="center">
-        <img src="../presentation/images/data_collection.PNG" width="400px" alt="Operation Environment"/>
+        <img src="../presentation/images/data_collection.png" width="400px" alt="Operation Environment"/>
     </p>
     <figcaption style="text-align: center; font-style: italic;">Figure 3: Human Demonstration Data Collection Process</figcaption>
 </figure>
@@ -54,7 +54,7 @@
 * `cd dataset/human_demonstrations`
 <figure>
     <p align="center">
-        <img src="../presentation/images/visualize_training_dataset.PNG" width="500px" alt="Operation Environment"/>
+        <img src="../presentation/images/visualize_training_dataset.png" width="500px" alt="Operation Environment"/>
     </p>
     <figcaption style="text-align: center; font-style: italic;">Figure 4: Human Collected Training Dataset of 43 Trajectories (Expert Demonstrations)</figcaption>
 </figure>
@@ -65,7 +65,7 @@
 * `visualize_demonstration.ipynb`
 <figure>
     <p align="center">
-        <img src="../presentation/images/visualize_particular_trajectory.PNG" width="600px" alt="Operation Environment"/>
+        <img src="../presentation/images/visualize_particular_trajectory.png" width="600px" alt="Operation Environment"/>
     </p>
     <figcaption style="text-align: center; font-style: italic;">Figure 5: Visualization of One Trajectory of Human Operation (Expert Demonstration)</figcaption>
 </figure>
@@ -93,7 +93,7 @@
 * `evaluate_trust_behavior.ipynb`
 <figure>
     <p align="center">
-        <img src="../presentation/images/optimization_result.PNG" width="500px" alt="Operation Environment"/>
+        <img src="../presentation/images/optimization_result.png" width="500px" alt="Operation Environment"/>
     </p>
     <figcaption style="text-align: center; font-style: italic;">Figure 6: Parameter Optimization during Learning Trust Behavior after Each Experiment</figcaption>
 </figure>
@@ -106,7 +106,7 @@
 # Methodology
 <figure>
     <p align="center">
-        <img src="../presentation/images/methodology.JPG" width="700px" alt="Operation Environment"/>
+        <img src="../presentation/images/methodology.jpg" width="700px" alt="Operation Environment"/>
     </p>
     <figcaption style="text-align: center; font-style: italic;">Figure 7: Illustration of an Iterative Trust Estimation Process (Proposed Framework)</figcaption>
 </figure>
@@ -119,13 +119,13 @@
 * `visualize_trust_dynamics.ipynb`
 <figure>
     <p align="center">
-        <img src="../presentation/images/inference_experiment.PNG" width="500px" alt="Operation Environment"/>
+        <img src="../presentation/images/inference_experiment.png" width="500px" alt="Operation Environment"/>
     </p>
     <figcaption style="text-align: center; font-style: italic;">Figure 8: Comparing Trust Estimation with Trust Measurement in Testing Stage Experiments</figcaption>
 </figure>
 <figure>
     <p align="center">
-        <img src="../presentation/images/inference_result.JPG" width="700px" alt="Operation Environment"/>
+        <img src="../presentation/images/inference_result.jpg" width="700px" alt="Operation Environment"/>
     </p>
     <figcaption style="text-align: center; font-style: italic;">Figure 8: Reward Function and Probabilistic Trust Behavior in the Testing Stage Experiments</figcaption>
 </figure>
