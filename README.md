@@ -2,7 +2,7 @@
 A codebase of paper "A Continuous Probabilistic Model for Learning Trust Behavior in Human-Robot Collaboration" submission to International Conference on Intelligent Robots and Systems (IROS) 2024, Abu Dhabi, UAE.
 
 ---
-## [Paper]() | [Code](https://github.com/resuldagdanov/learning-trust-behavior) | [ArXiv]() | [Slide](https://github.com/resuldagdanov/learning-trust-behavior/tree/main/presentation/slides) | [Video](https://youtu.be/qJnhyp-dHg0) | [Presentation](https://youtu.be/qJnhyp-dHg0)
+## [Paper]() | [Code](https://github.com/resuldagdanov/learning-trust-behavior) | [ArXiv]() | [Slide](https://github.com/resuldagdanov/learning-trust-behavior/tree/main/presentation/slides) | [Video](https://youtu.be/qJnhyp-dHg0) | [Presentation](https://youtu.be/qJnhyp-dHg0) | <a href="src/README.md">ReadMe</a>
 
 ---
 ## Methodology
