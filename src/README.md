@@ -29,7 +29,7 @@
 * `cd src/environment`
 <figure>
     <p align="center">
-        <img src="../presentation/images/experiment_environment.jpg" width="600px" alt="Experiment Environment"/>
+        <img src="../presentation/images/experiment_environment.JPG" width="600px" alt="Experiment Environment"/>
     </p>
     <figcaption style="text-align: center; font-style: italic;">Figure 1: Environment of Tiling Operation with Cobot (@ UTS - Robotics Institute)</figcaption>
 </figure>
@@ -38,13 +38,13 @@
 # Experiments
 <figure>
     <p align="center">
-        <img src="../presentation/images/operation_environment.png" width="600px" alt="Operation Environment"/>
+        <img src="../presentation/images/operation_environment.PNG" width="600px" alt="Operation Environment"/>
     </p>
     <figcaption style="text-align: center; font-style: italic;">Figure 2: Environment of Human-Robot Teaming in Construction (@ UTS - Robotics Institute)</figcaption>
 </figure>
 <figure>
     <p align="center">
-        <img src="../presentation/images/data_collection.png" width="400px" alt="Data Collection"/>
+        <img src="../presentation/images/data_collection.PNG" width="400px" alt="Data Collection"/>
     </p>
     <figcaption style="text-align: center; font-style: italic;">Figure 3: Human Demonstration Data Collection Process</figcaption>
 </figure>
@@ -54,7 +54,7 @@
 * `cd dataset/human_demonstrations`
 <figure>
     <p align="center">
-        <img src="../presentation/images/visualize_training_dataset.png" width="500px" alt="Training Dataset"/>
+        <img src="../presentation/images/visualize_training_dataset.PNG" width="500px" alt="Training Dataset"/>
     </p>
     <figcaption style="text-align: center; font-style: italic;">Figure 4: Human Collected Training Dataset of 43 Trajectories (Expert Demonstrations)</figcaption>
 </figure>
