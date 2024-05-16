@@ -3,12 +3,16 @@
     - [Anaconda Environment Creation](#anaconda-environment-creation)
     - [Package Installation](#package-installation)
 * [Environment](#environment)
+    - [Download Collected Dataset](#download-collected-dataset)
 * [Experiments](#installation)
     - [Dataset Analysis](#dataset-analysis)
     - [Model Training](#model-training)
     - [Model Evaluation](#model-evaluation)
 * [Methodology](#methodology)
 * [Results](#results)
+    - [Experiment Outcomes](#experiment-outcomes)
+    - [Optimized Model Parameters](#optimized-model-parameters)
+* [Corresponding Author](#corresponding-author)
 
 ---
 # Installation
@@ -33,6 +37,14 @@
     </p>
     <figcaption style="text-align: center; font-style: italic;">Figure 1: Environment of Tiling Operation with Cobot (@ UTS - Robotics Institute)</figcaption>
 </figure>
+
+## Download Collected Dataset
+> Human collection dataset of demonstrations is shared in the repository:
+* `cd dataset/human_demonstrations`
+
+> Training and testing datasets of .json files are located in the following directory:
+* `cd dataset/human_demonstrations/2024_01_23_Train/jsons`
+* `cd dataset/human_demonstrations/2024_02_02_Test/jsons`
 
 ---
 # Experiments
@@ -129,3 +141,25 @@
     </p>
     <figcaption style="text-align: center; font-style: italic;">Figure 8: Reward Function and Probabilistic Trust Behavior in the Testing Stage Experiments</figcaption>
 </figure>
+
+## Experiment Outcomes
+> The resultant Excel files of the experiments are shared in the following directory:
+* `cd results/experiments`
+
+> Trust learning stage experiment results:
+* `cd results/experiments/learning_experiments`
+* `results/experiments/learning_stage_experiment_results.xlsx`
+
+> Inference stage experiment results:
+* `cd results/experiments/inference_experiments`
+* `results/experiments/inference_stage_experiment_results.xlsx`
+
+## Optimized Model Parameters
+> The trained policy network and reward model parameters are shared in the following directories:
+* `cd results/policy_network_params`
+* `cd results/reward_network_params`
+
+---
+# Corresponding Author
+> For any inquiries or lack of clarity, please contact the corresponding author:
+➔ [Resul.Dagdanov@uts.edu.au](mailto:Resul.Dagdanov@uts.edu.au)
