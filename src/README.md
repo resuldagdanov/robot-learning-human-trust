@@ -4,7 +4,7 @@
     - [Package Installation](#package-installation)
 * [Environment](#environment)
     - [Download Collected Dataset](#download-collected-dataset)
-* [Experiments](#installation)
+* [Experiments](#experiments)
     - [Dataset Analysis](#dataset-analysis)
     - [Model Training](#model-training)
     - [Model Evaluation](#model-evaluation)
