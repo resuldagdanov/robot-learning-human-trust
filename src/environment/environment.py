@@ -7,11 +7,11 @@ import torch
 
 from typing import Tuple
 
-sys.path.append(
-    os.path.dirname(
-        os.path.dirname(
-            os.path.abspath(__file__))
-            if "__file__" in locals() else os.getcwd()))
+sys.path.insert(0,
+                os.path.dirname(
+                    os.path.dirname(
+                        os.path.abspath(__file__))
+                        if "__file__" in locals() else os.getcwd()))
 
 from utils import constants, common
 

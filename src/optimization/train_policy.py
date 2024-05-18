@@ -11,8 +11,8 @@ from tqdm import tqdm
 current_directory = os.path.dirname(os.path.abspath(__file__)) if "__file__" in locals() else os.getcwd()
 # get the parent directory
 parent_directory = os.path.dirname(current_directory)
-# add the parent directory to the sys.path
-sys.path.append(parent_directory)
+# add the parent directory to the sys.path at the beginning
+sys.path.insert(0, parent_directory)
 
 from utils import constants, common
 from utils.dataset_loader import PolicyDatasetLoader
