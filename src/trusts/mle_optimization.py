@@ -8,15 +8,28 @@ from scipy.optimize import differential_evolution
 
 from trusts.model_dynamics import TrustDistribution
 
+# binary performance values during learning stage experiments
+BINARY_PERFORMANCE_LEARNING = [1, 1, -1, -1, -1, 1, -1, -1, -1, 1]
+BINARY_PERFORMANCE_INFERENCE = [1, 1, -1, -1, -1]
+
+TRAJECTORY_SIZE = 20
 
 class MLEOptimization(object):
 
     def __init__(self,
                  learning_experiment_data: pd.DataFrame,
+                 is_binary_performance: bool = False,
                  seed: int = 1773) -> object:
         
         self.random_seed = seed
+        self.is_binary_performance = is_binary_performance
         self.learning_experiment_data = learning_experiment_data
+
+        self.binary_performance_learning = BINARY_PERFORMANCE_LEARNING
+        self.binary_performance_inference = BINARY_PERFORMANCE_INFERENCE
+
+        if self.is_binary_performance:
+            self.reward_binary = self.binary_performance_learning[0]
 
         # min-max bounds for optimizing parameters
         self.bounds = [(1e-1, 5e+1), # initial_alpha
@@ -24,7 +37,7 @@ class MLEOptimization(object):
                        (5e-4, 1e+0), # w_success
                        (5e-4, 6e+0), # w_failure
                        (5e-3, 5e-1), # gamma
-                      (-5e-1, 5e-1)] # epsilon_reward
+                       (-5e-1, 5e-1)] # epsilon_reward
     
     def negative_log_likelihood(self,
                                 params: Tuple[float,
@@ -47,14 +60,31 @@ class MLEOptimization(object):
         
         # minimize sum of negative log likelihood
         log_likelihood = 0.0
+        exp_number_idx = 0
 
         for _, row in self.learning_experiment_data.iterrows():
 
+            time_step = row["TimeStep"]
             trust_label = row["TrustLabel"]
             reward = row["Reward"]
 
             if np.isnan(trust_label) or np.isnan(reward):
                 continue
+            
+            # only consider reward data from the last time step of each trajectory
+            if time_step != TRAJECTORY_SIZE:
+                continue
+            else:
+                pass
+
+            # in our particular case scenarios, reward is a notation of performance
+            if self.is_binary_performance:
+                reward = self.binary_performance_learning[exp_number_idx]
+                self.reward_binary = reward
+            
+            # in a proposed case scenarios, reward function is continuous, therefore no need to change
+            else:
+                pass
 
             self.trust_obj.update_parameters(performance=reward)
 
@@ -74,6 +104,11 @@ class MLEOptimization(object):
                 if nll == np.inf:
                     continue
                 log_likelihood += nll
+
+            if time_step == TRAJECTORY_SIZE:
+                exp_number_idx += 1
+            else:
+                pass
         
         return log_likelihood
     
