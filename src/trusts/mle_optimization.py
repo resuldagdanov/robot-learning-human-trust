@@ -32,10 +32,10 @@ class MLEOptimization(object):
             self.reward_binary = self.binary_performance_learning[0]
 
         # min-max bounds for optimizing parameters
-        self.bounds = [(1e-1, 5e+1), # initial_alpha
-                       (1e-1, 5e+1), # initial_beta
-                       (5e-4, 1e+0), # w_success
-                       (5e-4, 6e+0), # w_failure
+        self.bounds = [(1e-1, 1e+2), # initial_alpha
+                       (1e-1, 1e+2), # initial_beta
+                       (5e-4, 4e+2), # w_success
+                       (5e-4, 4e+2), # w_failure
                        (5e-3, 5e-1), # gamma
                        (-5e-1, 5e-1)] # epsilon_reward
     
