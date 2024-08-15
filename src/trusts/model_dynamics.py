@@ -88,6 +88,10 @@ class TrustDistribution(object):
         
         num = len(parameter_list)
 
+        # consider the last value only as a history when gamma is zero
+        if self.gamma == 0.0:
+            return parameter_list[-1]
+
         history = 0.0
         for idx in range(num - 1, - 1, - 1):
             history += (self.gamma ** (num - 1 - idx)) * parameter_list[idx]

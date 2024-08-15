@@ -14,6 +14,7 @@ BINARY_PERFORMANCE_INFERENCE = [1, 1, -1, -1, -1]
 
 TRAJECTORY_SIZE = 20
 
+
 class MLEOptimization(object):
 
     def __init__(self,
@@ -32,23 +33,29 @@ class MLEOptimization(object):
             self.reward_binary = self.binary_performance_learning[0]
 
         # min-max bounds for optimizing parameters
-        self.bounds = [(1e-1, 1e+2), # initial_alpha
-                       (1e-1, 1e+2), # initial_beta
-                       (5e-4, 4e+2), # w_success
-                       (5e-4, 4e+2), # w_failure
-                       (5e-3, 5e-1), # gamma
-                       (-5e-1, 5e-1)] # epsilon_reward
+        if self.is_binary_performance:
+            # International Journal of Social Robotics, 2021
+            # Article Link : https://link.springer.com/article/10.1007/s12369-020-00703-3
+            self.bounds = [(1e-1, 1e+2), # initial_alpha
+                           (1e-1, 1e+2), # initial_beta
+                           (5e-4, 4e+2), # w_success
+                           (5e-4, 4e+2)] # w_failure
+        else:
+            self.bounds = [(1e-1, 1e+2), # initial_alpha
+                           (1e-1, 1e+2), # initial_beta
+                           (5e-4, 4e+2), # w_success
+                           (5e-4, 4e+2), # w_failure
+                           (5e-3, 5e-1), # gamma
+                          (-5e-1, 5e-1)] # epsilon_reward
     
     def negative_log_likelihood(self,
-                                params: Tuple[float,
-                                              float,
-                                              float,
-                                              float,
-                                              float,
-                                              float]) -> float:
-
-        initial_alpha, initial_beta, \
-            w_success, w_failure, \
+                                params: Tuple) -> float:
+        
+        if self.is_binary_performance:
+            initial_alpha, initial_beta, w_success, w_failure = params
+            gamma, epsilon_reward = 0.0, 0.0 # binary case scenarios (comparison model)
+        else:
+            initial_alpha, initial_beta, w_success, w_failure, \
                 gamma, epsilon_reward = params
         
         self.trust_obj = TrustDistribution(initial_alpha=initial_alpha,
@@ -113,13 +120,7 @@ class MLEOptimization(object):
         return log_likelihood
     
     def fit(self,
-            initial_params: List[float]) -> Tuple[TrustDistribution,
-                                                  float,
-                                                  float,
-                                                  float,
-                                                  float,
-                                                  float,
-                                                  float]:
+            initial_params: List[float]) -> Tuple:
         
         result = differential_evolution(func=self.negative_log_likelihood, # function to minimize
                                         x0=np.array(initial_params), # initial guess
@@ -136,12 +137,17 @@ class MLEOptimization(object):
                                         polish=True, # polish (L-BFGS-B) after optimization
                                         disp=False) # display the result after each iteration
         
-        # extract the MLE parameters
-        mle_initial_alpha, mle_initial_beta, \
-            mle_w_success, mle_w_failure, \
-                mle_gamma, mle_epsilon_reward = result.x
-        
-        return self.trust_obj, \
+        if self.is_binary_performance:
             mle_initial_alpha, mle_initial_beta, \
-                mle_w_success, mle_w_failure, \
+                mle_w_success, mle_w_failure = result.x
+            
+            return self.trust_obj, \
+                mle_initial_alpha, mle_initial_beta, mle_w_success, mle_w_failure
+        else:
+            # extract the MLE parameters
+            mle_initial_alpha, mle_initial_beta, mle_w_success, mle_w_failure, \
+                mle_gamma, mle_epsilon_reward = result.x
+            
+            return self.trust_obj, \
+                mle_initial_alpha, mle_initial_beta, mle_w_success, mle_w_failure, \
                     mle_gamma, mle_epsilon_reward
