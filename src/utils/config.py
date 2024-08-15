@@ -61,18 +61,18 @@ class Config(object):
         self.replay_buffer_capacity = 10000
 
         # continuous beta distibution parameters
-        self.initial_alpha = 1.0 # MLE results: found to be the best value
-        self.initial_beta = 0.1 # MLE results: found to be the best value
-
-        # discount factor to store cumulative history of trust values
-        self.gamma = 0.011 # found to be the best value for the provided experiment data
+        self.initial_alpha = 0.50651927199982 # MLE optimized results
+        self.initial_beta = 0.992862478025096 # MLE optimized results
 
         # weights for success and failure updates
-        self.initial_w_success = 0.2 # MLE results: 0.1
-        self.initial_w_failure = 0.2 # MLE results: 0.2871
+        self.initial_w_success = 3.78971727548625 # MLE optimized results
+        self.initial_w_failure = 4.53965297545633 # MLE optimized results
+
+        # discount factor to store cumulative history of trust values
+        self.gamma = 0.005 # MLE optimized results
 
         # threshold of reward value for diferentiating success and failure
-        self.epsilon_reward = 0.1 # TODO: future work: optimize this value with MLE
+        self.epsilon_reward = 0.378482948006227 # MLE optimized results
     
     def model_saving_path(self,
                           directory: str) -> str:
