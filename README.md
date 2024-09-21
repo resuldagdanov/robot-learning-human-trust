@@ -54,7 +54,7 @@ A codebase of journal paper "Robot Learning of Human Trust with A Continuous Bet
 ## Modeling Trust with Learned Reward Function
 <figure>
     <p align="center">
-        <img src="presentation/videos/IROS_Video_Submission_Inference_Stage_GIF.gif" width="640px" alt="Video Submission GIF"/>
+        <img src="presentation/videos/Video_Submission_Inference_Stage_GIF.gif" width="640px" alt="Video Submission GIF"/>
     </p>
     <figcaption style="text-align: center; font-style: italic;">Video 3: Reward and Trust Estimation Values during Inference Experiment #2 (4x speed-up) <a href="https://youtu.be/qJnhyp-dHg0">[Full Video]</a>
     </figcaption>
