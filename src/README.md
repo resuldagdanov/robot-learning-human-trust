@@ -8,7 +8,8 @@
     - [Dataset Analysis](#dataset-analysis)
     - [Model Training](#model-training)
     - [Model Evaluation](#model-evaluation)
-* [Methodology](#methodology)
+* [General Framework](#general-framework)
+* [Learning Trust](#learning-trust)
 * [Results](#results)
     - [Experiment Outcomes](#experiment-outcomes)
     - [Optimized Model Parameters](#optimized-model-parameters)
@@ -107,7 +108,7 @@
     <p align="center">
         <img src="../presentation/images/optimization_result.png" width="640px" alt="Optimization Result"/>
     </p>
-    <figcaption style="text-align: center; font-style: italic;">Figure 6: Parameter Optimization during Learning Trust Behavior after Each Experiment</figcaption>
+    <figcaption style="text-align: center; font-style: italic;">Figure 6: Parameter Optimization during Robot Learning of Human Trust after Each Experiment</figcaption>
 </figure>
 
 > A Beta Reputation System implementation script is located in the following directory:
@@ -115,17 +116,26 @@
 * `model_dynamics.py`
 
 ---
-# Methodology
+# General Framework
+<figure>
+    <p align="center">
+        <img src="../presentation/images/framework.png" width="1080px" alt="General Framework"/>
+    </p>
+    <figcaption style="text-align: center; font-style: italic;">Figure 7: Visualization of the Proposed Framework</figcaption>
+</figure>
+
+---
+# Learning Trust
 <figure>
     <p align="center">
         <img src="../presentation/images/methodology.jpg" width="640px" alt="Methodology Framework"/>
     </p>
-    <figcaption style="text-align: center; font-style: italic;">Figure 7: Illustration of an Iterative Trust Estimation Process (Proposed Framework)</figcaption>
+    <figcaption style="text-align: center; font-style: italic;">Figure 8: Illustration of an Iterative Trust Estimation Process</figcaption>
 </figure>
 
 ---
 # Results
-> Visualize the results of the Modeled Trust Behavior in the following notebook:
+> Visualize the results of the Modeled Human Trust in the following notebook:
 * `cd src/evaluation`
 * `jupyter notebook`
 * `visualize_trust_dynamics.ipynb`
@@ -133,13 +143,13 @@
     <p align="center">
         <img src="../presentation/images/inference_experiment.png" width="640px" alt="Inference Experiment"/>
     </p>
-    <figcaption style="text-align: center; font-style: italic;">Figure 8: Comparing Trust Estimation with Trust Measurement in Testing Stage Experiments</figcaption>
+    <figcaption style="text-align: center; font-style: italic;">Figure 9: Comparing Trust Estimation with Trust Measurement in Verification Stage Experiments</figcaption>
 </figure>
 <figure>
     <p align="center">
-        <img src="../presentation/images/inference_result.jpg" width="640px" alt="Inference Result"/>
+        <img src="../presentation/images/inference_result.png" width="1080px" alt="Inference Result"/>
     </p>
-    <figcaption style="text-align: center; font-style: italic;">Figure 8: Reward Function and Probabilistic Trust Behavior in the Testing Stage Experiments</figcaption>
+    <figcaption style="text-align: center; font-style: italic;">Figure 10: Reward Function and Probabilistic Trust Estimation in the Verification Stage Experiments</figcaption>
 </figure>
 
 ## Experiment Outcomes
