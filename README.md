@@ -5,12 +5,12 @@ A codebase of journal paper "Robot Learning of Human Trust with A Continuous Bet
 ## [Paper]() | [Code](https://github.com/resuldagdanov/robot-learning-human-trust) | [ArXiv]() | [Slide](https://github.com/resuldagdanov/robot-learning-human-trust/tree/main/presentation/slides) | [Video](https://youtu.be/qJnhyp-dHg0) | [Presentation](https://youtu.be/qJnhyp-dHg0) | <a href="src/README.md">ReadMe</a>
 
 ---
-## Methodology
+## Teaser
 <figure>
     <p align="center">
-        <img src="presentation/images/methodology.jpg" width="640px" alt="Methodology"/>
+        <img src="presentation/images/teaser.png" width="640px" alt="Teaser"/>
     </p>
-    <figcaption style="text-align: center; font-style: italic;">Figure 1: Illustration of an Iterative Human Trust Modeling Process (Proposed Framework)</figcaption>
+    <figcaption style="text-align: center; font-style: italic;">Figure 1: Teaser of the Proposed Framework</figcaption>
 </figure>
 
 ---
@@ -19,6 +19,15 @@ A codebase of journal paper "Robot Learning of Human Trust with A Continuous Bet
 @INPROCEEDINGS{dagdanov2024trust,
 }
 ```
+
+---
+## Methodology
+<figure>
+    <p align="center">
+        <img src="presentation/images/methodology.jpg" width="640px" alt="Methodology"/>
+    </p>
+    <figcaption style="text-align: center; font-style: italic;">Figure 2: Illustration of an Iterative Human Trust Modeling Process (Proposed Framework)</figcaption>
+</figure>
 
 ---
 ## Follow <a href="src/README.md">ReadMe</a> File for Experiments and Source Code
@@ -38,7 +47,7 @@ A codebase of journal paper "Robot Learning of Human Trust with A Continuous Bet
     <p align="center">
         <img src="presentation/images/human_interaction.PNG" width="640px" alt="Human Interaction"/>
     </p>
-    <figcaption style="text-align: center; font-style: italic;">Figure 2: Data Collection by Human Demonstrator in <a href="https://www.uts.edu.au/research/robotics-institute">UTS Robotics Institute</a> Lab Environment</figcaption>
+    <figcaption style="text-align: center; font-style: italic;">Figure 3: Data Collection by Human Demonstrator in <a href="https://www.uts.edu.au/research/robotics-institute">UTS Robotics Institute</a> Lab Environment</figcaption>
 </figure>
 
 ---
