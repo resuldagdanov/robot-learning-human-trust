@@ -30,15 +30,6 @@ A codebase of journal paper "Robot Learning of Human Trust with A Continuous Bet
 ```
 
 ---
-## Methodology
-<figure>
-    <p align="center">
-        <img src="presentation/images/methodology.jpg" width="640px" alt="Methodology"/>
-    </p>
-    <figcaption style="text-align: center; font-style: italic;">Figure 3: Illustration of an Iterative Human Trust Modeling Process (Proposed Framework)</figcaption>
-</figure>
-
----
 ## Follow <a href="src/README.md">ReadMe</a> File for Experiments and Source Code
 
 ---
@@ -50,17 +41,36 @@ A codebase of journal paper "Robot Learning of Human Trust with A Continuous Bet
     <figcaption style="text-align: center; font-style: italic;">Video 1: Robot Executing Tiling Operation Autonomously after Learning from Demonstrations</figcaption>
 </figure>
 
+
+---
+## Human Trust Measurement
+<figure>
+    <p align="center">
+        <img src="presentation/images/trust_measurement.png" width="640px" alt="Measurement"/>
+    </p>
+    <figcaption style="text-align: center; font-style: italic;">Figure 3: Measurement of Human Trust Toward a Robot (7-point Likert Scale)</figcaption>
+</figure>
+
+---
+## Methodology
+<figure>
+    <p align="center">
+        <img src="presentation/images/methodology.jpg" width="640px" alt="Methodology"/>
+    </p>
+    <figcaption style="text-align: center; font-style: italic;">Figure 4: Illustration of an Iterative Human Trust Modeling Process (Proposed Framework)</figcaption>
+</figure>
+
 ---
 ## Data Collection Process
 <figure>
     <p align="center">
         <img src="presentation/images/human_interaction.PNG" width="640px" alt="Human Interaction"/>
     </p>
-    <figcaption style="text-align: center; font-style: italic;">Figure 4: Data Collection by Human Demonstrator in <a href="https://www.uts.edu.au/research/robotics-institute">UTS Robotics Institute</a> Lab Environment</figcaption>
+    <figcaption style="text-align: center; font-style: italic;">Figure 5: Data Collection by Human Demonstrator in <a href="https://www.uts.edu.au/research/robotics-institute">UTS Robotics Institute</a> Lab Environment</figcaption>
 </figure>
 
 ---
-## Optimizing Reward Function with Inverse Reinforcement Learning
+## Reward Function with Maximum-Entropy Optimization
 <figure>
     <p align="center">
         <img src="presentation/videos/Simulation_Video_ROS.gif" width="640px" alt="Simulation Video"/>
@@ -69,7 +79,7 @@ A codebase of journal paper "Robot Learning of Human Trust with A Continuous Bet
 </figure>
 
 ---
-## Modeling Trust with Learned Reward Function
+## Modeling Trust with Optimized Reward Function
 <figure>
     <p align="center">
         <img src="presentation/videos/Video_Submission_Inference_Stage_GIF.gif" width="640px" alt="Video Submission GIF"/>
