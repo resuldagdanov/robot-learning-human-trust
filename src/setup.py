@@ -14,8 +14,8 @@ setuptools.setup(
     version="0.1",
     author="Resul Dagdanov",
     author_email="",
-    description="source codes for learning trust behavior via IRL",
-    url="https://github.com/resuldagdanov/learning-trust-behavior",
+    description="source codes for robot learning of human trust",
+    url="https://github.com/resuldagdanov/robot-learning-human-trust",
     install_requires=install_requires,
     packages=setuptools.find_packages(),
 )

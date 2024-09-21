@@ -85,7 +85,7 @@ ROBOT_EXPERIMENT_DATE = "2024_02_23_Learning" # year_month_day NOTE: make sure t
 ROBOT_INFERENCE_DATE = "2024_02_23_Inference" # year_month_day NOTE: make sure that data date is correct
 
 # collected experiments with robot should be saved in the following folders ("results \\ experiments \\ ___")
-LEARNING_EXPERIMENT_FOLDER = "learning_experiments" # learning trust behavior experiment results stored in this folder
+LEARNING_EXPERIMENT_FOLDER = "learning_experiments" # learning trust experiment results stored in this folder
 INFERENCE_EXPERIMENT_FOLDER = "inference_experiments" # inference experiment results stored in this folder
 
 # altitute of the base of the robot from the ground as a focal point

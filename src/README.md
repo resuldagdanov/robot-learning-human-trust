@@ -102,7 +102,7 @@
 > The evaluation of the trained models is included in the following notebook:
 * `cd src/evaluation`
 * `jupyter notebook`
-* `evaluate_trust_behavior.ipynb`
+* `evaluate_trust_estimation.ipynb`
 <figure>
     <p align="center">
         <img src="../presentation/images/optimization_result.png" width="640px" alt="Optimization Result"/>
