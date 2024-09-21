@@ -14,6 +14,15 @@ A codebase of journal paper "Robot Learning of Human Trust with A Continuous Bet
 </figure>
 
 ---
+## General Framework
+<figure>
+    <p align="center">
+        <img src="presentation/images/framework.png" width="1080px" alt="Framework"/>
+    </p>
+    <figcaption style="text-align: center; font-style: italic;">Figure 2: General Framework</figcaption>
+</figure>
+
+---
 ## Citation
 ```bibtex
 @INPROCEEDINGS{dagdanov2024trust,
@@ -26,7 +35,7 @@ A codebase of journal paper "Robot Learning of Human Trust with A Continuous Bet
     <p align="center">
         <img src="presentation/images/methodology.jpg" width="640px" alt="Methodology"/>
     </p>
-    <figcaption style="text-align: center; font-style: italic;">Figure 2: Illustration of an Iterative Human Trust Modeling Process (Proposed Framework)</figcaption>
+    <figcaption style="text-align: center; font-style: italic;">Figure 3: Illustration of an Iterative Human Trust Modeling Process (Proposed Framework)</figcaption>
 </figure>
 
 ---
@@ -47,7 +56,7 @@ A codebase of journal paper "Robot Learning of Human Trust with A Continuous Bet
     <p align="center">
         <img src="presentation/images/human_interaction.PNG" width="640px" alt="Human Interaction"/>
     </p>
-    <figcaption style="text-align: center; font-style: italic;">Figure 3: Data Collection by Human Demonstrator in <a href="https://www.uts.edu.au/research/robotics-institute">UTS Robotics Institute</a> Lab Environment</figcaption>
+    <figcaption style="text-align: center; font-style: italic;">Figure 4: Data Collection by Human Demonstrator in <a href="https://www.uts.edu.au/research/robotics-institute">UTS Robotics Institute</a> Lab Environment</figcaption>
 </figure>
 
 ---
@@ -73,6 +82,6 @@ A codebase of journal paper "Robot Learning of Human Trust with A Continuous Bet
     <p align="center">
         <iframe width="640" height="360" src="https://www.youtube.com/embed/qJnhyp-dHg0" frameborder="0" allowfullscreen></iframe>
     </p>
-    <figcaption style="text-align: center; font-style: italic;">Video 4: Short Illustration (1 minute) of 3 Stages of the Proposed Methodology <a href="https://youtu.be/qJnhyp-dHg0">[YouTube Video]</a>
+    <figcaption style="text-align: center; font-style: italic;">Video 4: Short Illustration (1 minute) of 3 Stages of the Proposed Framework <a href="https://youtu.be/qJnhyp-dHg0">[YouTube Video]</a>
     </figcaption>
 </figure>
