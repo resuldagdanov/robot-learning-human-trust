@@ -1,5 +1,5 @@
 # Robot Learning of Human Trust
-A codebase of journal paper "Robot Learning of Human Trust with A Continuous Beta Reputation in Human-Robot Collaboration" submission to IEEE Robotics and Automation Letters (RA-L) 2024.
+A codebase of the journal paper "Robot Learning of Human Trust Using Continuous Beta Reputation in Human-Robot Collaboration" submitted to IEEE Robotics and Automation Letters (RA-L) 2024.
 
 ---
 ## [Paper]() | [Code](https://github.com/resuldagdanov/robot-learning-human-trust) | [ArXiv]() | [Slide](https://github.com/resuldagdanov/robot-learning-human-trust/tree/main/presentation/slides) | [Video](https://youtu.be/qJnhyp-dHg0) | [Presentation](https://youtu.be/qJnhyp-dHg0) | <a href="src/README.md">ReadMe</a>
