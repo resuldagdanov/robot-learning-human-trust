@@ -6,10 +6,7 @@ A codebase of the paper "Improving Trust Estimation in Human-Robot Collaboration
 
 ---
 ## Authors
-[Resul Dagdanov](https://profiles.uts.edu.au/Resul.Dagdanov)  
-[Milan Andrejevic](https://profiles.uts.edu.au/Milan.Andrejevic)  
-[Dikai Liu](https://profiles.uts.edu.au/Dikai.Liu)  
-[Chin-Teng Lin](https://profiles.uts.edu.au/Chin-Teng.Lin)
+[Resul Dagdanov](https://profiles.uts.edu.au/Resul.Dagdanov), [Milan Andrejevic](https://profiles.uts.edu.au/Milan.Andrejevic), [Dikai Liu](https://profiles.uts.edu.au/Dikai.Liu), [Chin-Teng Lin](https://profiles.uts.edu.au/Chin-Teng.Lin)
 
 ## Watch YouTube Video
 [![Watch Video](https://img.youtube.com/vi/tSxQLM4Hr8s/maxresdefault.jpg)](https://youtu.be/tSxQLM4Hr8s)
@@ -17,6 +14,9 @@ A codebase of the paper "Improving Trust Estimation in Human-Robot Collaboration
     <figcaption style="text-align: center; font-style: italic;">Video 1: Detailed Explanation of the Proposed Framework <a href="https://youtu.be/tSxQLM4Hr8s">[YouTube Link]</a>
     </figcaption>
 </figure>
+
+---
+## Follow <a href="src/README.md">ReadMe</a> File for Experiments and Source Code
 
 ---
 ## Teaser
@@ -42,9 +42,6 @@ A codebase of the paper "Improving Trust Estimation in Human-Robot Collaboration
 @INPROCEEDINGS{dagdanov2024trust,
 }
 ```
-
----
-## Follow <a href="src/README.md">ReadMe</a> File for Experiments and Source Code
 
 ---
 ## Autonomous Tiling with Collaborative Robot
