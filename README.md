@@ -1,8 +1,16 @@
 # Robot Learning of Human Trust
-A codebase of the journal paper "Robot Learning of Human Trust Using Continuous Beta Reputation in Human-Robot Collaboration" submitted to IEEE Robotics and Automation Letters (RA-L) 2024.
+A codebase of the paper "Improving Trust Estimation in Human-Robot Collaboration Using Beta Reputation at Fine-grained Timescales".
 
 ---
-## [Paper]() | [Code](https://github.com/resuldagdanov/robot-learning-human-trust) | [ArXiv]() | [Slide](https://github.com/resuldagdanov/robot-learning-human-trust/tree/main/presentation/slides) | [Video](https://youtu.be/qJnhyp-dHg0) | [Presentation](https://youtu.be/qJnhyp-dHg0) | <a href="src/README.md">ReadMe</a>
+## [Paper]() | [Code](https://github.com/resuldagdanov/robot-learning-human-trust) | [ArXiv]() | [Slide](https://github.com/resuldagdanov/robot-learning-human-trust/tree/main/presentation/slides) | [Video](https://youtu.be/tSxQLM4Hr8s) | [Presentation](https://youtu.be/tSxQLM4Hr8s) | <a href="src/README.md">ReadMe</a>
+
+<figure>
+    <p align="center">
+        <iframe width="640" height="360" src="https://www.youtube.com/embed/qJnhyp-dHg0" frameborder="0" allowfullscreen></iframe>
+    </p>
+    <figcaption style="text-align: center; font-style: italic;">Video 4: Short Illustration (1 minute) of 3 Stages of the Proposed Framework <a href="https://youtu.be/tSxQLM4Hr8s">[YouTube Video]</a>
+    </figcaption>
+</figure>
 
 ---
 ## Teaser
@@ -85,13 +93,5 @@ A codebase of the journal paper "Robot Learning of Human Trust Using Continuous 
         <img src="presentation/videos/Video_Submission_Inference_Stage_GIF.gif" width="640px" alt="Video Submission GIF"/>
     </p>
     <figcaption style="text-align: center; font-style: italic;">Video 3: Reward and Trust Estimation Values during Inference Experiment #2 (4x speed-up) <a href="https://youtu.be/qJnhyp-dHg0">[Full Video]</a>
-    </figcaption>
-</figure>
-
-<figure>
-    <p align="center">
-        <iframe width="640" height="360" src="https://www.youtube.com/embed/qJnhyp-dHg0" frameborder="0" allowfullscreen></iframe>
-    </p>
-    <figcaption style="text-align: center; font-style: italic;">Video 4: Short Illustration (1 minute) of 3 Stages of the Proposed Framework <a href="https://youtu.be/qJnhyp-dHg0">[YouTube Video]</a>
     </figcaption>
 </figure>
