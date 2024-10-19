@@ -4,20 +4,19 @@ A codebase of the paper "Improving Trust Estimation in Human-Robot Collaboration
 ---
 ## [Paper]() | [Code](https://github.com/resuldagdanov/robot-learning-human-trust) | [ArXiv]() | [Slide](https://github.com/resuldagdanov/robot-learning-human-trust/tree/main/presentation/slides) | [Video](https://youtu.be/tSxQLM4Hr8s) | [Presentation](https://youtu.be/tSxQLM4Hr8s) | <a href="src/README.md">ReadMe</a>
 
-<figure>
-    <p align="center">
-        <iframe width="640" height="360" src="https://www.youtube.com/embed/tSxQLM4Hr8s" frameborder="0" allowfullscreen></iframe>
-    </p>
-    <figcaption style="text-align: center; font-style: italic;">Video 1: Detailed Illustration of the Proposed Framework <a href="https://youtu.be/tSxQLM4Hr8s">[YouTube Video]</a>
-    </figcaption>
-</figure>
-
 ---
 ## Authors
 [Resul Dagdanov](https://profiles.uts.edu.au/Resul.Dagdanov)  
 [Milan Andrejevic](https://profiles.uts.edu.au/Milan.Andrejevic)  
 [Dikai Liu](https://profiles.uts.edu.au/Dikai.Liu)  
 [Chin-Teng Lin](https://profiles.uts.edu.au/Chin-Teng.Lin)
+
+## Watch YouTube Video
+[![Watch Video](https://img.youtube.com/vi/tSxQLM4Hr8s/maxresdefault.jpg)](https://youtu.be/tSxQLM4Hr8s)
+<figure>
+    <figcaption style="text-align: center; font-style: italic;">Video 1: Detailed Explanation of the Proposed Framework <a href="https://youtu.be/tSxQLM4Hr8s">[YouTube Link]</a>
+    </figcaption>
+</figure>
 
 ---
 ## Teaser
@@ -99,6 +98,6 @@ A codebase of the paper "Improving Trust Estimation in Human-Robot Collaboration
     <p align="center">
         <img src="presentation/videos/Video_Submission_Inference_Stage_GIF.gif" width="640px" alt="Video Submission GIF"/>
     </p>
-    <figcaption style="text-align: center; font-style: italic;">Video 4: Reward and Trust Estimation Values during Inference Experiment #2 (4x speed-up) <a href="https://youtu.be/qJnhyp-dHg0">[Full Video]</a>
+    <figcaption style="text-align: center; font-style: italic;">Video 4: Reward and Trust Estimation Values during Inference Experiment #2 (4x speed-up) <a href="https://youtu.be/tSxQLM4Hr8s">[Full Video]</a>
     </figcaption>
 </figure>
