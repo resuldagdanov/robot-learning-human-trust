@@ -88,13 +88,3 @@ A codebase of the paper "Improving Trust Estimation in Human-Robot Collaboration
     </p>
     <figcaption style="text-align: center; font-style: italic;">Video 3: Visualization of Robot Decision-Making Policy in ROS Simulation Environment during IRL Optimization</figcaption>
 </figure>
-
----
-## Modeling Trust with Optimized Reward Function
-<figure>
-    <p align="center">
-        <img src="presentation/videos/Video_Submission_Inference_Stage_GIF.gif" width="640px" alt="Video Submission GIF"/>
-    </p>
-    <figcaption style="text-align: center; font-style: italic;">Video 4: Reward and Trust Estimation Values during Inference Experiment #2 (4x speed-up) <a href="https://youtu.be/tSxQLM4Hr8s">[Full Video]</a>
-    </figcaption>
-</figure>
