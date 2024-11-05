@@ -2,7 +2,7 @@
 A codebase of the paper "Improving Trust Estimation in Human-Robot Collaboration Using Beta Reputation at Fine-grained Timescales".
 
 ---
-## [Paper]() | [Code](https://github.com/resuldagdanov/robot-learning-human-trust) | [ArXiv]() | [Slide](https://github.com/resuldagdanov/robot-learning-human-trust/tree/main/presentation/slides) | [Video](https://youtu.be/tSxQLM4Hr8s) | [Presentation](https://youtu.be/tSxQLM4Hr8s) | <a href="src/README.md">ReadMe</a>
+## [Paper](https://arxiv.org/abs/2411.01866) | [Code](https://github.com/resuldagdanov/robot-learning-human-trust) | [ArXiv](https://arxiv.org/abs/2411.01866) | [Slide](https://github.com/resuldagdanov/robot-learning-human-trust/tree/main/presentation/slides) | [Video](https://youtu.be/tSxQLM4Hr8s) | [Presentation](https://youtu.be/tSxQLM4Hr8s) | <a href="src/README.md">ReadMe</a>
 
 ---
 ## Authors
