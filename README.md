@@ -19,6 +19,20 @@ A codebase of the paper "Improving Trust Estimation in Human-Robot Collaboration
 ## Follow <a href="src/README.md">ReadMe</a> File for Experiments and Source Code
 
 ---
+## Citation
+```bibtex
+@misc{dagdanov2024trust,
+      title={Improving Trust Estimation in Human-Robot Collaboration Using Beta Reputation at Fine-grained Timescales}, 
+      author={Resul Dagdanov and Milan Andrejevic and Dikai Liu and Chin-Teng Lin},
+      year={2024},
+      eprint={2411.01866},
+      archivePrefix={arXiv},
+      primaryClass={cs.RO},
+      url={https://arxiv.org/abs/2411.01866}, 
+}
+```
+
+---
 ## Teaser
 <figure>
     <p align="center">
@@ -35,13 +49,6 @@ A codebase of the paper "Improving Trust Estimation in Human-Robot Collaboration
     </p>
     <figcaption style="text-align: center; font-style: italic;">Figure 2: General Framework</figcaption>
 </figure>
-
----
-## Citation
-```bibtex
-@INPROCEEDINGS{dagdanov2024trust,
-}
-```
 
 ---
 ## Autonomous Tiling with Collaborative Robot
