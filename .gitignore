@@ -161,3 +161,7 @@ cython_debug/
 
 # Remove ros bag files and unnecessary files
 *.bag
+*.png
+src/evaluation/*.xlsx
+
+!presentation/images/*
