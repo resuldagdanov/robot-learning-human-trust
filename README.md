@@ -1,8 +1,36 @@
 # Robot Learning of Human Trust
-A codebase of the journal paper "Robot Learning of Human Trust Using Continuous Beta Reputation in Human-Robot Collaboration" submitted to IEEE Robotics and Automation Letters (RA-L) 2024.
+A codebase of the paper "Improving Trust Estimation in Human-Robot Collaboration Using Beta Reputation at Fine-grained Timescales".
 
 ---
-## [Paper]() | [Code](https://github.com/resuldagdanov/robot-learning-human-trust) | [ArXiv]() | [Slide](https://github.com/resuldagdanov/robot-learning-human-trust/tree/main/presentation/slides) | [Video](https://youtu.be/qJnhyp-dHg0) | [Presentation](https://youtu.be/qJnhyp-dHg0) | <a href="src/README.md">ReadMe</a>
+## [Paper](https://arxiv.org/abs/2411.01866) | [Code](https://github.com/resuldagdanov/robot-learning-human-trust) | [ArXiv](https://arxiv.org/abs/2411.01866) | [Slide](https://github.com/resuldagdanov/robot-learning-human-trust/tree/main/presentation/slides) | [Video](https://youtu.be/tSxQLM4Hr8s) | [Presentation](https://youtu.be/tSxQLM4Hr8s) | <a href="src/README.md">ReadMe</a>
+
+---
+## Authors
+[Resul Dagdanov](https://profiles.uts.edu.au/Resul.Dagdanov), [Milan Andrejevic](https://profiles.uts.edu.au/Milan.Andrejevic), [Dikai Liu](https://profiles.uts.edu.au/Dikai.Liu), [Chin-Teng Lin](https://profiles.uts.edu.au/Chin-Teng.Lin)
+
+## Watch YouTube Video
+[![Watch Video](https://img.youtube.com/vi/tSxQLM4Hr8s/maxresdefault.jpg)](https://youtu.be/tSxQLM4Hr8s)
+<figure>
+    <figcaption style="text-align: center; font-style: italic;">Video 1: Detailed Explanation of the Proposed Framework <a href="https://youtu.be/tSxQLM4Hr8s">[YouTube Link]</a>
+    </figcaption>
+</figure>
+
+---
+## Follow <a href="src/README.md">ReadMe</a> File for Experiments and Source Code
+
+---
+## Citation
+```bibtex
+@misc{dagdanov2024trust,
+      title={Improving Trust Estimation in Human-Robot Collaboration Using Beta Reputation at Fine-grained Timescales}, 
+      author={Resul Dagdanov and Milan Andrejevic and Dikai Liu and Chin-Teng Lin},
+      year={2024},
+      eprint={2411.01866},
+      archivePrefix={arXiv},
+      primaryClass={cs.RO},
+      url={https://arxiv.org/abs/2411.01866}, 
+}
+```
 
 ---
 ## Teaser
@@ -23,22 +51,12 @@ A codebase of the journal paper "Robot Learning of Human Trust Using Continuous 
 </figure>
 
 ---
-## Citation
-```bibtex
-@INPROCEEDINGS{dagdanov2024trust,
-}
-```
-
----
-## Follow <a href="src/README.md">ReadMe</a> File for Experiments and Source Code
-
----
 ## Autonomous Tiling with Collaborative Robot
 <figure>
     <p align="center">
         <img src="presentation/videos/Cobot_Autonomous_Tiling_Operation_GIF.gif" width="640px" alt="Tiling Operation"/>
     </p>
-    <figcaption style="text-align: center; font-style: italic;">Video 1: Robot Executing Tiling Operation Autonomously after Learning from Demonstrations</figcaption>
+    <figcaption style="text-align: center; font-style: italic;">Video 2: Robot Executing Tiling Operation Autonomously after Learning from Demonstrations</figcaption>
 </figure>
 
 
@@ -75,23 +93,5 @@ A codebase of the journal paper "Robot Learning of Human Trust Using Continuous 
     <p align="center">
         <img src="presentation/videos/Simulation_Video_ROS.gif" width="640px" alt="Simulation Video"/>
     </p>
-    <figcaption style="text-align: center; font-style: italic;">Video 2: Visualization of Robot Decision-Making Policy in ROS Simulation Environment during IRL Optimization</figcaption>
-</figure>
-
----
-## Modeling Trust with Optimized Reward Function
-<figure>
-    <p align="center">
-        <img src="presentation/videos/Video_Submission_Inference_Stage_GIF.gif" width="640px" alt="Video Submission GIF"/>
-    </p>
-    <figcaption style="text-align: center; font-style: italic;">Video 3: Reward and Trust Estimation Values during Inference Experiment #2 (4x speed-up) <a href="https://youtu.be/qJnhyp-dHg0">[Full Video]</a>
-    </figcaption>
-</figure>
-
-<figure>
-    <p align="center">
-        <iframe width="640" height="360" src="https://www.youtube.com/embed/qJnhyp-dHg0" frameborder="0" allowfullscreen></iframe>
-    </p>
-    <figcaption style="text-align: center; font-style: italic;">Video 4: Short Illustration (1 minute) of 3 Stages of the Proposed Framework <a href="https://youtu.be/qJnhyp-dHg0">[YouTube Video]</a>
-    </figcaption>
+    <figcaption style="text-align: center; font-style: italic;">Video 3: Visualization of Robot Decision-Making Policy in ROS Simulation Environment during IRL Optimization</figcaption>
 </figure>
