@@ -1,5 +1,5 @@
 # Robot Learning of Human Trust
-A codebase of the paper "Improving Trust Estimation in Human-Robot Collaboration Using Beta Reputation at Fine-grained Timescales".
+The codebase for the paper "Improving Trust Estimation in Human-Robot Collaboration Using Beta Reputation at Fine-grained Timescales", published in the 2025 [IEEE Robotics and Automation Letters (RA-L)](https://www.ieee-ras.org/publications/ra-l).
 
 ---
 ## [Paper](https://arxiv.org/abs/2411.01866) | [Code](https://github.com/resuldagdanov/robot-learning-human-trust) | [ArXiv](https://arxiv.org/abs/2411.01866) | [Slide](https://github.com/resuldagdanov/robot-learning-human-trust/tree/main/presentation/slides) | [Video](https://youtu.be/tSxQLM4Hr8s) | [Presentation](https://youtu.be/tSxQLM4Hr8s) | <a href="src/README.md">ReadMe</a>
