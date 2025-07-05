@@ -2,7 +2,7 @@
 The codebase for the paper "Improving Trust Estimation in Human-Robot Collaboration Using Beta Reputation at Fine-grained Timescales", published in the 2025 [IEEE Robotics and Automation Letters (RA-L)](https://www.ieee-ras.org/publications/ra-l).
 
 ---
-## [Paper](https://arxiv.org/abs/2411.01866) | [Code](https://github.com/resuldagdanov/robot-learning-human-trust) | [ArXiv](https://arxiv.org/abs/2411.01866) | [Slide](https://github.com/resuldagdanov/robot-learning-human-trust/tree/main/presentation/slides) | [Video](https://youtu.be/tSxQLM4Hr8s) | [Presentation](https://youtu.be/tSxQLM4Hr8s) | <a href="src/README.md">ReadMe</a>
+## [Paper](https://ieeexplore.ieee.org/document/11068145) | [Code](https://github.com/resuldagdanov/robot-learning-human-trust) | [ArXiv](https://arxiv.org/abs/2411.01866) | [Slide](https://github.com/resuldagdanov/robot-learning-human-trust/tree/main/presentation/slides) | [Video](https://youtu.be/tSxQLM4Hr8s) | [Presentation](https://youtu.be/tSxQLM4Hr8s) | <a href="src/README.md">ReadMe</a>
 
 ---
 ## Authors
@@ -21,15 +21,15 @@ The codebase for the paper "Improving Trust Estimation in Human-Robot Collaborat
 ---
 ## Citation
 ```bibtex
-@misc{dagdanov2024trust,
-      title={Improving Trust Estimation in Human-Robot Collaboration Using Beta Reputation at Fine-grained Timescales}, 
-      author={Resul Dagdanov and Milan Andrejevic and Dikai Liu and Chin-Teng Lin},
-      year={2024},
-      eprint={2411.01866},
-      archivePrefix={arXiv},
-      primaryClass={cs.RO},
-      url={https://arxiv.org/abs/2411.01866}, 
-}
+@ARTICLE{dagdanov2025ral,
+author={Dagdanov, Resul and Andrejević, Milan and Liu, Dikai and Lin, Chin-Teng},
+journal={IEEE Robotics and Automation Letters},
+title={Improving Trust Estimation in Human-Robot Collaboration Using Beta Reputation at Fine-grained Timescales},
+year={2025},
+volume={},
+number={},
+pages={1-8},
+doi={10.1109/LRA.2025.3585653}}
 ```
 
 ---
