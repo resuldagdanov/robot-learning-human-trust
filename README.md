@@ -21,15 +21,16 @@ The codebase for the paper "Improving Trust Estimation in Human-Robot Collaborat
 ---
 ## Citation
 ```bibtex
-@ARTICLE{dagdanov2025ral,
-author={Dagdanov, Resul and Andrejević, Milan and Liu, Dikai and Lin, Chin-Teng},
-journal={IEEE Robotics and Automation Letters},
-title={Improving Trust Estimation in Human-Robot Collaboration Using Beta Reputation at Fine-grained Timescales},
-year={2025},
-volume={},
-number={},
-pages={1-8},
-doi={10.1109/LRA.2025.3585653}}
+@article{dagdanov2025improving,
+  author  = {Dagdanov, Resul and Andrejevi{\'c}, Milan and Liu, Dikai and Lin, Chin-Teng},
+  title   = {Improving Trust Estimation in Human-Robot Collaboration Using Beta Reputation at Fine-Grained Timescales},
+  journal = {IEEE Robotics and Automation Letters},
+  year    = {2025},
+  volume  = {10},
+  number  = {8},
+  pages   = {8562--8569},
+  doi     = {10.1109/LRA.2025.3585653}
+}
 ```
 
 ---
